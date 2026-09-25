@@ -1,0 +1,1196 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-25T04:12:07.412870+00:00",
+  "title": "Design System: SIMUTU",
+  "extensions": {
+    "colorMeta": {
+      "mist-base": {
+        "role": "neutral",
+        "displayName": "Mist Base",
+        "tonalRamp": [
+          "#1d3433",
+          "#35504f",
+          "#557372",
+          "#7d9a98",
+          "#a6c1bf",
+          "#c9dcdb",
+          "#e6f0ef",
+          "#f5f9f9"
+        ]
+      },
+      "mist-teal": {
+        "role": "neutral",
+        "displayName": "Mist Teal Bloom"
+      },
+      "mist-lavender": {
+        "role": "neutral",
+        "displayName": "Mist Lavender Bloom"
+      },
+      "teal-ink": {
+        "role": "neutral",
+        "displayName": "Teal Ink"
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Muted Ink"
+      },
+      "sidebar-ink": {
+        "role": "neutral",
+        "displayName": "Sidebar Ink"
+      },
+      "action-teal": {
+        "role": "primary",
+        "displayName": "Deep Action Teal",
+        "tonalRamp": [
+          "#062f35",
+          "#07505a",
+          "#0b6f7a",
+          "#0e827f",
+          "#3fa39c",
+          "#7fc7bf",
+          "#b5e0db",
+          "#e2f3f1"
+        ]
+      },
+      "action-teal-grad-start": {
+        "role": "primary",
+        "displayName": "Action Teal Gradient Start",
+        "purpose": "Start stop of grad-primary."
+      },
+      "action-teal-grad-end": {
+        "role": "primary",
+        "displayName": "Action Teal Gradient End"
+      },
+      "hero-teal-start": {
+        "role": "primary",
+        "displayName": "Banner Teal Start"
+      },
+      "hero-teal-end": {
+        "role": "primary",
+        "displayName": "Banner Teal End"
+      },
+      "hero-accent": {
+        "role": "primary",
+        "displayName": "Banner Apricot"
+      },
+      "mint-secondary": {
+        "role": "neutral",
+        "displayName": "Mint Secondary"
+      },
+      "mint-secondary-ink": {
+        "role": "neutral",
+        "displayName": "Mint Secondary Ink"
+      },
+      "glass-fill": {
+        "role": "neutral",
+        "displayName": "Glass Fill"
+      },
+      "glass-edge": {
+        "role": "neutral",
+        "displayName": "Glass Edge",
+        "purpose": "1px inner top highlight on glass."
+      },
+      "popover-glass": {
+        "role": "neutral",
+        "displayName": "Popover Glass"
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline"
+      },
+      "input-stroke": {
+        "role": "neutral",
+        "displayName": "Input Stroke"
+      },
+      "warm-orange": {
+        "role": "secondary",
+        "displayName": "Warm Orange (token name: gold)",
+        "tonalRamp": [
+          "#4a2508",
+          "#7a400f",
+          "#a8581a",
+          "#ec7f2e",
+          "#f0954a",
+          "#ffbf7a",
+          "#fde0c4",
+          "#fef3e4"
+        ]
+      },
+      "warm-orange-soft": {
+        "role": "secondary",
+        "displayName": "Apricot Wash"
+      },
+      "warm-orange-ink": {
+        "role": "secondary",
+        "displayName": "Burnt Orange Ink"
+      },
+      "violet": {
+        "role": "tertiary",
+        "displayName": "Soft Violet",
+        "tonalRamp": [
+          "#2a2070",
+          "#4a3bb8",
+          "#6f5ce8",
+          "#7a67ee",
+          "#ad9ffb",
+          "#cfc6fd",
+          "#e4e0fd",
+          "#f0edff"
+        ]
+      },
+      "violet-soft": {
+        "role": "tertiary",
+        "displayName": "Violet Wash"
+      },
+      "violet-ink": {
+        "role": "tertiary",
+        "displayName": "Deep Violet Ink"
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Status Teal"
+      },
+      "success-soft": {
+        "role": "tertiary",
+        "displayName": "Status Teal Wash"
+      },
+      "success-ink": {
+        "role": "tertiary",
+        "displayName": "Status Teal Ink"
+      },
+      "warning": {
+        "role": "tertiary",
+        "displayName": "Warning Orange"
+      },
+      "warning-soft": {
+        "role": "tertiary",
+        "displayName": "Warning Wash"
+      },
+      "coral-danger": {
+        "role": "tertiary",
+        "displayName": "Coral Rose",
+        "tonalRamp": [
+          "#5a1020",
+          "#9a2640",
+          "#c63b58",
+          "#d24d68",
+          "#ef7d92",
+          "#f0a3b1",
+          "#fbdfe5",
+          "#fdecef"
+        ]
+      },
+      "danger-soft": {
+        "role": "tertiary",
+        "displayName": "Coral Wash"
+      },
+      "danger-ink": {
+        "role": "tertiary",
+        "displayName": "Wine Ink"
+      },
+      "chart-1": {
+        "role": "data",
+        "displayName": "Categorical 1"
+      },
+      "chart-2": {
+        "role": "data",
+        "displayName": "Categorical 2"
+      },
+      "chart-3": {
+        "role": "data",
+        "displayName": "Categorical 3"
+      },
+      "chart-4": {
+        "role": "data",
+        "displayName": "Categorical 4"
+      },
+      "chart-5": {
+        "role": "data",
+        "displayName": "Categorical 5"
+      },
+      "seq-1": {
+        "role": "data",
+        "displayName": "Teal Sequential 1"
+      },
+      "seq-2": {
+        "role": "data",
+        "displayName": "Teal Sequential 2"
+      },
+      "seq-3": {
+        "role": "data",
+        "displayName": "Teal Sequential 3"
+      },
+      "seq-4": {
+        "role": "data",
+        "displayName": "Teal Sequential 4"
+      },
+      "seq-5": {
+        "role": "data",
+        "displayName": "Teal Sequential 5"
+      },
+      "seq-6": {
+        "role": "data",
+        "displayName": "Teal Sequential 6"
+      },
+      "div-neg-2": {
+        "role": "data",
+        "displayName": "Diverging Coral Strong"
+      },
+      "div-neg-1": {
+        "role": "data",
+        "displayName": "Diverging Coral Soft"
+      },
+      "div-mid": {
+        "role": "data",
+        "displayName": "Diverging Midpoint"
+      },
+      "div-pos-1": {
+        "role": "data",
+        "displayName": "Diverging Teal Soft"
+      },
+      "div-pos-2": {
+        "role": "data",
+        "displayName": "Diverging Teal Strong"
+      },
+      "on-dark-up": {
+        "role": "data",
+        "displayName": "Up Delta on Banner"
+      },
+      "on-dark-down": {
+        "role": "data",
+        "displayName": "Down Delta on Banner"
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White"
+      },
+      "glass-tint": {
+        "role": "neutral",
+        "displayName": "Glass Tint",
+        "purpose": "Pale end of the active tab gradient."
+      },
+      "hero-mid": {
+        "role": "primary",
+        "displayName": "Banner Teal Mid",
+        "purpose": "grad-hero middle stop, bg-hero solid fallback, tooltip."
+      },
+      "hero-shade": {
+        "role": "primary",
+        "displayName": "Banner Shade",
+        "purpose": "Dark blurred blobs and lower-corner shade in banners."
+      },
+      "on-hero": {
+        "role": "primary",
+        "displayName": "On-Banner White",
+        "purpose": "Text and focus rings on banners."
+      },
+      "hero-sparkle": {
+        "role": "primary",
+        "displayName": "Banner Sparkle",
+        "purpose": "Dotted texture on banners."
+      },
+      "teal-deep": {
+        "role": "data",
+        "displayName": "Teal Deep",
+        "purpose": "Trend-line gradient start."
+      },
+      "track": {
+        "role": "neutral",
+        "displayName": "Track",
+        "purpose": "Slider, progress and score-bar channels."
+      },
+      "control-off": {
+        "role": "neutral",
+        "displayName": "Control Off",
+        "purpose": "Unchecked switch."
+      },
+      "neutral-soft": {
+        "role": "neutral",
+        "displayName": "Neutral Wash",
+        "purpose": "Neutral badge gradient start."
+      },
+      "scrim": {
+        "role": "neutral",
+        "displayName": "Scrim",
+        "purpose": "Dialog/sheet overlay at 30%."
+      },
+      "dot-ring": {
+        "role": "data",
+        "displayName": "Dot Ring",
+        "purpose": "White ring around chart dots."
+      },
+      "on-orange": {
+        "role": "secondary",
+        "displayName": "Umber",
+        "purpose": "Text on orange counter gradient."
+      },
+      "grad-page-bloom-top-left": {
+        "role": "gradient-stop",
+        "displayName": "Grad Page Bloom Top Left",
+        "canonical": "#a6ccce",
+        "gradient": "grad-page"
+      },
+      "grad-page-bloom-top-right": {
+        "role": "gradient-stop",
+        "displayName": "Grad Page Bloom Top Right",
+        "canonical": "#b1b7dc",
+        "gradient": "grad-page"
+      },
+      "grad-page-bloom-bottom-right": {
+        "role": "gradient-stop",
+        "displayName": "Grad Page Bloom Bottom Right",
+        "canonical": "#aab6d9",
+        "gradient": "grad-page"
+      },
+      "grad-page-bloom-bottom-left": {
+        "role": "gradient-stop",
+        "displayName": "Grad Page Bloom Bottom Left",
+        "canonical": "#a9cfcf",
+        "gradient": "grad-page"
+      },
+      "grad-page-wash-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Page Wash Start",
+        "canonical": "#cae0e0",
+        "gradient": "grad-page"
+      },
+      "grad-page-wash-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Page Wash End",
+        "canonical": "#d1dae8",
+        "gradient": "grad-page"
+      },
+      "grad-card-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Card Start",
+        "canonical": "rgb(255 255 255 / 0.46)",
+        "gradient": "grad-card"
+      },
+      "grad-card-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Card End",
+        "canonical": "rgb(255 255 255 / 0.26)",
+        "gradient": "grad-card"
+      },
+      "grad-card-strong-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Card Strong Start",
+        "canonical": "rgb(255 255 255 / 0.95)",
+        "gradient": "grad-card-strong"
+      },
+      "grad-card-strong-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Card Strong End",
+        "canonical": "rgb(246 251 250 / 0.86)",
+        "gradient": "grad-card-strong"
+      },
+      "grad-sidebar-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Sidebar Start",
+        "canonical": "rgb(255 255 255 / 0.4)",
+        "gradient": "grad-sidebar"
+      },
+      "grad-sidebar-mid": {
+        "role": "gradient-stop",
+        "displayName": "Grad Sidebar Mid",
+        "canonical": "rgb(236 246 244 / 0.26)",
+        "gradient": "grad-sidebar"
+      },
+      "grad-sidebar-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Sidebar End",
+        "canonical": "rgb(232 230 250 / 0.3)",
+        "gradient": "grad-sidebar"
+      },
+      "grad-primary-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Primary Start",
+        "canonical": "#0b6f7a",
+        "gradient": "grad-primary"
+      },
+      "grad-primary-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Primary End",
+        "canonical": "#0e827f",
+        "gradient": "grad-primary"
+      },
+      "grad-primary-hover-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Primary Hover Start",
+        "canonical": "#0a6570",
+        "gradient": "grad-primary-hover"
+      },
+      "grad-primary-hover-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Primary Hover End",
+        "canonical": "#0c7875",
+        "gradient": "grad-primary-hover"
+      },
+      "grad-danger-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Danger Start",
+        "canonical": "#c63b58",
+        "gradient": "grad-danger"
+      },
+      "grad-danger-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Danger End",
+        "canonical": "#d24d68",
+        "gradient": "grad-danger"
+      },
+      "grad-hero-glow": {
+        "role": "gradient-stop",
+        "displayName": "Grad Hero Glow",
+        "canonical": "rgb(158 232 216 / 0.14)",
+        "gradient": "grad-hero"
+      },
+      "grad-hero-shade": {
+        "role": "gradient-stop",
+        "displayName": "Grad Hero Shade",
+        "canonical": "rgb(4 52 60 / 0.45)",
+        "gradient": "grad-hero"
+      },
+      "grad-hero-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Hero Start",
+        "canonical": "#0a5a67",
+        "gradient": "grad-hero"
+      },
+      "grad-hero-mid": {
+        "role": "gradient-stop",
+        "displayName": "Grad Hero Mid",
+        "canonical": "#0b6470",
+        "gradient": "grad-hero"
+      },
+      "grad-hero-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Hero End",
+        "canonical": "#0b6e74",
+        "gradient": "grad-hero"
+      },
+      "grad-teal-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Teal Start",
+        "canonical": "#0f8f86",
+        "gradient": "grad-teal"
+      },
+      "grad-teal-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Teal End",
+        "canonical": "#55c7ba",
+        "gradient": "grad-teal"
+      },
+      "grad-violet-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Violet Start",
+        "canonical": "#6f5ce8",
+        "gradient": "grad-violet"
+      },
+      "grad-violet-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Violet End",
+        "canonical": "#ad9ffb",
+        "gradient": "grad-violet"
+      },
+      "grad-pink-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Pink Start",
+        "canonical": "#e0529a",
+        "gradient": "grad-pink"
+      },
+      "grad-pink-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Pink End",
+        "canonical": "#ff9ccb",
+        "gradient": "grad-pink"
+      },
+      "grad-orange-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Orange Start",
+        "canonical": "#ec7f2e",
+        "gradient": "grad-orange"
+      },
+      "grad-orange-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Orange End",
+        "canonical": "#ffbf7a",
+        "gradient": "grad-orange"
+      },
+      "grad-sky-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Sky Start",
+        "canonical": "#2b7fc7",
+        "gradient": "grad-sky"
+      },
+      "grad-sky-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Sky End",
+        "canonical": "#7cc0f2",
+        "gradient": "grad-sky"
+      },
+      "grad-mint-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Mint Start",
+        "canonical": "#e3f5f1",
+        "gradient": "grad-mint"
+      },
+      "grad-mint-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Mint End",
+        "canonical": "#d3ecf0",
+        "gradient": "grad-mint"
+      },
+      "grad-good-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Good Start",
+        "canonical": "#0b7a80",
+        "gradient": "grad-good"
+      },
+      "grad-good-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Good End",
+        "canonical": "#22b3a1",
+        "gradient": "grad-good"
+      },
+      "grad-warn-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Warn Start",
+        "canonical": "#e68a24",
+        "gradient": "grad-warn"
+      },
+      "grad-warn-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Warn End",
+        "canonical": "#f7b766",
+        "gradient": "grad-warn"
+      },
+      "grad-critical-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Critical Start",
+        "canonical": "#c63b58",
+        "gradient": "grad-critical"
+      },
+      "grad-critical-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Critical End",
+        "canonical": "#ef7d92",
+        "gradient": "grad-critical"
+      },
+      "grad-neutral-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Neutral Start",
+        "canonical": "#7f9d9a",
+        "gradient": "grad-neutral"
+      },
+      "grad-neutral-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Neutral End",
+        "canonical": "#b5cac8",
+        "gradient": "grad-neutral"
+      },
+      "grad-gap-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Gap Start",
+        "canonical": "#f3b8c4",
+        "gradient": "grad-gap"
+      },
+      "grad-gap-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Gap End",
+        "canonical": "#fbdde3",
+        "gradient": "grad-gap"
+      },
+      "grad-success-soft-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Success Soft Start",
+        "canonical": "#e2f6f2",
+        "gradient": "grad-success-soft"
+      },
+      "grad-success-soft-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Success Soft End",
+        "canonical": "#d3eee9",
+        "gradient": "grad-success-soft"
+      },
+      "grad-info-soft-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Info Soft Start",
+        "canonical": "#f0edff",
+        "gradient": "grad-info-soft"
+      },
+      "grad-info-soft-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Info Soft End",
+        "canonical": "#e4e0fd",
+        "gradient": "grad-info-soft"
+      },
+      "grad-danger-soft-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Danger Soft Start",
+        "canonical": "#fdecef",
+        "gradient": "grad-danger-soft"
+      },
+      "grad-danger-soft-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Danger Soft End",
+        "canonical": "#fbdfe5",
+        "gradient": "grad-danger-soft"
+      },
+      "grad-warm-soft-start": {
+        "role": "gradient-stop",
+        "displayName": "Grad Warm Soft Start",
+        "canonical": "#fef3e4",
+        "gradient": "grad-warm-soft"
+      },
+      "grad-warm-soft-end": {
+        "role": "gradient-stop",
+        "displayName": "Grad Warm Soft End",
+        "canonical": "#fde5cf",
+        "gradient": "grad-warm-soft"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Banner greetings (dashboard, portal), 30px (24px mobile)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page titles under the breadcrumb."
+      },
+      "stat": {
+        "displayName": "Stat",
+        "purpose": "KPI tile values, tabular."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "16px: card titles, wordmark, empty-state and questionnaire titles, lead paragraphs; dialog titles 18px."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "14px: descriptions, table cells, sidebar nav items, indicator statements, form text."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "KPI labels, score-bar labels, form labels."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "12px: table headers, calendar cells, hints, badge text; 11px minimum for axes and meta."
+      },
+      "nav-group": {
+        "displayName": "Nav Group",
+        "purpose": "Sidebar group headings only."
+      },
+      "record-code": {
+        "displayName": "Record Code",
+        "purpose": "Record codes such as finding IDs."
+      },
+      "banner-headline": {
+        "displayName": "Banner Headline",
+        "purpose": "Login brand-panel headline only, 800 36px at all widths, line-height 1.12; the one size above Display, banner-only."
+      }
+    },
+    "gradients": [
+      {
+        "name": "grad-page",
+        "value": "radial-gradient(58rem 40rem at -10% -14%, #a6ccce 0%, transparent 64%), radial-gradient(50rem 38rem at 110% -8%, #b1b7dc 0%, transparent 60%), radial-gradient(54rem 40rem at 104% 112%, #aab6d9 0%, transparent 62%), radial-gradient(46rem 34rem at -8% 108%, #a9cfcf 0%, transparent 62%), linear-gradient(160deg, #cae0e0 0%, #d1dae8 100%)",
+        "stops": [
+          "#a6ccce",
+          "#b1b7dc",
+          "#aab6d9",
+          "#a9cfcf",
+          "#cae0e0",
+          "#d1dae8"
+        ],
+        "purpose": "Fixed page mist."
+      },
+      {
+        "name": "grad-card",
+        "value": "linear-gradient(150deg, rgb(255 255 255 / 0.46) 0%, rgb(255 255 255 / 0.26) 100%)",
+        "stops": [
+          "rgb(255 255 255 / 0.46)",
+          "rgb(255 255 255 / 0.26)"
+        ],
+        "purpose": "Thin glass for resting cards."
+      },
+      {
+        "name": "grad-card-strong",
+        "value": "linear-gradient(150deg, rgb(255 255 255 / 0.95) 0%, rgb(246 251 250 / 0.86) 100%)",
+        "stops": [
+          "rgb(255 255 255 / 0.95)",
+          "rgb(246 251 250 / 0.86)"
+        ],
+        "purpose": "Strong glass for floating layers."
+      },
+      {
+        "name": "grad-sidebar",
+        "value": "linear-gradient(180deg, rgb(255 255 255 / 0.4) 0%, rgb(236 246 244 / 0.26) 55%, rgb(232 230 250 / 0.3) 100%)",
+        "stops": [
+          "rgb(255 255 255 / 0.4)",
+          "rgb(236 246 244 / 0.26)",
+          "rgb(232 230 250 / 0.3)"
+        ],
+        "purpose": "Sidebar glass."
+      },
+      {
+        "name": "grad-primary",
+        "value": "linear-gradient(135deg, #0b6f7a 0%, #0e827f 100%)",
+        "stops": [
+          "#0b6f7a",
+          "#0e827f"
+        ],
+        "purpose": "Primary button, active nav pill."
+      },
+      {
+        "name": "grad-primary-hover",
+        "value": "linear-gradient(135deg, #0a6570 0%, #0c7875 100%)",
+        "stops": [
+          "#0a6570",
+          "#0c7875"
+        ],
+        "purpose": "Darker primary hover gradient."
+      },
+      {
+        "name": "grad-hero",
+        "value": "radial-gradient(30rem 18rem at 112% -40%, rgb(158 232 216 / 0.14) 0%, transparent 60%), radial-gradient(30rem 20rem at 0% 120%, rgb(4 52 60 / 0.45) 0%, transparent 62%), linear-gradient(120deg, #0a5a67 0%, #0b6470 50%, #0b6e74 100%)",
+        "stops": [
+          "rgb(158 232 216 / 0.14)",
+          "rgb(4 52 60 / 0.45)",
+          "#0a5a67",
+          "#0b6470",
+          "#0b6e74"
+        ],
+        "purpose": "Banner teal (glow, shade, base ramp)."
+      },
+      {
+        "name": "grad-danger",
+        "value": "linear-gradient(135deg, #c63b58 0%, #d24d68 100%)",
+        "stops": [
+          "#c63b58",
+          "#d24d68"
+        ],
+        "purpose": "Destructive button."
+      },
+      {
+        "name": "grad-teal",
+        "value": "linear-gradient(135deg, #0f8f86 0%, #55c7ba 100%)",
+        "stops": [
+          "#0f8f86",
+          "#55c7ba"
+        ],
+        "purpose": "Teal icon chip."
+      },
+      {
+        "name": "grad-violet",
+        "value": "linear-gradient(135deg, #6f5ce8 0%, #ad9ffb 100%)",
+        "stops": [
+          "#6f5ce8",
+          "#ad9ffb"
+        ],
+        "purpose": "Violet icon chip."
+      },
+      {
+        "name": "grad-pink",
+        "value": "linear-gradient(135deg, #e0529a 0%, #ff9ccb 100%)",
+        "stops": [
+          "#e0529a",
+          "#ff9ccb"
+        ],
+        "purpose": "Pink icon chip."
+      },
+      {
+        "name": "grad-orange",
+        "value": "linear-gradient(135deg, #ec7f2e 0%, #ffbf7a 100%)",
+        "stops": [
+          "#ec7f2e",
+          "#ffbf7a"
+        ],
+        "purpose": "Orange chip, counters, bg-gold."
+      },
+      {
+        "name": "grad-sky",
+        "value": "linear-gradient(135deg, #2b7fc7 0%, #7cc0f2 100%)",
+        "stops": [
+          "#2b7fc7",
+          "#7cc0f2"
+        ],
+        "purpose": "Sky icon chip."
+      },
+      {
+        "name": "grad-mint",
+        "value": "linear-gradient(135deg, #e3f5f1 0%, #d3ecf0 100%)",
+        "stops": [
+          "#e3f5f1",
+          "#d3ecf0"
+        ],
+        "purpose": "Secondary button, bg-secondary."
+      },
+      {
+        "name": "grad-good",
+        "value": "linear-gradient(90deg, #0b7a80 0%, #22b3a1 100%)",
+        "stops": [
+          "#0b7a80",
+          "#22b3a1"
+        ],
+        "purpose": "Good meter."
+      },
+      {
+        "name": "grad-warn",
+        "value": "linear-gradient(90deg, #e68a24 0%, #f7b766 100%)",
+        "stops": [
+          "#e68a24",
+          "#f7b766"
+        ],
+        "purpose": "Warning meter."
+      },
+      {
+        "name": "grad-critical",
+        "value": "linear-gradient(90deg, #c63b58 0%, #ef7d92 100%)",
+        "stops": [
+          "#c63b58",
+          "#ef7d92"
+        ],
+        "purpose": "Critical meter."
+      },
+      {
+        "name": "grad-neutral",
+        "value": "linear-gradient(90deg, #7f9d9a 0%, #b5cac8 100%)",
+        "stops": [
+          "#7f9d9a",
+          "#b5cac8"
+        ],
+        "purpose": "Neutral meter."
+      },
+      {
+        "name": "grad-gap",
+        "value": "linear-gradient(90deg, #f3b8c4 0%, #fbdde3 100%)",
+        "stops": [
+          "#f3b8c4",
+          "#fbdde3"
+        ],
+        "purpose": "Readiness segment with no evidence yet."
+      },
+      {
+        "name": "grad-success-soft",
+        "value": "linear-gradient(135deg, #e2f6f2 0%, #d3eee9 100%)",
+        "stops": [
+          "#e2f6f2",
+          "#d3eee9"
+        ],
+        "purpose": "Success soft fill."
+      },
+      {
+        "name": "grad-info-soft",
+        "value": "linear-gradient(135deg, #f0edff 0%, #e4e0fd 100%)",
+        "stops": [
+          "#f0edff",
+          "#e4e0fd"
+        ],
+        "purpose": "Info soft fill."
+      },
+      {
+        "name": "grad-danger-soft",
+        "value": "linear-gradient(135deg, #fdecef 0%, #fbdfe5 100%)",
+        "stops": [
+          "#fdecef",
+          "#fbdfe5"
+        ],
+        "purpose": "Danger soft fill."
+      },
+      {
+        "name": "grad-warm-soft",
+        "value": "linear-gradient(135deg, #fef3e4 0%, #fde5cf 100%)",
+        "stops": [
+          "#fef3e4",
+          "#fde5cf"
+        ],
+        "purpose": "Warning and gold soft fills."
+      },
+      {
+        "name": "hero-sparkle pattern",
+        "value": "radial-gradient(circle at 1px 1px, var(--hero-sparkle) 1px, transparent 0) / 22px 22px",
+        "stops": [
+          "rgb(255 255 255 / 0.12)"
+        ],
+        "purpose": "Dotted banner texture."
+      }
+    ],
+    "shadows": [
+      {
+        "name": "shadow-card",
+        "value": "inset 0 1px 0 var(--glass-edge), 0 18px 40px -22px rgb(20 70 76 / 0.35), 0 2px 8px -3px rgb(20 70 76 / 0.1)",
+        "purpose": "Resting glass cards and tiles."
+      },
+      {
+        "name": "shadow-float",
+        "value": "0 24px 60px -24px rgb(20 60 76 / 0.45), 0 4px 14px -6px rgb(20 60 76 / 0.15)",
+        "purpose": "Dialogs, popovers, menus, tooltips."
+      },
+      {
+        "name": "shadow-primary",
+        "value": "0 10px 22px -10px rgb(11 111 122 / 0.65)",
+        "purpose": "Primary button and active nav pill."
+      },
+      {
+        "name": "shadow-danger",
+        "value": "0 10px 22px -10px rgb(198 59 88 / 0.6)",
+        "purpose": "Destructive button."
+      },
+      {
+        "name": "shadow-soft",
+        "value": "0 6px 16px -10px rgb(20 70 76 / 0.35)",
+        "purpose": "Outline buttons, small glass controls."
+      },
+      {
+        "name": "shadow-chip-teal",
+        "value": "0 8px 18px -8px rgb(15 143 134 / 0.6)",
+        "purpose": "Teal icon chip."
+      },
+      {
+        "name": "shadow-chip-violet",
+        "value": "0 8px 18px -8px rgb(111 92 232 / 0.6)",
+        "purpose": "Violet icon chip."
+      },
+      {
+        "name": "shadow-chip-pink",
+        "value": "0 8px 18px -8px rgb(224 82 154 / 0.6)",
+        "purpose": "Pink icon chip."
+      },
+      {
+        "name": "shadow-chip-orange",
+        "value": "0 8px 18px -8px rgb(236 127 46 / 0.6)",
+        "purpose": "Orange icon chip."
+      },
+      {
+        "name": "shadow-chip-sky",
+        "value": "0 8px 18px -8px rgb(43 127 199 / 0.55)",
+        "purpose": "Sky icon chip."
+      },
+      {
+        "name": "drop-seal",
+        "value": "drop-shadow(0 12px 24px rgb(0 0 0 / 0.35))",
+        "purpose": "Institution seal on the teal login panel."
+      }
+    ],
+    "materials": [
+      {
+        "name": "surface-glass",
+        "value": "backdrop-filter: blur(22px) saturate(1.35)",
+        "purpose": "Thin glass."
+      },
+      {
+        "name": "surface-glass-strong",
+        "value": "backdrop-filter: blur(28px) saturate(1.4)",
+        "purpose": "Strong glass."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-transition",
+        "value": "150-200ms ease (Tailwind default)",
+        "purpose": "Hover/focus colour, brightness and ring changes."
+      },
+      {
+        "name": "overlay-enter",
+        "value": "200ms fade + zoom 95%",
+        "purpose": "Dialogs and popovers; scale removed under reduced motion."
+      },
+      {
+        "name": "meter-fill",
+        "value": "width 500ms",
+        "purpose": "Meter fills; near-instant under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px",
+        "note": "sidebar becomes persistent"
+      },
+      {
+        "name": "xl",
+        "value": "1280px",
+        "note": "active-period pill appears in topbar"
+      }
+    ],
+    "focus": {
+      "default": "2px solid var(--ring) outline, 2px offset, radius var(--radius-sm); controls use a 3px ring at rgb(7 80 90 / 0.8)",
+      "onBanner": "var(--on-hero)"
+    },
+    "radii": {
+      "button": "18px (all sizes)",
+      "card": "22px",
+      "banner": "24px",
+      "input": "12px",
+      "close-button": "14px",
+      "focus-outline": "var(--radius-sm) = 10px",
+      "badge": "9999px"
+    },
+    "overlay": {
+      "scrim": "var(--scrim) at 30%"
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action; teal gradient with its own glow.",
+      "html": "<button class=\"ds-btn-primary\">Buka Monev</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:8px;height:36px;padding:8px 16px;border:0;border-radius:18px;background:#07505a linear-gradient(135deg,#0b6f7a 0%,#0e827f 100%);color:#fff;font:600 14px/1 'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;box-shadow:0 10px 22px -10px rgb(11 111 122/.65);cursor:pointer;transition:filter .15s}.ds-btn-primary:hover{filter:brightness(1.1)}.ds-btn-primary:active{filter:brightness(.95)}.ds-btn-primary:focus-visible{outline:none;box-shadow:0 0 0 3px rgb(7 80 90/.8)}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary action on glass or on the banner.",
+      "html": "<button class=\"ds-btn-outline\">Instrumen</button>",
+      "css": ".ds-btn-outline{display:inline-flex;align-items:center;height:36px;padding:8px 16px;border:1px solid rgb(255 255 255/.85);border-radius:18px;background:linear-gradient(to bottom,rgb(255 255 255/.85),rgb(255 255 255/.45));color:#17393a;font:600 14px/1 'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;box-shadow:var(--shadow-soft,0 6px 16px -10px rgb(20 70 76/.35));backdrop-filter:blur(12px);cursor:pointer;transition:background .15s}.ds-btn-outline:hover{background:linear-gradient(to bottom,#fff,rgb(255 255 255/.7))}.ds-btn-outline:focus-visible{outline:none;box-shadow:0 0 0 3px rgb(7 80 90/.8)}"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Delete or irreversible actions.",
+      "html": "<button class=\"ds-btn-danger\">Hapus</button>",
+      "css": ".ds-btn-danger{height:36px;padding:8px 16px;border:0;border-radius:18px;background:linear-gradient(135deg,#c63b58 0%,#d24d68 100%);color:#fff;font:600 14px/1 'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;box-shadow:0 10px 22px -10px rgb(198 59 88/.6);cursor:pointer}.ds-btn-danger:hover{filter:brightness(1.1)}.ds-btn-danger:focus-visible{outline:none;box-shadow:0 0 0 3px rgb(154 38 64/.4)}"
+    },
+    {
+      "name": "Small and Icon Buttons",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Every size keeps the same 18px radius.",
+      "html": "<button class=\"ds-btn-sm\">Filter</button> <button class=\"ds-btn-icon\" aria-label=\"Notifikasi\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\"/></svg></button>",
+      "css": ".ds-btn-sm,.ds-btn-icon{display:inline-flex;align-items:center;justify-content:center;border-radius:18px;border:1px solid rgb(255 255 255/.85);background:linear-gradient(to bottom,rgb(255 255 255/.85),rgb(255 255 255/.45));color:#17393a;font:600 14px/1 'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;box-shadow:0 6px 16px -10px rgb(20 70 76/.35);cursor:pointer}.ds-btn-sm{height:32px;padding:0 12px}.ds-btn-icon{width:36px;height:36px}.ds-btn-sm:hover,.ds-btn-icon:hover{background:#fff}.ds-btn-sm:focus-visible,.ds-btn-icon:focus-visible{outline:none;box-shadow:0 0 0 3px rgb(7 80 90/.8)}"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Text field with a 3:1 stroke on glass.",
+      "html": "<input class=\"ds-input\" placeholder=\"Email, NIM, atau NIDN\">",
+      "css": ".ds-input{height:36px;width:280px;padding:4px 12px;border:1px solid #4f6a68;border-radius:12px;background:linear-gradient(to bottom,rgb(255 255 255/.85),rgb(255 255 255/.55));color:#17393a;font:400 14px 'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;outline:none;transition:box-shadow .15s,border-color .15s}.ds-input::placeholder{color:#2f4a48}.ds-input:focus-visible{border-color:#07505a;box-shadow:0 0 0 3px rgb(7 80 90/.8)}"
+    },
+    {
+      "name": "Sidebar Navigation",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Glass sidebar; active item is a teal gradient pill.",
+      "html": "<nav class=\"ds-nav\"><div class=\"ds-nav-group\">Utama</div><a class=\"ds-nav-item ds-active\" href=\"#\">Dashboard</a><a class=\"ds-nav-item\" href=\"#\">Notifikasi <span class=\"ds-count\">3</span></a></nav>",
+      "css": ".ds-nav{display:flex;flex-direction:column;gap:4px;width:240px;padding:12px;background:linear-gradient(180deg,rgb(255 255 255/.4) 0%,rgb(236 246 244/.26) 55%,rgb(232 230 250/.3) 100%);border-right:1px solid rgb(255 255 255/.7);font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif}.ds-nav-group{padding:0 12px 4px;font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f4a48}.ds-nav-item{display:flex;align-items:center;height:40px;padding:0 12px;border-radius:18px;font-size:14px;font-weight:500;color:#2c5856;text-decoration:none;transition:background .15s}.ds-nav-item:hover{background:rgb(255 255 255/.6);color:#17393a}.ds-nav-item.ds-active{background:linear-gradient(135deg,#0b6f7a,#0e827f);color:#fff;box-shadow:0 10px 22px -10px rgb(11 111 122/.65)}.ds-nav-item:focus-visible{outline:2px solid #07505a;outline-offset:2px}.ds-count{margin-left:auto;padding:0 6px;border-radius:9999px;background:linear-gradient(135deg,#ec7f2e,#ffbf7a);color:var(--on-orange,#5a2c05);font-size:11px;font-weight:700;line-height:20px}"
+    },
+    {
+      "name": "Status Badges",
+      "kind": "chip",
+      "refersTo": "status-badge-success",
+      "description": "Pill with dot, soft tone gradient and ink text.",
+      "html": "<span class=\"ds-badge ds-ok\"><i></i>Terverifikasi</span> <span class=\"ds-badge ds-warn\"><i></i>Menunggu</span> <span class=\"ds-badge ds-bad\"><i></i>Lewat tenggat</span>",
+      "css": ".ds-badge{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:9999px;font:600 12px/1.4 'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif}.ds-badge i{width:6px;height:6px;border-radius:9999px;background:currentColor;opacity:.8}.ds-ok{background:linear-gradient(to right,#dcf3ef,rgb(255 255 255/.7));color:#0b6b62;box-shadow:inset 0 0 0 1px rgb(16 148 138/.25)}.ds-warn{background:linear-gradient(to right,#fdf0da,rgb(255 255 255/.7));color:#7a400f;box-shadow:inset 0 0 0 1px rgb(238 154 51/.3)}.ds-bad{background:linear-gradient(to right,#fde6ea,rgb(255 255 255/.7));color:#9a2640;box-shadow:inset 0 0 0 1px rgb(154 38 64/.2)}"
+    },
+    {
+      "name": "KPI Tile",
+      "kind": "card",
+      "refersTo": "stat-tile",
+      "description": "Glass tile with label, extrabold value and gradient icon chip.",
+      "html": "<div class=\"ds-tile\"><div class=\"ds-tile-top\"><span>Response rate Monev</span><span class=\"ds-chip\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/></svg></span></div><div class=\"ds-tile-val\">51,9%</div><div class=\"ds-tile-hint\">280 dari 540</div></div>",
+      "css": ".ds-tile{display:flex;flex-direction:column;gap:12px;width:240px;padding:20px;border-radius:22px;border:1px solid rgb(255 255 255/.75);background:linear-gradient(150deg,rgb(255 255 255/.46),rgb(255 255 255/.26));box-shadow:inset 0 1px 0 rgb(255 255 255/.75),0 18px 40px -22px rgb(20 70 76/.35),0 2px 8px -3px rgb(20 70 76/.1);backdrop-filter:blur(22px) saturate(1.35);color:#17393a;font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif}.ds-tile-top{display:flex;justify-content:space-between;gap:12px;font-size:13px;font-weight:600;color:#2f4a48}.ds-chip{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:18px;background:linear-gradient(135deg,#6f5ce8,#ad9ffb);color:#fff;box-shadow:0 8px 18px -8px rgb(111 92 232/.6)}.ds-tile-val{font-size:28px;font-weight:800;line-height:1;letter-spacing:-.025em;font-variant-numeric:tabular-nums}.ds-tile-hint{font-size:12px;color:#2f4a48}"
+    },
+    {
+      "name": "Hero Banner",
+      "kind": "custom",
+      "refersTo": "hero-banner",
+      "description": "The one dark teal surface per screen, with apricot highlight.",
+      "html": "<section class=\"ds-hero\"><h1>Selamat siang, Administrator</h1><p>Superadmin · Periode aktif <b>Ganjil 2026/2027</b></p></section>",
+      "css": ".ds-hero{padding:24px 32px;border-radius:24px;background:#0b6470;background-image:radial-gradient(30rem 18rem at 112% -40%,rgb(158 232 216/.14) 0%,transparent 60%),radial-gradient(30rem 20rem at 0% 120%,rgb(4 52 60/.45) 0%,transparent 62%),linear-gradient(120deg,#0a5a67 0%,#0b6470 50%,#0b6e74 100%);color:#fff;font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif}.ds-hero h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.025em}.ds-hero p{margin:6px 0 0;font-size:14px;color:rgb(255 255 255/.85)}.ds-hero b{color:var(--hero-accent,#ffdcae);font-weight:600}"
+    },
+    {
+      "name": "Meter",
+      "kind": "custom",
+      "description": "Pill track with good/warning/critical gradient fill.",
+      "html": "<div class=\"ds-meter\"><div class=\"ds-fill ds-good\" style=\"width:64%\"></div></div><div class=\"ds-meter\"><div class=\"ds-fill ds-warn\" style=\"width:48%\"></div></div><div class=\"ds-meter\"><div class=\"ds-fill ds-crit\" style=\"width:30%\"></div></div><div class=\"ds-meter ds-trackonly\"><div class=\"ds-fill ds-gap\" style=\"width:40%\"></div></div>",
+      "css": ".ds-meter{width:240px;height:8px;margin:8px 0;border-radius:9999px;overflow:hidden;background:rgb(7 80 90/.12)}.ds-fill{height:100%;border-radius:9999px;transition:width .5s}.ds-good{background:linear-gradient(90deg,#0b7a80,#22b3a1)}.ds-warn{background:linear-gradient(90deg,#e68a24,#f7b766)}.ds-crit{background:linear-gradient(90deg,#c63b58,#ef7d92)}.ds-trackonly{background:var(--track,#d2e4e1)}.ds-gap{background:linear-gradient(90deg,#f3b8c4,#fbdde3)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Frosted Glass over Teal-Lavender Mist",
+    "overview": "SIMUTU is a daily working tool for quality-assurance staff, leadership, auditors, lecturers and students. Its world is a pale mist that drifts from mint-teal at the top left to lavender at the right and bottom corners, fixed behind the content while it scrolls. Every surface sitting on that mist is a translucent, blurred glass panel with a bright one-pixel white edge and a soft, offset teal-tinted shadow. Deep teal is the one voice of action: the primary button, the active navigation pill, and the dashboard/login banner. Violet, pink, orange, sky and teal appear only as small gradient icon chips and data encodings, never as surface fills.\n\nThe build rejects the flat admin dashboard (grey page, flat white cards, dark sidebar) in favour of a light, calm workspace. Density stays high: KPI tiles, tables, meters and charts sit side by side at 14px body text. Ink is dark teal, never black. The world is light-only; there is no dark mode.\n\nAccessibility shaped the palette. Every text tone was darkened until it clears WCAG AA against the thinnest glass (primary text, muted text, danger, violet and orange inks all have their own deeper \"ink\" token), and the banner teal was taken darker than first planned so white text holds.",
+    "keyCharacteristics": [
+      "Fixed multi-radial mist background; glass surfaces float on it with blur, a white edge and a soft teal shadow.",
+      "Gradient everywhere: primary buttons, active pill, banners, meters, chips and soft status badges are all gentle two-stop gradients.",
+      "One deep-teal action colour; accent hues are confined to icon chips, badges and charts.",
+      "Dark teal ink with separate AA-safe ink tokens for each tinted tone.",
+      "Generous roundness (14px base, 22px cards, 24px banners, pill badges).",
+      "Plus Jakarta Sans throughout, extrabold for numbers and headings, tabular figures for data."
+    ],
+    "rules": [
+      {
+        "name": "The One Teal Voice Rule",
+        "body": "Deep teal gradient marks action and \"you are here\": primary buttons, the active navigation pill, banners. Never use it as a card or section fill.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink Pair Rule",
+        "body": "Every tinted tone has a fill token and a separate darker ink token. Text on a tint always uses the ink (success-ink, warm-orange-ink, violet-ink, danger-ink), never the fill hue itself.",
+        "section": "colors"
+      },
+      {
+        "name": "The Apricot-Only-on-Teal Rule",
+        "body": "On the banner teal, text is white or white at 85%, and the single highlight colour is Banner Apricot.",
+        "section": "colors"
+      },
+      {
+        "name": "The Token-Only Color Rule",
+        "body": "Components never carry hex or rgb literals. Every colour, gradient and shadow is a `:root` token exposed through a theme colour or utility; a new colour needs a named token first.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Numbers Rule",
+        "body": "Scores, counts, percentages and dates in data displays use tabular figures so columns and meters align.",
+        "section": "typography"
+      },
+      {
+        "name": "The Uppercase Is Navigation Rule",
+        "body": "Tracked uppercase belongs only to sidebar group headings. Page and card headings stay in sentence case.",
+        "section": "typography"
+      },
+      {
+        "name": "The Two Glass Weights Rule",
+        "body": "Resting content uses thin glass (46% → 26% white, card shadow). Anything that floats above content uses strong glass (95% → 86% white, float shadow). There is no third opacity.",
+        "section": "elevation"
+      },
+      {
+        "name": "The One Button Radius Rule",
+        "body": "All buttons share the 18px radius regardless of size; sizes change height and padding, never the corner.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** put every content surface on thin glass (46% → 26% white, 22px blur, 1px white edge, card shadow) over the fixed mist background.",
+      "**Do** use the action-teal gradient only for primary actions, the active navigation pill and \"good\" meters; use action-teal (#07505a) for teal text and icons.",
+      "**Do** pair every tinted fill with its ink token for text (success-ink, warm-orange-ink, violet-ink, danger-ink) to hold 4.5:1.",
+      "**Do** use the validated categorical order chart-1 → chart-5, the teal seq ramp for magnitude, and the coral ↔ teal diverging ramp for Likert distributions.",
+      "**Do** keep input borders at input-stroke so fields stay ≥3:1 on glass.",
+      "**Do** add a named `:root` token before using any new colour, gradient or shadow in a component.",
+      "**Do** switch focus rings to white on the banner teal.",
+      "**Do** honour reduced motion: keep fades, drop scale, slide and width animations."
+    ],
+    "donts": [
+      "**Don't** return to the flat admin look: grey page, flat white cards, dark sidebar.",
+      "**Don't** use pure black text; ink is teal-ink.",
+      "**Don't** fill cards or sections with accent hues (violet, pink, orange, sky). They belong to icon chips, badges, counters and charts.",
+      "**Don't** lighten the banner back to the first-sketch teal (#0f7f86 → #16a39a); white text on it would fail AA.",
+      "**Don't** vary button corner radius by size.",
+      "**Don't** add a dark mode; the product is light-only by decision.",
+      "**Don't** carry this world into the PDF reports (resources/views/reports); they stay plain for print."
+    ]
+  }
+}

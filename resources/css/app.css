@@ -1,0 +1,458 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@source '../views';
+@source '../js';
+
+/*
+ * SIMUTU design tokens — "kaca beku di atas kabut teal–lavender".
+ * Latar kabut gradien, permukaan kaca bergradien, teal dalam sebagai warna aksi,
+ * violet/pink/oranye sebagai chip aksen. Tinta teal gelap, bukan hitam.
+ */
+:root {
+    --radius: 0.875rem;
+
+    /* Permukaan & tinta */
+    --background: #e6f0ef;
+    --foreground: #17393a;
+    --card: rgb(255 255 255 / 0);
+    --card-foreground: #17393a;
+    --popover: #f6fafa;
+    --popover-foreground: #17393a;
+
+    /* Teks/ikon/tautan teal (≥ 4,5:1 di kaca paling tipis); tombol memakai --grad-primary. */
+    --primary: #07505a;
+    --primary-foreground: #ffffff;
+    --secondary: #d9eeea;
+    --secondary-foreground: #0c6269;
+    --muted: rgb(215 232 229 / 0.62);
+    --muted-foreground: #2f4a48;
+    --accent: rgb(255 255 255 / 0.6);
+    --accent-foreground: #17393a;
+    --destructive: #9a2640;
+    --destructive-foreground: #ffffff;
+
+    /* Aksen hangat (oranye referensi) — nama token "gold" dipertahankan demi kompatibilitas. */
+    --gold: #f0954a;
+    --gold-soft: #fde9d6;
+    --gold-foreground: #7a400f;
+    --success: #10948a;
+    --success-foreground: #0b6b62;
+    --success-soft: #dcf3ef;
+    --warning: #ee9a33;
+    --warning-soft: #fdf0da;
+    --info: #7a67ee;
+    --info-foreground: #4a3bb8;
+    --info-soft: #ece9fe;
+    --danger-soft: #fde6ea;
+    --danger-foreground: #9a2640;
+
+    --border: rgb(120 160 158 / 0.28);
+    /* Batas kolom isian ≥ 3:1 terhadap kaca (WCAG 1.4.11). */
+    --input: #4f6a68;
+    --ring: #07505a;
+
+    /* Gradien — setiap permukaan & komponen adalah gradien. */
+    --grad-page:
+        radial-gradient(58rem 40rem at -10% -14%, #a6ccce 0%, transparent 64%),
+        radial-gradient(50rem 38rem at 110% -8%, #b1b7dc 0%, transparent 60%),
+        radial-gradient(54rem 40rem at 104% 112%, #aab6d9 0%, transparent 62%),
+        radial-gradient(46rem 34rem at -8% 108%, #a9cfcf 0%, transparent 62%),
+        linear-gradient(160deg, #cae0e0 0%, #d1dae8 100%);
+    --grad-card: linear-gradient(150deg, rgb(255 255 255 / 0.46) 0%, rgb(255 255 255 / 0.26) 100%);
+    --grad-card-strong: linear-gradient(150deg, rgb(255 255 255 / 0.95) 0%, rgb(246 251 250 / 0.86) 100%);
+    --grad-sidebar: linear-gradient(180deg, rgb(255 255 255 / 0.4) 0%, rgb(236 246 244 / 0.26) 55%, rgb(232 230 250 / 0.3) 100%);
+    --grad-primary: linear-gradient(135deg, #0b6f7a 0%, #0e827f 100%);
+    --grad-primary-hover: linear-gradient(135deg, #0a6570 0%, #0c7875 100%);
+    --grad-danger: linear-gradient(135deg, #c63b58 0%, #d24d68 100%);
+    --grad-hero:
+        radial-gradient(30rem 18rem at 112% -40%, rgb(158 232 216 / 0.14) 0%, transparent 60%),
+        radial-gradient(30rem 20rem at 0% 120%, rgb(4 52 60 / 0.45) 0%, transparent 62%),
+        linear-gradient(120deg, #0a5a67 0%, #0b6470 50%, #0b6e74 100%);
+    --grad-teal: linear-gradient(135deg, #0f8f86 0%, #55c7ba 100%);
+    --grad-violet: linear-gradient(135deg, #6f5ce8 0%, #ad9ffb 100%);
+    --grad-pink: linear-gradient(135deg, #e0529a 0%, #ff9ccb 100%);
+    --grad-orange: linear-gradient(135deg, #ec7f2e 0%, #ffbf7a 100%);
+    --grad-sky: linear-gradient(135deg, #2b7fc7 0%, #7cc0f2 100%);
+    --grad-mint: linear-gradient(135deg, #e3f5f1 0%, #d3ecf0 100%);
+    --grad-good: linear-gradient(90deg, #0b7a80 0%, #22b3a1 100%);
+    --grad-warn: linear-gradient(90deg, #e68a24 0%, #f7b766 100%);
+    --grad-critical: linear-gradient(90deg, #c63b58 0%, #ef7d92 100%);
+    --grad-neutral: linear-gradient(90deg, #7f9d9a 0%, #b5cac8 100%);
+    --grad-gap: linear-gradient(90deg, #f3b8c4 0%, #fbdde3 100%);
+    --grad-success-soft: linear-gradient(135deg, #e2f6f2 0%, #d3eee9 100%);
+    --grad-info-soft: linear-gradient(135deg, #f0edff 0%, #e4e0fd 100%);
+    --grad-danger-soft: linear-gradient(135deg, #fdecef 0%, #fbdfe5 100%);
+    --grad-warm-soft: linear-gradient(135deg, #fef3e4 0%, #fde5cf 100%);
+
+    --shadow-card: inset 0 1px 0 var(--glass-edge), 0 18px 40px -22px rgb(20 70 76 / 0.35), 0 2px 8px -3px rgb(20 70 76 / 0.1);
+    --shadow-float: 0 24px 60px -24px rgb(20 60 76 / 0.45), 0 4px 14px -6px rgb(20 60 76 / 0.15);
+    --shadow-primary: 0 10px 22px -10px rgb(11 111 122 / 0.65);
+    --shadow-danger: 0 10px 22px -10px rgb(198 59 88 / 0.6);
+    --shadow-soft: 0 6px 16px -10px rgb(20 70 76 / 0.35);
+    --shadow-chip-teal: 0 8px 18px -8px rgb(15 143 134 / 0.6);
+    --shadow-chip-violet: 0 8px 18px -8px rgb(111 92 232 / 0.6);
+    --shadow-chip-pink: 0 8px 18px -8px rgb(224 82 154 / 0.6);
+    --shadow-chip-orange: 0 8px 18px -8px rgb(236 127 46 / 0.6);
+    --shadow-chip-sky: 0 8px 18px -8px rgb(43 127 199 / 0.55);
+    --drop-seal: 0 12px 24px rgb(0 0 0 / 0.35);
+
+    /* Palet kategorikal tervalidasi (dataviz validate_palette: lightness, chroma, CVD, normal-vision, kontras). */
+    --chart-1: #008f86;
+    --chart-2: #7a67ee;
+    --chart-3: #c96a12;
+    --chart-4: #2b86cc;
+    --chart-5: #d9468a;
+    /* Ramp sekuensial satu hue (teal) untuk heatmap/magnitudo. */
+    --seq-1: #e2f3f1;
+    --seq-2: #b5e0db;
+    --seq-3: #7fc7bf;
+    --seq-4: #3fa39c;
+    --seq-5: #137d80;
+    --seq-6: #0b5a60;
+    /* Ramp divergen (distribusi jawaban Likert): koral ↔ teal, netral di tengah. */
+    --div-neg-2: #c63b58;
+    --div-neg-1: #f0a3b1;
+    --div-mid: #cbd6d5;
+    --div-pos-1: #86cfc5;
+    --div-pos-2: #0b7a80;
+    /* Perubahan naik/turun di atas banner teal. */
+    --on-dark-up: #b9f5e9;
+    --on-dark-down: #ffd3db;
+    /* Aksen hangat di atas banner teal (≥ 4,5:1 pada ujung tergelap, ≥ 3:1 untuk teks besar di ujung terang). */
+    --hero-accent: #ffdcae;
+    --hero-mid: #0b6470;
+    /* Tinta & fokus di atas banner teal. */
+    --on-hero: #ffffff;
+    --glass-edge: rgb(255 255 255 / 0.7);
+    --hero-sparkle: rgb(255 255 255 / 0.12);
+    --hero-shade: #04343c;
+
+    /* Kontrol & jalur (track) netral. */
+    --track: #d2e4e1;
+    --control-off: #bcd0ce;
+    --neutral-soft: #dbe9e7;
+    --glass-tint: #eef7f5;
+    --teal-deep: #0b6f7a;
+    --dot-ring: #ffffff;
+    --on-orange: #5a2c05;
+    /* Tirai di belakang dialog/sheet. */
+    --scrim: #0b3b40;
+
+    /* Sidebar kaca terang. */
+    --sidebar: rgb(255 255 255 / 0);
+    --sidebar-foreground: #2c5856;
+    --sidebar-primary: #07505a;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: rgb(255 255 255 / 0.62);
+    --sidebar-accent-foreground: #17393a;
+    --sidebar-border: rgb(255 255 255 / 0.7);
+    --sidebar-ring: #07505a;
+}
+
+@theme inline {
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --radius-2xl: calc(var(--radius) + 8px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-gold: var(--gold);
+    --color-gold-soft: var(--gold-soft);
+    --color-gold-foreground: var(--gold-foreground);
+    --color-success: var(--success);
+    --color-success-soft: var(--success-soft);
+    --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-soft: var(--warning-soft);
+    --color-info: var(--info);
+    --color-info-soft: var(--info-soft);
+    --color-info-foreground: var(--info-foreground);
+    --color-danger-soft: var(--danger-soft);
+    --color-danger-foreground: var(--danger-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-seq-1: var(--seq-1);
+    --color-seq-2: var(--seq-2);
+    --color-seq-3: var(--seq-3);
+    --color-seq-4: var(--seq-4);
+    --color-seq-5: var(--seq-5);
+    --color-seq-6: var(--seq-6);
+    --color-div-neg-2: var(--div-neg-2);
+    --color-div-neg-1: var(--div-neg-1);
+    --color-div-mid: var(--div-mid);
+    --color-div-pos-1: var(--div-pos-1);
+    --color-div-pos-2: var(--div-pos-2);
+    --color-on-dark-up: var(--on-dark-up);
+    --color-on-dark-down: var(--on-dark-down);
+    --color-hero-accent: var(--hero-accent);
+    --color-hero-mid: var(--hero-mid);
+    --color-hero-shade: var(--hero-shade);
+    --color-track: var(--track);
+    --color-control-off: var(--control-off);
+    --color-neutral-soft: var(--neutral-soft);
+    --color-glass-tint: var(--glass-tint);
+    --color-teal-deep: var(--teal-deep);
+    --color-dot-ring: var(--dot-ring);
+    --color-on-orange: var(--on-orange);
+    --color-scrim: var(--scrim);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring;
+    }
+
+    /* Fokus keyboard yang jelas untuk elemen tanpa gaya fokus sendiri (≥ 3:1). */
+    :where(a, button, summary, [role='button'], [tabindex]:not([tabindex='-1'])):focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 2px;
+        border-radius: var(--radius-sm);
+    }
+
+    /* Di banner teal (hero, login) fokus memakai putih. */
+    .bg-hero :focus-visible {
+        outline-color: var(--on-hero);
+        --tw-ring-color: var(--on-hero);
+    }
+
+    ::selection {
+        background: color-mix(in srgb, var(--info) 28%, transparent);
+        color: var(--foreground);
+    }
+
+    html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        accent-color: var(--primary);
+        caret-color: var(--primary);
+        scrollbar-color: color-mix(in oklch, var(--muted-foreground) 45%, transparent) transparent;
+    }
+
+    a {
+        text-underline-offset: 3px;
+    }
+
+    body {
+        @apply text-foreground;
+        background-color: var(--background);
+        background-image: var(--grad-page);
+        background-attachment: fixed;
+        min-height: 100svh;
+        font-feature-settings: 'ss01', 'cv11';
+    }
+
+    button:not(:disabled),
+    [role='button']:not(:disabled) {
+        cursor: pointer;
+    }
+}
+
+/*
+ * Kurangi gerakan: perubahan status tetap terlihat lewat pudar (opacity),
+ * tetapi skala, geser, dan animasi lebar/progres dihilangkan.
+ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        --tw-enter-scale: 1;
+        --tw-exit-scale: 1;
+        --tw-enter-translate-x: 0;
+        --tw-enter-translate-y: 0;
+        --tw-exit-translate-x: 0;
+        --tw-exit-translate-y: 0;
+        --tw-enter-rotate: 0;
+        --tw-exit-rotate: 0;
+        scroll-behavior: auto !important;
+    }
+
+    [class*='transition-[width]'],
+    [class*='duration-500'],
+    [class*='duration-700'] {
+        transition-duration: 1ms !important;
+    }
+
+    .animate-pulse {
+        animation: none;
+    }
+}
+
+/* Permukaan kaca bergradien. */
+@utility surface-glass {
+    background-color: var(--card);
+    background-image: var(--grad-card);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(22px) saturate(1.35);
+}
+
+@utility surface-glass-strong {
+    background-color: var(--popover);
+    background-image: var(--grad-card-strong);
+    box-shadow: var(--shadow-float);
+    backdrop-filter: blur(28px) saturate(1.4);
+}
+
+/* Banner teal (hero dashboard, panel login, portal). */
+@utility bg-hero {
+    background-color: var(--hero-mid);
+    background-image: var(--grad-hero);
+    color: var(--on-hero);
+}
+
+@utility bg-grad-primary {
+    background-color: var(--primary);
+    background-image: var(--grad-primary);
+}
+@utility bg-grad-danger {
+    background-color: var(--destructive);
+    background-image: var(--grad-danger);
+}
+@utility bg-grad-teal {
+    background-image: var(--grad-teal);
+}
+@utility bg-grad-violet {
+    background-image: var(--grad-violet);
+}
+@utility bg-grad-pink {
+    background-image: var(--grad-pink);
+}
+@utility bg-grad-orange {
+    background-image: var(--grad-orange);
+}
+@utility bg-grad-sky {
+    background-image: var(--grad-sky);
+}
+@utility bg-grad-mint {
+    background-image: var(--grad-mint);
+}
+@utility bg-grad-good {
+    background-color: var(--primary);
+    background-image: var(--grad-good);
+}
+@utility bg-grad-warn {
+    background-color: var(--warning);
+    background-image: var(--grad-warn);
+}
+@utility bg-grad-critical {
+    background-color: var(--destructive);
+    background-image: var(--grad-critical);
+}
+@utility bg-grad-neutral {
+    background-image: var(--grad-neutral);
+}
+@utility bg-grad-gap {
+    background-image: var(--grad-gap);
+}
+@utility shadow-soft {
+    box-shadow: var(--shadow-soft);
+}
+@utility shadow-danger {
+    box-shadow: var(--shadow-danger);
+}
+@utility shadow-chip-teal {
+    box-shadow: var(--shadow-chip-teal);
+}
+@utility shadow-chip-violet {
+    box-shadow: var(--shadow-chip-violet);
+}
+@utility shadow-chip-pink {
+    box-shadow: var(--shadow-chip-pink);
+}
+@utility shadow-chip-orange {
+    box-shadow: var(--shadow-chip-orange);
+}
+@utility shadow-chip-sky {
+    box-shadow: var(--shadow-chip-sky);
+}
+@utility drop-shadow-seal {
+    filter: drop-shadow(var(--drop-seal));
+}
+@utility shadow-card {
+    box-shadow: var(--shadow-card);
+}
+@utility shadow-float {
+    box-shadow: var(--shadow-float);
+}
+@utility shadow-primary {
+    box-shadow: var(--shadow-primary);
+}
+
+@layer utilities {
+    /* Setiap permukaan solid lama menjadi gradien (berlaku untuk seluruh halaman). */
+    .bg-card {
+        background-image: var(--grad-card);
+        box-shadow: inset 0 1px 0 var(--glass-edge);
+        backdrop-filter: blur(16px) saturate(1.3);
+    }
+    .bg-primary {
+        background-image: var(--grad-primary);
+    }
+    .bg-secondary {
+        background-image: var(--grad-mint);
+    }
+    .bg-destructive {
+        background-image: var(--grad-danger);
+    }
+    .bg-warning {
+        background-image: var(--grad-warn);
+    }
+    .bg-gold {
+        background-image: var(--grad-orange);
+    }
+    .bg-success-soft {
+        background-image: var(--grad-success-soft);
+    }
+    .bg-info-soft {
+        background-image: var(--grad-info-soft);
+    }
+    .bg-danger-soft {
+        background-image: var(--grad-danger-soft);
+    }
+    .bg-warning-soft,
+    .bg-gold-soft {
+        background-image: var(--grad-warm-soft);
+    }
+
+    .tabular {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Kilau halus untuk banner teal. */
+    .bg-pattern-star {
+        background-image: radial-gradient(circle at 1px 1px, var(--hero-sparkle) 1px, transparent 0);
+        background-size: 22px 22px;
+    }
+}
