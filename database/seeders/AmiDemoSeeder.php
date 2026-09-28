@@ -48,7 +48,7 @@ class AmiDemoSeeder extends Seeder
             'competencies' => 'Standar pendidikan, sistem penjaminan mutu, audit dokumen.',
         ]);
 
-        $members = Lecturer::query()->whereHas('studyProgram', fn ($q) => $q->whereIn('code', ['PAI', 'TBIG', 'TFIS']))->where('employment_status', 'tetap')->with('user')->take(3)->get()
+        $members = Lecturer::query()->whereHas('studyProgram', fn ($q) => $q->whereIn('code', ['PAI', 'TBIG', 'TFIS']))->where('employment_status', 'tetap')->with('user')->orderBy('id')->take(3)->get()
             ->map(function (Lecturer $lecturer): Auditor {
                 User::query()->findOrFail($lecturer->user_id)->assignRole(UserRole::Auditor->value);
 
