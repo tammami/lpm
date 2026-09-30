@@ -1,5 +1,5 @@
 import { Link, router, useForm } from '@inertiajs/react';
-import { AlertTriangle, ArrowRight, CalendarDays, FileText, FolderOpen, MapPin, MessageSquare, Pencil, Plus, ShieldAlert, UserRound, Users } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Ban, CalendarDays, FileText, FolderOpen, MapPin, MessageSquare, Pencil, Plus, ShieldAlert, UserRound, Users } from 'lucide-react';
 import { useState } from 'react';
 import { AuditForm } from '@/components/ami/audit-form';
 import { type FindingDraft, FindingForm, type FindingFormOptions } from '@/components/ami/finding-form';
@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { useCan } from '@/hooks/use-can';
 import { auditStages, auditTone, findingTone, severityTone } from '@/lib/ami';
 import { formatDate, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -46,6 +47,7 @@ const optionStyle: Record<string, string> = {
 };
 
 export default function AuditShow(props: Props) {
+    const canViewPrograms = useCan()('ami.view');
     const { audit, checklist, compliance, findings, evidence, can } = props;
     const [findingDraft, setFindingDraft] = useState<FindingDraft | null>(null);
     const [editing, setEditing] = useState(false);
@@ -58,7 +60,11 @@ export default function AuditShow(props: Props) {
         <>
             <PageHeader
                 title={audit.auditee_name}
-                breadcrumbs={[{ label: 'Program Audit', href: route('ami.programs.index') }, { label: audit.program.name, href: route('ami.programs.show', audit.program.id) }, { label: audit.code }]}
+                breadcrumbs={[
+                    { label: 'Program Audit', href: canViewPrograms ? route('ami.programs.index') : undefined },
+                    { label: audit.program.name, href: canViewPrograms ? route('ami.programs.show', audit.program.id) : undefined },
+                    { label: audit.code },
+                ]}
                 meta={
                     <>
                         <StatusBadge tone={auditTone[audit.status]}>{audit.status_label}</StatusBadge>
@@ -83,6 +89,20 @@ export default function AuditShow(props: Props) {
                             <Button variant="outline" onClick={() => setEditing(true)}>
                                 <Pencil /> Jadwal
                             </Button>
+                        )}
+                        {can.manage && !['completed', 'cancelled'].includes(audit.status) && (
+                            <ConfirmDialog
+                                trigger={
+                                    <Button variant="outline" className="text-destructive">
+                                        <Ban /> Batalkan
+                                    </Button>
+                                }
+                                title="Batalkan audit ini?"
+                                description="Audit yang dibatalkan tidak dapat dilanjutkan lagi. Jawaban dan temuan yang sudah dicatat tetap tersimpan."
+                                href={route('ami.audits.cancel', audit.id)}
+                                method="post"
+                                confirmLabel="Batalkan audit"
+                            />
                         )}
                         {can.lead && nextStage && audit.status !== 'cancelled' && (
                             <ConfirmDialog

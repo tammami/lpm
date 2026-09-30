@@ -52,7 +52,13 @@ export function ConfirmDialog({ trigger, title, description, confirmLabel = 'Ya,
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent
+                onCloseAutoFocus={() => {
+                    // Dialog yang dibuka dari menu (mis. "Aksi › Hapus") menahan menu tetap terbuka; tutup juga
+                    // menunya setelah dialog hilang agar halaman tidak tertahan satu klik.
+                    if (document.querySelector('[role="menu"]')) document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+                }}
+            >
                 <AlertDialogHeader>
                     <AlertDialogTitle>{title}</AlertDialogTitle>
                     {description && <AlertDialogDescription>{description}</AlertDialogDescription>}

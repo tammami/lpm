@@ -31,6 +31,7 @@ import { StatTile } from '@/components/stat-tile';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCan } from '@/hooks/use-can';
 import { formatDate, formatNumber, formatPercent, formatScore } from '@/lib/format';
 import { daysLeft } from '@/lib/survey';
 import { cn } from '@/lib/utils';
@@ -125,6 +126,7 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
     const min = quality?.scheme?.scale_min ?? 0;
     const expiring = accreditation.filter((a) => a.days_left !== null && a.days_left <= accreditationWarningDays);
     const active = activeSurveys[0];
+    const canViewSurveys = useCan()('surveys.view');
 
     return (
         <>
@@ -254,12 +256,12 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
                         {activeSurveys.length === 0 && <p className="text-sm text-muted-foreground">Tidak ada Monev yang sedang dibuka.</p>}
                         {activeSurveys.map((survey) => (
                             <div key={survey.id}>
-                                <Link href={route('surveys.show', survey.id)} className="flex items-baseline justify-between gap-3 hover:text-primary">
+                                <SurveyTitle href={canViewSurveys ? route('surveys.show', survey.id) : null}>
                                     <span className="truncate text-sm font-bold">{survey.title}</span>
                                     <StatusBadge tone={daysLeft(survey.ends_at) <= 3 ? 'warning' : 'success'} dot={false}>
                                         {Math.max(0, daysLeft(survey.ends_at))} hari lagi
                                     </StatusBadge>
-                                </Link>
+                                </SurveyTitle>
                                 <div className="mt-3 flex flex-col gap-2.5">
                                     {survey.byStudyProgram.map((row) => (
                                         <div key={row.study_program_id}>
@@ -578,5 +580,17 @@ function LecturerDashboard({ greeting, scopeLabel, threshold, lecturer, evaluati
                 </Card>
             )}
         </>
+    );
+}
+
+function SurveyTitle({ href, children }: { href: string | null; children: React.ReactNode }) {
+    const className = 'flex items-baseline justify-between gap-3';
+
+    return href ? (
+        <Link href={href} className={cn(className, 'hover:text-primary')}>
+            {children}
+        </Link>
+    ) : (
+        <div className={className}>{children}</div>
     );
 }

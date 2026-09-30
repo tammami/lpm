@@ -1,5 +1,5 @@
 import { router, useForm } from '@inertiajs/react';
-import { BookOpen, CalendarRange, GraduationCap, Plus, Trash2, UserMinus, UserPlus, Users } from 'lucide-react';
+import { BookOpen, CalendarRange, GraduationCap, Pencil, Plus, Trash2, UserMinus, UserPlus, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Combobox } from '@/components/combobox';
 import { ConfirmDialog } from '@/components/confirm-dialog';
@@ -13,6 +13,7 @@ import { StatusBadge } from '@/components/status-badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,6 +41,7 @@ const roleLabels: Record<string, string> = { koordinator: 'Koordinator', anggota
 export default function ClassShow({ courseClass, lecturers, entryYears, canManage }: Props) {
     const [search, setSearch] = useState('');
     const [enrolling, setEnrolling] = useState(false);
+    const [editing, setEditing] = useState(false);
     const lecturerForm = useForm({ lecturer_id: '', role: courseClass.assignments.length ? 'anggota' : 'koordinator' });
 
     const students = useMemo(() => {
@@ -69,20 +71,26 @@ export default function ClassShow({ courseClass, lecturers, entryYears, canManag
                 }
                 actions={
                     canManage && (
-                        <ConfirmDialog
-                            trigger={
-                                <Button variant="outline" className="text-destructive">
-                                    <Trash2 /> Hapus kelas
-                                </Button>
-                            }
-                            title="Hapus kelas ini?"
-                            description="Kelas yang sudah dievaluasi pada Monev tidak dapat dihapus."
-                            href={route('classes.destroy', courseClass.id)}
-                            confirmLabel="Hapus"
-                        />
+                        <>
+                            <Button variant="outline" onClick={() => setEditing(true)}>
+                                <Pencil /> Ubah kelas
+                            </Button>
+                            <ConfirmDialog
+                                trigger={
+                                    <Button variant="outline" className="text-destructive">
+                                        <Trash2 /> Hapus kelas
+                                    </Button>
+                                }
+                                title="Hapus kelas ini?"
+                                description="Kelas yang sudah dievaluasi pada Monev tidak dapat dihapus."
+                                href={route('classes.destroy', courseClass.id)}
+                                confirmLabel="Hapus"
+                            />
+                        </>
                     )
                 }
             />
+            {editing && <EditClassDialog courseClass={courseClass} onClose={() => setEditing(false)} />}
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[380px_1fr]">
                 <Card className="h-fit">
@@ -237,6 +245,30 @@ function EnrollDialog({ classId, entryYears, onClose }: { classId: number; entry
                     </FormField>
                 </TabsContent>
             </Tabs>
+        </FormDialog>
+    );
+}
+
+function EditClassDialog({ courseClass, onClose }: { courseClass: Props['courseClass']; onClose: () => void }) {
+    const form = useForm({ code: courseClass.code, capacity: courseClass.capacity === null ? '' : String(courseClass.capacity) });
+
+    return (
+        <FormDialog
+            open
+            onOpenChange={(open) => !open && onClose()}
+            title="Ubah kelas"
+            description={`${courseClass.course.name} · ${courseClass.period.name}`}
+            onSubmit={() => form.put(route('classes.update', courseClass.id), { preserveScroll: true, onSuccess: onClose })}
+            processing={form.processing}
+        >
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <FormField label="Kode kelas" error={form.errors.code} required hint="Mis. A, B, atau PAI-1.">
+                    <Input value={form.data.code} onChange={(e) => form.setData('code', e.target.value.toUpperCase())} />
+                </FormField>
+                <FormField label="Kapasitas" error={form.errors.capacity} hint="Kosongkan bila tidak dibatasi.">
+                    <Input type="number" min={1} max={500} value={form.data.capacity} onChange={(e) => form.setData('capacity', e.target.value)} />
+                </FormField>
+            </div>
         </FormDialog>
     );
 }

@@ -2,9 +2,11 @@
 
 use App\Enums\UserRole;
 use App\Models\ImportJob;
+use App\Models\Lecturer;
 use App\Models\Student;
 use App\Models\StudyProgram;
 use App\Models\User;
+use App\Services\Import\ImportManager;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use OpenSpout\Common\Entity\Row;
@@ -99,9 +101,75 @@ it('fails with a clear message when required columns are missing', function () {
         ->failure_message->toContain('Kode Prodi');
 });
 
-it('serves an xlsx template for each import type', function () {
-    $this->actingAs($this->admin)
-        ->get(route('imports.template', 'dosen'))
-        ->assertOk()
-        ->assertDownload('template_dosen.xlsx');
+it('serves a readable xlsx template that can be uploaded back unchanged', function (string $type) {
+    $response = $this->actingAs($this->admin)->get(route('imports.template', $type))->assertDownload("template_{$type}.xlsx");
+    $rows = downloadedRows($response);
+
+    expect($rows)->toHaveCount(2)
+        ->and($rows[0])->toBe(array_map(
+            fn (array $column): string => $column['label'].($column['required'] ? '*' : ''),
+            app(ImportManager::class)->importer($type)->columns(),
+        ));
+
+    $path = tempnam(sys_get_temp_dir(), 'tpl').'.xlsx';
+    file_put_contents($path, $response->streamedContent());
+
+    $this->actingAs($this->admin)->post(route('imports.store'), [
+        'type' => $type,
+        'file' => new UploadedFile($path, "template_{$type}.xlsx", null, null, true),
+    ])->assertSessionHasNoErrors();
+
+    expect(ImportJob::query()->sole())
+        ->status->toBe('validated')
+        ->total_rows->toBe(1);
+})->with(['mahasiswa', 'dosen', 'mata_kuliah', 'penugasan_mengajar', 'peserta_kelas']);
+
+it('imports lecturers from a semicolon separated csv', function () {
+    $this->actingAs($this->admin)->post(route('imports.store'), [
+        'type' => 'dosen',
+        'file' => UploadedFile::fake()->createWithContent('dosen.csv', "NIDN*;Nama*;Kode Prodi*\n0812345678;Ahmad Fauzi;TMTK\n"),
+    ])->assertSessionHasNoErrors();
+
+    $job = ImportJob::query()->sole();
+    $this->actingAs($this->admin)->post(route('imports.confirm', $job), ['update_existing' => true]);
+
+    expect($job->fresh()->status)->toBe('completed')
+        ->and(Lecturer::query()->where('nidn', '0812345678')->value('name'))->toBe('Ahmad Fauzi')
+        ->and(User::query()->where('username', '0812345678')->first()->hasRole('dosen'))->toBeTrue();
+});
+
+it('accepts an xlsx file that the server detects as a plain zip archive', function () {
+    $path = tempnam(sys_get_temp_dir(), 'zip').'.xlsx';
+    $zip = new ZipArchive;
+    $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+    $zip->addFromString('catatan.txt', 'bukan workbook');
+    $zip->close();
+
+    $this->actingAs($this->admin)->post(route('imports.store'), [
+        'type' => 'dosen',
+        'file' => new UploadedFile($path, 'dosen.xlsx', null, null, true),
+    ])->assertSessionHasNoErrors();
+
+    expect(ImportJob::query()->sole()->status)->toBe('failed');
+});
+
+it('rejects legacy xls files with a clear message', function () {
+    $this->actingAs($this->admin)->post(route('imports.store'), [
+        'type' => 'dosen',
+        'file' => UploadedFile::fake()->create('dosen.xls', 20, 'application/vnd.ms-excel'),
+    ])->assertSessionHasErrors(['file' => 'Gunakan file Excel (.xlsx) atau CSV. File Excel lama (.xls) perlu disimpan ulang sebagai .xlsx.']);
+
+    expect(ImportJob::query()->count())->toBe(0);
+});
+
+it('downloads the validation errors of an import as xlsx', function () {
+    $this->actingAs($this->admin)->post(route('imports.store'), [
+        'type' => 'mahasiswa',
+        'file' => studentWorkbook([['2511002', 'Ahmad Fauzi', 'XXXX', '2025', '3']]),
+    ]);
+
+    $rows = downloadedRows($this->actingAs($this->admin)->get(route('imports.errors', ImportJob::query()->sole())));
+
+    expect($rows[0])->toBe(['Baris', 'Kolom', 'Nilai', 'Keterangan'])
+        ->and($rows[1])->toBe(['2', 'kode_prodi', 'XXXX', 'Kode prodi tidak valid']);
 });

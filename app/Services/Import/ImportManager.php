@@ -9,6 +9,7 @@ use App\Support\Spreadsheet;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Throwable;
 
 /**
@@ -53,7 +54,7 @@ class ImportManager
         $job = ImportJob::query()->create([
             'user_id' => $user->id,
             'type' => $type,
-            'file_path' => $file->storeAs('imports', now()->format('Ymd_His').'_'.$user->id.'.'.$file->getClientOriginalExtension(), 'local'),
+            'file_path' => $file->storeAs('imports', now()->format('Ymd_His').'_'.$user->id.'_'.Str::lower(Str::random(6)).'.'.Str::lower($file->getClientOriginalExtension()), 'local'),
             'original_name' => $file->getClientOriginalName(),
             'status' => 'uploaded',
             'options' => $options,

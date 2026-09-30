@@ -7,6 +7,7 @@ import {
     Building2,
     ClipboardCheck,
     ClipboardList,
+    DatabaseBackup,
     FileBarChart2,
     FileSpreadsheet,
     FolderArchive,
@@ -142,6 +143,7 @@ export const navigation: NavGroup[] = [
                 ],
             },
             { title: 'Log Audit', icon: Activity, route: 'audit-logs.index', match: 'audit-logs.*', permission: 'audit_logs.view' },
+            { title: 'Cadangan Database', icon: DatabaseBackup, route: 'backups.index', match: 'backups.*', permission: 'backups.manage' },
         ],
     },
 ];

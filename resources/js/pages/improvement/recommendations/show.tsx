@@ -1,5 +1,5 @@
 import { Link, router, useForm } from '@inertiajs/react';
-import { Ban, CheckCircle2, CheckSquare, Lightbulb, Lock, Pencil, Plus, ShieldCheck, Square, Target, XCircle } from 'lucide-react';
+import { Ban, CheckCircle2, CheckSquare, Lightbulb, Lock, Pencil, Plus, ShieldCheck, Square, Target, Trash2, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Combobox } from '@/components/combobox';
 import { ConfirmDialog } from '@/components/confirm-dialog';
@@ -183,6 +183,19 @@ export default function RecommendationShow({ recommendation, plans, targets, pic
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
+                                        {can.manage && plan.status === 'planned' && (
+                                            <ConfirmDialog
+                                                trigger={
+                                                    <Button variant="outline" size="sm" className="text-destructive" aria-label={`Hapus rencana aksi ${plan.title}`}>
+                                                        <Trash2 /> Hapus
+                                                    </Button>
+                                                }
+                                                title="Hapus rencana aksi ini?"
+                                                description="Tugas di dalam rencana aksi ini ikut terhapus. Hanya rencana yang belum berjalan yang dapat dihapus."
+                                                href={route('improvement.action-plans.destroy', plan.id)}
+                                                confirmLabel="Hapus"
+                                            />
+                                        )}
                                         {plan.can_update && plan.status !== 'verified' && (
                                             <Button variant="outline" size="sm" onClick={() => setPlanForm(plan)}>
                                                 <Pencil /> Perbarui

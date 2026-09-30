@@ -107,7 +107,7 @@ class InstrumentVersionController extends Controller
 
     public function import(Request $request, AccreditationInstrumentVersion $version, AccreditationInstruments $instruments): RedirectResponse
     {
-        $request->validate(['file' => ['required', 'file', 'mimes:xlsx,csv,txt', 'max:5120']]);
+        $request->validate(['file' => Spreadsheet::uploadRules(5)], Spreadsheet::uploadMessages(5));
         $file = $request->file('file');
         $path = $file->storeAs('tmp', Str::uuid().'.'.strtolower($file->getClientOriginalExtension()), 'local');
 

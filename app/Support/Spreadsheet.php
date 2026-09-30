@@ -9,6 +9,8 @@ use OpenSpout\Common\Entity\Style\Style;
 use OpenSpout\Reader\CSV\Options as CsvOptions;
 use OpenSpout\Reader\CSV\Reader as CsvReader;
 use OpenSpout\Reader\XLSX\Reader as XlsxReader;
+use OpenSpout\Writer\XLSX\Options as XlsxOptions;
+use OpenSpout\Writer\XLSX\Properties;
 use OpenSpout\Writer\XLSX\Writer as XlsxWriter;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -17,6 +19,41 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 final class Spreadsheet
 {
+    public const IMPORT_MAX_MB = 10;
+
+    /**
+     * Aturan validasi file impor. Ekstensi menjadi acuan karena XLSX dari sebagian aplikasi
+     * (Google Sheets, LibreOffice, WPS) terdeteksi sebagai ZIP/biner oleh pemeriksa MIME.
+     *
+     * @return list<string>
+     */
+    public static function uploadRules(int $maxMb = self::IMPORT_MAX_MB): array
+    {
+        return [
+            'required',
+            'file',
+            'extensions:xlsx,csv',
+            'mimetypes:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip,application/x-zip-compressed,application/octet-stream,text/plain,text/csv,application/csv',
+            'max:'.UploadLimit::kilobytes($maxMb),
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function uploadMessages(int $maxMb = self::IMPORT_MAX_MB): array
+    {
+        $format = 'Gunakan file Excel (.xlsx) atau CSV. File Excel lama (.xls) perlu disimpan ulang sebagai .xlsx.';
+
+        return [
+            'file.required' => 'Pilih file yang akan diimpor.',
+            'file.extensions' => $format,
+            'file.mimetypes' => $format,
+            'file.max' => 'Ukuran file melebihi batas '.UploadLimit::megabytes($maxMb).' MB.',
+            'file.uploaded' => 'File gagal diunggah. Ukuran file mungkin melebihi batas '.UploadLimit::megabytes($maxMb).' MB.',
+        ];
+    }
+
     /**
      * Baca sheet pertama. Menghasilkan [nomor baris => nilai-nilai sel].
      *
@@ -65,8 +102,7 @@ final class Spreadsheet
     public static function download(string $filename, array $headers, iterable $rows, array $widths = [], ?string $title = null, array $notes = []): StreamedResponse
     {
         return response()->streamDownload(function () use ($headers, $rows, $widths, $title, $notes): void {
-            $writer = new XlsxWriter;
-            $writer->setCreator(config('app.name'));
+            $writer = self::writer();
             $writer->openToFile('php://output');
 
             $sheet = $writer->getCurrentSheet();
@@ -108,8 +144,7 @@ final class Spreadsheet
     public static function downloadSheets(string $filename, array $sheets): StreamedResponse
     {
         return response()->streamDownload(function () use ($sheets): void {
-            $writer = new XlsxWriter;
-            $writer->setCreator(config('app.name'));
+            $writer = self::writer();
             $writer->openToFile('php://output');
 
             foreach ($sheets as $index => $definition) {
@@ -131,6 +166,19 @@ final class Spreadsheet
         }, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
+    }
+
+    /**
+     * OpenSpout 5 menetapkan properti dokumen lewat Options, bukan setter pada writer.
+     */
+    private static function writer(): XlsxWriter
+    {
+        return new XlsxWriter(new XlsxOptions(properties: new Properties(
+            title: null,
+            application: config('app.name'),
+            creator: config('app.name'),
+            lastModifiedBy: config('app.name'),
+        )));
     }
 
     public static function headerStyle(): Style

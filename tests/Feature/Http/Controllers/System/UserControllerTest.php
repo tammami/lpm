@@ -43,3 +43,22 @@ it('prevents a superadmin from demoting itself', function () {
 
     expect($admin->fresh()->hasRole('superadmin'))->toBeTrue();
 });
+
+it('keeps usernames with a dot editable', function () {
+    $program = StudyProgram::factory()->create();
+    $user = userWithRole(UserRole::AdminProdi, ['username' => 'prodi.tmtk', 'study_program_id' => $program->id]);
+
+    $this->actingAs(userWithRole(UserRole::AdminLpm))
+        ->put(route('users.update', $user), [
+            'name' => 'Admin Prodi Diubah',
+            'username' => 'prodi.tmtk',
+            'email' => $user->email,
+            'roles' => ['admin_prodi'],
+            'study_program_id' => $program->id,
+            'is_active' => true,
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    expect($user->fresh()->name)->toBe('Admin Prodi Diubah');
+});

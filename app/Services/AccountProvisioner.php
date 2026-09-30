@@ -49,7 +49,7 @@ class AccountProvisioner
             $user = User::query()->create([
                 'username' => $username,
                 'name' => $name,
-                'email' => $email ?: "{$username}@users.simutu.local",
+                'email' => $this->availableEmail($email, $username),
                 'password' => $username,
                 'must_change_password' => true,
                 'is_active' => true,
@@ -63,6 +63,19 @@ class AccountProvisioner
         }
 
         return $user;
+    }
+
+    /**
+     * Email akun harus unik. Bila email sudah dipakai akun lain (mis. email bersama),
+     * akun tetap dibuat dengan alamat internal; email asli tetap tersimpan di data dosen/mahasiswa.
+     */
+    private function availableEmail(?string $email, string $username): string
+    {
+        if ($email && ! User::query()->where('email', $email)->exists()) {
+            return $email;
+        }
+
+        return "{$username}@users.simutu.local";
     }
 
     public function resetPassword(User $user): void

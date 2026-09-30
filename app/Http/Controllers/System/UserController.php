@@ -125,7 +125,7 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'username' => ['nullable', 'string', 'max:50', 'alpha_dash', Rule::unique('users')->ignore($user)],
+            'username' => ['nullable', 'string', 'max:50', 'regex:/^[A-Za-z0-9._-]+$/', Rule::unique('users')->ignore($user)],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user)],
             'phone' => ['nullable', 'string', 'max:30'],
             'roles' => ['required', 'array', 'min:1'],
@@ -135,7 +135,7 @@ class UserController extends Controller
             'unit_id' => ['nullable', 'exists:units,id'],
             'is_active' => ['boolean'],
             'password' => ['nullable', Password::defaults()],
-        ], ['roles.required' => 'Pilih minimal satu peran.']);
+        ], ['roles.required' => 'Pilih minimal satu peran.', 'username.regex' => 'Nama pengguna hanya boleh berisi huruf, angka, titik, tanda hubung, dan garis bawah.']);
 
         if (in_array(UserRole::AdminFakultas->value, $validated['roles'], true) && empty($validated['faculty_id'])) {
             $this->failWith('Admin Fakultas wajib memiliki fakultas.');

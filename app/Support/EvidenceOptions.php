@@ -22,7 +22,7 @@ final class EvidenceOptions
                 ->map(fn (EvidenceCategory $category): array => ['value' => $category->id, 'label' => $category->name])->all(),
             'units' => Auditee::options($request->user()),
             'periods' => Options::periods(),
-            'maxUploadMb' => (int) Settings::get('evidence.max_upload_mb', 20),
+            'maxUploadMb' => UploadLimit::megabytes((int) Settings::get('evidence.max_upload_mb', 20)),
             'allowedExtensions' => EvidenceService::ALLOWED_EXTENSIONS,
         ];
     }

@@ -11,6 +11,7 @@ use App\Models\InstrumentVersion;
 use App\Services\Import\Importer;
 use App\Services\Import\ImportManager;
 use App\Support\Spreadsheet;
+use App\Support\UploadLimit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -42,6 +43,7 @@ class ImportController extends Controller
                 'columns' => $importer->columns(),
             ])->values()->all(),
             'jobs' => $jobs,
+            'maxUploadMb' => UploadLimit::megabytes(Spreadsheet::IMPORT_MAX_MB),
             'draftVersions' => InstrumentVersion::query()->where('status', InstrumentVersionStatus::Draft)->with('instrument:id,name')->get()
                 ->map(fn (InstrumentVersion $version): array => ['value' => $version->id, 'label' => "{$version->instrument->name} — v{$version->version} (draf)"])->all(),
         ]);
@@ -68,9 +70,9 @@ class ImportController extends Controller
     {
         $validated = $request->validate([
             'type' => ['required', Rule::in(array_keys($manager->importers()))],
-            'file' => ['required', 'file', 'mimes:xlsx,csv,txt', 'max:10240'],
+            'file' => Spreadsheet::uploadRules(),
             'instrument_version_id' => ['nullable', 'required_if:type,butir_instrumen', Rule::exists('instrument_versions', 'id')->where('status', 'draft')],
-        ], ['file.mimes' => 'Gunakan file Excel (.xlsx) atau CSV.', 'instrument_version_id.required_if' => 'Pilih versi instrumen tujuan (berstatus draf).']);
+        ], [...Spreadsheet::uploadMessages(), 'instrument_version_id.required_if' => 'Pilih versi instrumen tujuan (berstatus draf).']);
 
         $job = $manager->upload($request->file('file'), $validated['type'], $request->user(), array_filter([
             'instrument_version_id' => $validated['instrument_version_id'] ?? null,

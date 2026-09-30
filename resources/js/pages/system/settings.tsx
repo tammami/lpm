@@ -23,6 +23,7 @@ const groups: Record<string, { title: string; description: string }> = {
     improvement: { title: 'Peningkatan Mutu', description: 'Tenggat bawaan tindak lanjut.' },
     accreditation: { title: 'Akreditasi', description: 'Peringatan masa berlaku akreditasi.' },
     evidence: { title: 'Dokumen Bukti', description: 'Batas ukuran unggahan.' },
+    backup: { title: 'Cadangan Database', description: 'Jumlah file cadangan yang dipertahankan.' },
     report: { title: 'Laporan', description: 'Identitas pada laporan PDF.' },
 };
 

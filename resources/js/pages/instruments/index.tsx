@@ -1,21 +1,25 @@
-import { Link, useForm } from '@inertiajs/react';
-import { Archive, ClipboardList, FileStack, ListChecks, Plus, Users } from 'lucide-react';
+import { Link, router, useForm } from '@inertiajs/react';
+import { Archive, ArchiveRestore, ClipboardList, FileStack, ListChecks, Pencil, Plus, Trash2, Users } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
 import { FormDialog } from '@/components/form-dialog';
 import { FormField } from '@/components/form-field';
 import { PageHeader } from '@/components/page-header';
 import { PaginationBar } from '@/components/pagination-bar';
+import { RowActions } from '@/components/row-actions';
 import { SearchInput } from '@/components/search-input';
 import { SelectField } from '@/components/select-field';
 import { StatusBadge } from '@/components/status-badge';
 import { Button } from '@/components/ui/button';
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { useQueryFilters } from '@/hooks/use-query-filters';
 import { fromNow } from '@/lib/format';
 import { instrumentTypeTone, versionTone } from '@/lib/instrument';
+import { cn } from '@/lib/utils';
 import type { Option, Paginated } from '@/types';
 
 interface InstrumentCard {
@@ -25,6 +29,7 @@ interface InstrumentCard {
     description: string | null;
     type: string;
     type_label: string;
+    respondent_type: string;
     respondent_label: string;
     versions_count: number;
     archived: boolean;
@@ -49,7 +54,7 @@ export default function InstrumentsIndex({ instruments, filters, types, responde
         respondent_type: filters.respondent_type ?? 'all',
         archived: filters.archived === '1' || filters.archived === 'true' ? '1' : '',
     });
-    const [creating, setCreating] = useState(false);
+    const [editing, setEditing] = useState<InstrumentCard | 'new' | null>(null);
 
     return (
         <>
@@ -59,7 +64,7 @@ export default function InstrumentsIndex({ instruments, filters, types, responde
                 breadcrumbs={[{ label: 'e-Monev' }, { label: 'Instrumen' }]}
                 actions={
                     canManage && (
-                        <Button onClick={() => setCreating(true)}>
+                        <Button onClick={() => setEditing('new')}>
                             <Plus /> Instrumen baru
                         </Button>
                     )
@@ -86,7 +91,7 @@ export default function InstrumentsIndex({ instruments, filters, types, responde
                         description="Mulai dengan membuat instrumen Monev Pembelajaran, lalu susun bagian dan butir pertanyaannya."
                         action={
                             canManage && (
-                                <Button onClick={() => setCreating(true)}>
+                                <Button onClick={() => setEditing('new')}>
                                     <Plus /> Instrumen baru
                                 </Button>
                             )
@@ -96,10 +101,10 @@ export default function InstrumentsIndex({ instruments, filters, types, responde
             ) : (
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
                     {instruments.data.map((instrument) => (
+                        <div key={instrument.id} className="relative flex">
                         <Link
-                            key={instrument.id}
                             href={instrument.latest ? route('instrument-versions.show', instrument.latest.id) : route('instruments.show', instrument.id)}
-                            className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card p-5 transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                            className="group relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border bg-card p-5 transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
                         >
                             <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-primary/70 to-gold opacity-0 transition group-hover:opacity-100" />
                             <div className="flex items-start justify-between gap-3">
@@ -134,11 +139,37 @@ export default function InstrumentsIndex({ instruments, filters, types, responde
                                     <Users className="size-3.5" /> {instrument.respondent_label}
                                 </span>
                             </div>
-                            <div className="mt-3 flex items-center justify-between text-[11px] text-muted-foreground">
+                            <div className={cn('mt-3 flex items-center justify-between text-[11px] text-muted-foreground', canManage && 'pr-9')}>
                                 <span>{instrument.published_version ? `Versi terbit: v${instrument.published_version}` : 'Belum ada versi terbit'}</span>
                                 <span>Diubah {fromNow(instrument.updated_at)}</span>
                             </div>
                         </Link>
+                            {canManage && (
+                                <div className="absolute right-3 bottom-3">
+                                    <RowActions>
+                                        <DropdownMenuItem onSelect={() => setEditing(instrument)}>
+                                            <Pencil /> Ubah informasi
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onSelect={() => router.post(route('instruments.archive', instrument.id), {}, { preserveScroll: true })}>
+                                            {instrument.archived ? <ArchiveRestore /> : <Archive />} {instrument.archived ? 'Aktifkan kembali' : 'Arsipkan'}
+                                        </DropdownMenuItem>
+                                        {instrument.surveys_count === 0 && (
+                                            <ConfirmDialog
+                                                trigger={
+                                                    <DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()}>
+                                                        <Trash2 /> Hapus
+                                                    </DropdownMenuItem>
+                                                }
+                                                title={`Hapus ${instrument.name}?`}
+                                                description="Seluruh versi, bagian, dan butir pertanyaan instrumen ini ikut terhapus."
+                                                href={route('instruments.destroy', instrument.id)}
+                                                confirmLabel="Hapus"
+                                            />
+                                        )}
+                                    </RowActions>
+                                </div>
+                            )}
+                        </div>
                     ))}
                 </div>
             )}
@@ -149,23 +180,35 @@ export default function InstrumentsIndex({ instruments, filters, types, responde
                 </div>
             )}
 
-            {creating && <CreateInstrumentDialog types={types} respondentTypes={respondentTypes} onClose={() => setCreating(false)} />}
+            {editing !== null && (
+                <InstrumentDialog instrument={editing === 'new' ? null : editing} types={types} respondentTypes={respondentTypes} onClose={() => setEditing(null)} />
+            )}
         </>
     );
 }
 
-function CreateInstrumentDialog({ types, respondentTypes, onClose }: { types: Option[]; respondentTypes: Option[]; onClose: () => void }) {
-    const form = useForm({ code: '', name: '', type: 'monev_pembelajaran', respondent_type: 'mahasiswa', description: '' });
+function InstrumentDialog({ instrument, types, respondentTypes, onClose }: { instrument: InstrumentCard | null; types: Option[]; respondentTypes: Option[]; onClose: () => void }) {
+    const form = useForm({
+        code: instrument?.code ?? '',
+        name: instrument?.name ?? '',
+        type: instrument?.type ?? 'monev_pembelajaran',
+        respondent_type: instrument?.respondent_type ?? 'mahasiswa',
+        description: instrument?.description ?? '',
+    });
 
     return (
         <FormDialog
             open
             onOpenChange={(open) => !open && onClose()}
-            title="Instrumen baru"
-            description="Versi 1.0 (draf) akan dibuat otomatis beserta satu bagian awal."
-            onSubmit={() => form.post(route('instruments.store'))}
+            title={instrument ? 'Ubah informasi instrumen' : 'Instrumen baru'}
+            description={instrument ? 'Butir pertanyaan diubah melalui penyusun instrumen.' : 'Versi 1.0 (draf) akan dibuat otomatis beserta satu bagian awal.'}
+            onSubmit={() =>
+                instrument
+                    ? form.put(route('instruments.update', instrument.id), { preserveScroll: true, onSuccess: onClose })
+                    : form.post(route('instruments.store'))
+            }
             processing={form.processing}
-            submitLabel="Buat & susun"
+            submitLabel={instrument ? 'Simpan' : 'Buat & susun'}
         >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <FormField label="Nama instrumen" error={form.errors.name} required className="sm:col-span-2">

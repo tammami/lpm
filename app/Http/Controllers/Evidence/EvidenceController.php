@@ -19,6 +19,7 @@ use App\Services\Settings;
 use App\Support\Auditee;
 use App\Support\Options;
 use App\Support\TableQuery;
+use App\Support\UploadLimit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -371,7 +372,7 @@ class EvidenceController extends Controller
             'studyPrograms' => Options::studyPrograms($request->user(), activeOnly: false),
             'years' => DB::table('evidence')->whereNotNull('year')->distinct()->orderByDesc('year')->pluck('year')
                 ->map(fn ($year): array => ['value' => $year, 'label' => (string) $year])->all(),
-            'maxUploadMb' => (int) Settings::get('evidence.max_upload_mb', 20),
+            'maxUploadMb' => UploadLimit::megabytes((int) Settings::get('evidence.max_upload_mb', 20)),
             'allowedExtensions' => EvidenceService::ALLOWED_EXTENSIONS,
         ];
     }

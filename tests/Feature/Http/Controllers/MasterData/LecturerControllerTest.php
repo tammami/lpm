@@ -74,3 +74,22 @@ it('forbids students from opening master data', function () {
         ->get(route('lecturers.index'))
         ->assertForbidden();
 });
+
+it('still creates the login account when the lecturer email already belongs to another user', function () {
+    User::factory()->create(['email' => 'bersama@iaia.ac.id']);
+
+    $this->actingAs($this->adminA)
+        ->post(route('lecturers.store'), [
+            'study_program_id' => $this->programA->id,
+            'nidn' => '0812345678',
+            'name' => 'Ahmad Fauzi',
+            'employment_status' => 'tetap',
+            'email' => 'bersama@iaia.ac.id',
+            'create_account' => true,
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect();
+
+    expect(Lecturer::query()->where('nidn', '0812345678')->value('email'))->toBe('bersama@iaia.ac.id')
+        ->and(User::query()->where('username', '0812345678')->value('email'))->toBe('0812345678@users.simutu.local');
+});

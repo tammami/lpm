@@ -77,7 +77,10 @@ it('imports criteria and indicators from a spreadsheet into a draft version', fu
         ->and($version->indicators()->count())->toBe(2)
         ->and($version->indicators()->where('code', 'C1.1')->sole()->is_essential)->toBeTrue();
 
-    $this->actingAs($this->lpm)->get(route('accreditation.versions.export', $version))->assertOk()->assertDownload('instrumen-iaps-i-v10.xlsx');
+    $rows = downloadedRows($this->actingAs($this->lpm)->get(route('accreditation.versions.export', $version))->assertDownload('instrumen-iaps-i-v10.xlsx'));
+
+    expect($rows)->toHaveCount(4)
+        ->and($rows[1][0])->toBe('C1');
 });
 
 it('runs a period from preparation to decision and syncs the study program', function () {

@@ -96,9 +96,18 @@ it('downloads the monev PDF and Excel reports', function () {
     $survey = Survey::query()->where('status', 'closed')->firstOrFail();
 
     $this->actingAs($admin)->get(route('reports.monev.pdf', ['survey' => $survey->id]))->assertOk()->assertHeader('content-type', 'application/pdf');
-    $this->actingAs($admin)->get(route('reports.monev.excel', ['survey' => $survey->id]))->assertOk();
-    $this->actingAs($admin)->get(route('reports.monev.responses', ['survey' => $survey->id]))->assertOk();
+
+    expect(downloadedRows($this->actingAs($admin)->get(route('reports.monev.excel', ['survey' => $survey->id]))))->not->toBeEmpty()
+        ->and(downloadedRows($this->actingAs($admin)->get(route('reports.monev.responses', ['survey' => $survey->id]))))->not->toBeEmpty();
 });
+
+it('exports master data to readable xlsx files', function (string $type, string $firstHeader) {
+    $admin = User::query()->where('username', 'lpm')->firstOrFail();
+    $rows = downloadedRows($this->actingAs($admin)->get(route('master.export', $type)));
+
+    expect($rows[0][0])->toBe($firstHeader)
+        ->and(count($rows))->toBeGreaterThan(1);
+})->with([['mahasiswa', 'NIM'], ['dosen', 'NIDN'], ['mata-kuliah', 'Kode MK']]);
 
 it('renders the dashboard for pimpinan and auditor accounts', function () {
     foreach (['rektor', 'auditor', 'ftk'] as $username) {

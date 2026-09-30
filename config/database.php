@@ -134,6 +134,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Cadangan Database
+    |--------------------------------------------------------------------------
+    |
+    | Lokasi lengkap program mysqldump (cadangan) dan mysql (pemulihan).
+    | Kosongkan agar dicari otomatis.
+    |
+    */
+
+    'backup' => [
+        'dump_binary' => env('DB_DUMP_BINARY'),
+        'client_binary' => env('DB_CLIENT_BINARY'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Redis Databases
     |--------------------------------------------------------------------------
     |

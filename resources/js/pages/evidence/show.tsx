@@ -304,6 +304,9 @@ function VersionDialog({ evidenceId, maxUploadMb, allowedExtensions, onClose }: 
             title="Unggah versi baru"
             description="Versi baru akan diverifikasi ulang. Versi sebelumnya tetap tersimpan."
             onSubmit={() => {
+                if (form.data.mode === 'file' && !form.data.file) return form.setError('file', 'Pilih berkas versi baru, atau gunakan tab Tautan.');
+                if (form.data.mode === 'link' && !form.data.url.trim()) return form.setError('url', 'Isi tautan versi baru, atau gunakan tab Berkas.');
+                form.clearErrors('file', 'url');
                 form.transform((d) => ({ ...d, file: d.mode === 'file' ? d.file : null, url: d.mode === 'link' ? d.url : '' }));
                 form.post(route('evidence.versions.store', evidenceId), { forceFormData: true, preserveScroll: true, onSuccess: onClose });
             }}
@@ -316,7 +319,7 @@ function VersionDialog({ evidenceId, maxUploadMb, allowedExtensions, onClose }: 
                     <TabsTrigger value="link">Tautan</TabsTrigger>
                 </TabsList>
                 <TabsContent value="file">
-                    <FormField error={form.errors.file} hint={`${allowedExtensions.join(', ').toUpperCase()} · maks. ${maxUploadMb} MB`}>
+                    <FormField error={form.errors.file ?? (form.data.mode === 'file' ? form.errors.url : undefined)} hint={`${allowedExtensions.join(', ').toUpperCase()} · maks. ${maxUploadMb} MB`}>
                         <Input type="file" accept={allowedExtensions.map((e) => `.${e}`).join(',')} onChange={(e) => form.setData('file', e.target.files?.[0] ?? null)} />
                     </FormField>
                 </TabsContent>

@@ -42,6 +42,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Reports\MasterExportController;
 use App\Http\Controllers\Reports\ReportController;
 use App\Http\Controllers\System\AuditLogController;
+use App\Http\Controllers\System\BackupController;
 use App\Http\Controllers\System\ImportController;
 use App\Http\Controllers\System\NotificationController;
 use App\Http\Controllers\System\RoleController;
@@ -253,6 +254,15 @@ Route::middleware('auth')->group(function (): void {
         });
 
         Route::get('log-audit', [AuditLogController::class, 'index'])->middleware('permission:audit_logs.view')->name('audit-logs.index');
+
+        Route::prefix('cadangan')->middleware('permission:backups.manage')->group(function (): void {
+            Route::get('/', [BackupController::class, 'index'])->name('backups.index');
+            Route::post('/', [BackupController::class, 'store'])->middleware('throttle:6,1')->name('backups.store');
+            Route::get('{backup}/unduh', [BackupController::class, 'download'])->where('backup', '[A-Za-z0-9_.\\-]+')->name('backups.download');
+            Route::post('{backup}/pulihkan', [BackupController::class, 'restore'])->where('backup', '[A-Za-z0-9_.\\-]+')
+                ->middleware(['permission:backups.restore', 'throttle:3,1'])->name('backups.restore');
+            Route::delete('{backup}', [BackupController::class, 'destroy'])->where('backup', '[A-Za-z0-9_.\\-]+')->name('backups.destroy');
+        });
     });
 
     Route::get('notifikasi', [NotificationController::class, 'index'])->name('notifications.index');

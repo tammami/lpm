@@ -1,6 +1,7 @@
 import { Link, useForm } from '@inertiajs/react';
-import { BookMarked, Layers, Pencil, Plus } from 'lucide-react';
+import { BookMarked, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import { EmptyState } from '@/components/empty-state';
 import { FormDialog } from '@/components/form-dialog';
 import { FormField } from '@/components/form-field';
@@ -67,6 +68,19 @@ export default function AccreditationInstruments({ instruments, bodies }: { inst
                                     <Button variant="ghost" size="icon-sm" onClick={() => setEditing(instrument)} aria-label="Ubah instrumen">
                                         <Pencil />
                                     </Button>
+                                    {instrument.versions.every((version) => version.periods_count === 0) && (
+                                        <ConfirmDialog
+                                            trigger={
+                                                <Button variant="ghost" size="icon-sm" className="text-destructive" aria-label="Hapus instrumen">
+                                                    <Trash2 />
+                                                </Button>
+                                            }
+                                            title={`Hapus ${instrument.name}?`}
+                                            description="Seluruh versi, kriteria, dan indikator instrumen ini ikut terhapus."
+                                            href={route('accreditation.instruments.destroy', instrument.id)}
+                                            confirmLabel="Hapus"
+                                        />
+                                    )}
                                 </div>
                                 <CardContent className="flex flex-col gap-2 py-4">
                                     {instrument.versions.map((version) => (

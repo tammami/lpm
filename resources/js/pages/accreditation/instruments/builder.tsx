@@ -135,9 +135,17 @@ export default function Builder({ version, instrument, criteria, issues }: Props
                                 {editable && (
                                     <>
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuItem variant="destructive" onSelect={() => router.delete(route('accreditation.versions.destroy', version.id))}>
-                                            <Trash2 /> Hapus draf
-                                        </DropdownMenuItem>
+                                        <ConfirmDialog
+                                            trigger={
+                                                <DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()}>
+                                                    <Trash2 /> Hapus draf
+                                                </DropdownMenuItem>
+                                            }
+                                            title={`Hapus draf v${version.version}?`}
+                                            description="Seluruh kriteria dan indikator pada draf ini ikut terhapus."
+                                            href={route('accreditation.versions.destroy', version.id)}
+                                            confirmLabel="Hapus draf"
+                                        />
                                     </>
                                 )}
                             </DropdownMenuContent>
@@ -259,9 +267,17 @@ function CriterionActions({ criterion, onEdit, onAddSub, onAddIndicator }: { cri
                     <Pencil /> Ubah
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onSelect={() => router.delete(route('accreditation.criteria.destroy', criterion.id), { preserveScroll: true })}>
-                    <Trash2 /> Hapus beserta isinya
-                </DropdownMenuItem>
+                <ConfirmDialog
+                    trigger={
+                        <DropdownMenuItem variant="destructive" onSelect={(e) => e.preventDefault()}>
+                            <Trash2 /> Hapus beserta isinya
+                        </DropdownMenuItem>
+                    }
+                    title={`Hapus kriteria ${criterion.code}?`}
+                    description="Sub-kriteria dan seluruh indikator di dalamnya ikut terhapus."
+                    href={route('accreditation.criteria.destroy', criterion.id)}
+                    confirmLabel="Hapus"
+                />
             </DropdownMenuContent>
         </DropdownMenu>
     );

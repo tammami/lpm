@@ -45,7 +45,19 @@ export function EvidenceUploadDialog({ onClose, mapTo, categories, units, period
         map_context: mapTo?.context ?? '',
     });
 
+    // Server mengembalikan kekurangan berkas/tautan pada kunci `url`; tampilkan di tab yang sedang aktif.
+    const sourceError = form.errors.file ?? (form.data.mode === 'file' ? form.errors.url : undefined);
+
     const submit = () => {
+        if (form.data.mode === 'file' && !form.data.file) {
+            form.setError('file', 'Pilih berkas yang akan diunggah, atau gunakan tab Tautan dokumen.');
+            return;
+        }
+        if (form.data.mode === 'link' && !form.data.url.trim()) {
+            form.setError('url', 'Isi tautan dokumen, atau gunakan tab Unggah berkas.');
+            return;
+        }
+        form.clearErrors('file', 'url');
         form.transform((data) => ({ ...data, file: data.mode === 'file' ? data.file : null, url: data.mode === 'link' ? data.url : '' }));
         form.post(route('evidence.store'), { forceFormData: true, preserveScroll: true, onSuccess: onClose });
     };
@@ -83,7 +95,7 @@ export function EvidenceUploadDialog({ onClose, mapTo, categories, units, period
                                 className={cn(
                                     'flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 border-dashed px-4 py-6 text-center transition hover:border-primary/40 hover:bg-secondary/40',
                                     form.data.file && 'border-primary/40 bg-secondary/40',
-                                    form.errors.file && 'border-destructive/50',
+                                    sourceError && 'border-destructive/50',
                                 )}
                             >
                                 <Upload className="size-5 text-primary" />
@@ -91,9 +103,17 @@ export function EvidenceUploadDialog({ onClose, mapTo, categories, units, period
                                 <span className="text-xs text-muted-foreground">
                                     {allowedExtensions.join(', ').toUpperCase()} · maks. {maxUploadMb} MB
                                 </span>
-                                <input type="file" className="sr-only" accept={allowedExtensions.map((e) => `.${e}`).join(',')} onChange={(e) => form.setData('file', e.target.files?.[0] ?? null)} />
+                                <input
+                                    type="file"
+                                    className="sr-only"
+                                    accept={allowedExtensions.map((e) => `.${e}`).join(',')}
+                                    onChange={(e) => {
+                                        form.setData('file', e.target.files?.[0] ?? null);
+                                        form.clearErrors('file', 'url');
+                                    }}
+                                />
                             </label>
-                            {form.errors.file && <p className="mt-1.5 text-xs font-medium text-destructive">{form.errors.file}</p>}
+                            {sourceError && <p className="mt-1.5 text-xs font-medium text-destructive">{sourceError}</p>}
                         </TabsContent>
                         <TabsContent value="link">
                             <FormField error={form.errors.url} hint="Mis. tautan Google Drive/OneDrive/SIAKAD yang dapat diakses tim mutu.">

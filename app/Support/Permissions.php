@@ -69,6 +69,8 @@ final class Permissions
                 'roles.manage' => 'Mengelola peran & hak akses',
                 'audit_logs.view' => 'Melihat log audit',
                 'settings.manage' => 'Mengubah pengaturan sistem',
+                'backups.manage' => 'Mencadangkan database',
+                'backups.restore' => 'Memulihkan database dari cadangan',
             ],
         ];
     }
@@ -90,7 +92,7 @@ final class Permissions
     {
         return match ($role) {
             UserRole::Superadmin => self::all(),
-            UserRole::AdminLpm => array_values(array_diff(self::all(), ['roles.manage', 'monev.fill', 'monev.own_results'])),
+            UserRole::AdminLpm => array_values(array_diff(self::all(), ['roles.manage', 'backups.restore', 'monev.fill', 'monev.own_results'])),
             UserRole::AdminFakultas, UserRole::AdminProdi => [
                 'dashboard.view', 'notifications.view', 'master.view', 'master.manage', 'instruments.view',
                 'surveys.view', 'analytics.view', 'analytics.lecturer', 'reports.export', 'ami.view',

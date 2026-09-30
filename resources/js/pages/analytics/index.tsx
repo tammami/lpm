@@ -15,6 +15,7 @@ import { SelectField } from '@/components/select-field';
 import { StatTile } from '@/components/stat-tile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCan } from '@/hooks/use-can';
 import { formatNumber, formatPercent, formatScore } from '@/lib/format';
 import type { Option } from '@/types';
 
@@ -57,6 +58,7 @@ export default function AnalyticsIndex(props: Props) {
 }
 
 function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, threshold, summary, benchmark, progress, byStudyProgram, byLecturer, bySection, byQuestion, heatmap, trend, comments, minimum, can }: Props & { survey: AnalyticsSurvey }) {
+    const canManageSettings = useCan()('settings.manage');
     const max = scheme?.scale_max ?? survey.scale_max;
     const min = scheme?.scale_min ?? 0;
     const lowQuestions = byQuestion.filter((q) => q.score !== null && q.score < threshold);
@@ -257,7 +259,7 @@ function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, thresh
             )}
             <p className="mt-2 text-xs text-muted-foreground">
                 Klasifikasi: {scheme?.classes.map((c) => `${c.label} (${c.min_score}–${c.max_score})`).join(' · ')}. Ubah di{' '}
-                {route().has('settings.scales') ? <Link href={route('settings.scales')} className="text-primary hover:underline">Klasifikasi & Skala</Link> : 'pengaturan'}.
+                {canManageSettings ? <Link href={route('settings.scales')} className="text-primary hover:underline">Klasifikasi & Skala</Link> : 'pengaturan'}.
             </p>
         </>
     );

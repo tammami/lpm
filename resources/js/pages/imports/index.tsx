@@ -58,7 +58,7 @@ const icons: Record<string, typeof Users> = {
 
 const order = ['mahasiswa', 'dosen', 'mata_kuliah', 'penugasan_mengajar', 'peserta_kelas', 'butir_instrumen'];
 
-export default function ImportsIndex({ importers, jobs, draftVersions }: { importers: ImporterDef[]; jobs: Paginated<ImportJobRow>; draftVersions: Option[] }) {
+export default function ImportsIndex({ importers, jobs, draftVersions, maxUploadMb }: { importers: ImporterDef[]; jobs: Paginated<ImportJobRow>; draftVersions: Option[]; maxUploadMb: number }) {
     const sorted = [...importers].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
     const [selected, setSelected] = useState(sorted[0]?.type ?? '');
     const current = sorted.find((i) => i.type === selected);
@@ -187,7 +187,7 @@ export default function ImportsIndex({ importers, jobs, draftVersions }: { impor
                                     >
                                         <Upload className="size-6 text-primary" />
                                         <span className="text-sm font-semibold">{form.data.file ? form.data.file.name : 'Klik untuk memilih file'}</span>
-                                        <span className="text-xs text-muted-foreground">.xlsx atau .csv, maks. 10 MB</span>
+                                        <span className="text-xs text-muted-foreground">.xlsx atau .csv, maks. {maxUploadMb} MB</span>
                                         <input type="file" accept=".xlsx,.csv" className="sr-only" onChange={(e) => form.setData('file', e.target.files?.[0] ?? null)} />
                                     </label>
                                 </FormField>

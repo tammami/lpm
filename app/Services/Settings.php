@@ -55,6 +55,11 @@ class Settings
                 'value' => 20, 'group' => 'evidence', 'type' => 'number',
                 'label' => 'Ukuran maksimum unggah dokumen (MB)',
             ],
+            'backup.keep_files' => [
+                'value' => 30, 'group' => 'backup', 'type' => 'number',
+                'label' => 'Jumlah file cadangan yang disimpan',
+                'help' => 'Cadangan terlama dihapus otomatis setelah jumlah ini terlampaui.',
+            ],
         ];
     }
 

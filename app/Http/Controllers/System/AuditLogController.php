@@ -15,7 +15,7 @@ class AuditLogController extends Controller
         'deleted' => 'Menghapus', 'published' => 'Menerbitkan', 'approved' => 'Menyetujui', 'status_changed' => 'Ubah status',
         'imported' => 'Impor', 'exported' => 'Ekspor', 'uploaded' => 'Unggah', 'permission_changed' => 'Ubah hak akses',
         'password_changed' => 'Ganti sandi', 'password_reset' => 'Reset sandi', 'reopened' => 'Buka kembali', 'verified' => 'Verifikasi',
-        'activated' => 'Aktivasi', 'downloaded' => 'Unduh', 'issued' => 'Terbitkan temuan', 'closed' => 'Menutup', 'enrolled' => 'Tambah peserta', 'unenrolled' => 'Keluarkan peserta',
+        'activated' => 'Aktivasi', 'downloaded' => 'Unduh', 'issued' => 'Terbitkan temuan', 'closed' => 'Menutup', 'enrolled' => 'Tambah peserta', 'unenrolled' => 'Keluarkan peserta', 'backed_up' => 'Cadangkan database', 'restored' => 'Pulihkan database',
     ];
 
     public function index(Request $request): Response

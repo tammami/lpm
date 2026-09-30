@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { useCan } from '@/hooks/use-can';
 import { deadlineLabel, deadlineTone, indicatorStatus, periodSteps, periodTone } from '@/lib/accreditation';
 import { formatDate, formatNumber, formatPercent } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -77,6 +78,7 @@ const filters: { value: Filter; label: string }[] = [
 ];
 
 export default function PeriodShow({ period, summary, byCriterion, gaps, criteria, evidenceOptions, studyPrograms, versions, picOptions, can }: Props) {
+    const canViewReadiness = useCan()('accreditation.view');
     const [editing, setEditing] = useState(false);
     const [deciding, setDeciding] = useState(false);
     const [cancelling, setCancelling] = useState(false);
@@ -433,10 +435,15 @@ export default function PeriodShow({ period, summary, byCriterion, gaps, criteri
             {cancelling && <CancelDialog id={period.id} onClose={() => setCancelling(false)} />}
             {!open && period.status === 'cancelled' && period.notes && <p className="mt-6 text-sm whitespace-pre-line text-muted-foreground">{period.notes}</p>}
             <div className="mt-8 text-xs text-muted-foreground">
-                Akreditasi prodi saat ini: <b>{period.current_status ?? '—'}</b> · berlaku s.d. {formatDate(period.current_valid_until)} ·{' '}
-                <Link href={route('accreditation.readiness')} className="font-semibold text-primary hover:underline">
-                    Lihat kesiapan seluruh prodi
-                </Link>
+                Akreditasi prodi saat ini: <b>{period.current_status ?? '—'}</b> · berlaku s.d. {formatDate(period.current_valid_until)}
+                {canViewReadiness && (
+                    <>
+                        {' · '}
+                        <Link href={route('accreditation.readiness')} className="font-semibold text-primary hover:underline">
+                            Lihat kesiapan seluruh prodi
+                        </Link>
+                    </>
+                )}
             </div>
         </>
     );
