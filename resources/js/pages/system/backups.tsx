@@ -23,11 +23,10 @@ interface Props {
     directory: string;
     database: string;
     keepFiles: number;
-    schedule: string;
     canRestore: boolean;
 }
 
-export default function Backups({ backups, directory, database, keepFiles, schedule, canRestore }: Props) {
+export default function Backups({ backups, directory, database, keepFiles, canRestore }: Props) {
     const [processing, setProcessing] = useState(false);
     const [restoring, setRestoring] = useState<Backup | null>(null);
     const latest = backups[0];
@@ -172,10 +171,6 @@ export default function Backups({ backups, directory, database, keepFiles, sched
                                     <dd className="text-right font-semibold">{latest ? formatDateTime(latest.created_at) : 'Belum ada'}</dd>
                                 </div>
                                 <div className="flex justify-between gap-4">
-                                    <dt className="text-muted-foreground">Jadwal otomatis</dt>
-                                    <dd className="text-right font-semibold">{schedule}</dd>
-                                </div>
-                                <div className="flex justify-between gap-4">
                                     <dt className="text-muted-foreground">Disimpan</dt>
                                     <dd className="text-right font-semibold">{keepFiles} file terbaru</dd>
                                 </div>
@@ -185,7 +180,7 @@ export default function Backups({ backups, directory, database, keepFiles, sched
                                 </div>
                             </dl>
                             <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                                Cadangan otomatis berjalan bila penjadwal server aktif. Jumlah file yang disimpan dapat diubah di Konfigurasi Sistem.
+                                Cadangan dibuat manual dengan tombol “Cadangkan sekarang”. Buat cadangan secara rutin, misalnya setiap akhir pekan dan sebelum pembaruan aplikasi. Jumlah file yang disimpan dapat diubah di Konfigurasi Sistem.
                             </p>
                         </CardContent>
                     </Card>

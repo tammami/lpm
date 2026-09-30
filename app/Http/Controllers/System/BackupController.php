@@ -27,7 +27,6 @@ class BackupController extends Controller
             'directory' => $backups->directory(),
             'database' => config('database.connections.'.config('database.default').'.database'),
             'keepFiles' => (int) Settings::get('backup.keep_files', 30),
-            'schedule' => 'Setiap hari pukul 01.00',
             'canRestore' => $request->user()->can('backups.restore'),
         ]);
     }

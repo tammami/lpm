@@ -10,7 +10,7 @@ use Illuminate\Console\Command;
 use Throwable;
 
 #[Signature('backup:database')]
-#[Description('Cadangkan database ke folder penyimpanan dan hapus cadangan lama')]
+#[Description('Cadangkan database lewat terminal (sama dengan tombol "Cadangkan sekarang")')]
 class BackupDatabase extends Command
 {
     public function handle(DatabaseBackup $backups): int
@@ -24,7 +24,7 @@ class BackupDatabase extends Command
             return self::FAILURE;
         }
 
-        AuditLogger::log('backed_up', 'backup', null, "Cadangan otomatis: {$name}");
+        AuditLogger::log('backed_up', 'backup', null, "Cadangan lewat terminal: {$name}");
         $this->info("Cadangan tersimpan: {$backups->directory()}".DIRECTORY_SEPARATOR.$name);
 
         return self::SUCCESS;

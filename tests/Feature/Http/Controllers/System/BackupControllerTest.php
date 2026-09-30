@@ -118,7 +118,7 @@ it('forbids backups for roles without the permission', function () {
     $this->actingAs($prodi)->post(route('backups.store'))->assertForbidden();
 });
 
-it('creates a backup from the scheduled command', function () {
+it('creates a backup from the terminal command', function () {
     fakeDump();
 
     $this->artisan('backup:database')->assertSuccessful();
