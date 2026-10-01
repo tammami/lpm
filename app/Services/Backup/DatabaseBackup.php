@@ -27,7 +27,16 @@ class DatabaseBackup
      */
     private const BINARY_DIRECTORIES = [
         '/usr/bin', '/usr/local/bin', '/usr/local/mysql/bin', '/opt/homebrew/bin', '/opt/homebrew/opt/mysql-client/bin',
-        '/Applications/XAMPP/xamppfiles/bin', '/Applications/MAMP/Library/bin', 'C:\\xampp\\mysql\\bin', 'C:\\laragon\\bin\\mysql',
+        '/Applications/XAMPP/xamppfiles/bin', '/Applications/MAMP/Library/bin', 'C:\\xampp\\mysql\\bin',
+    ];
+
+    /**
+     * Pola folder berversi di Windows (Herd, Laragon, installer resmi MySQL/MariaDB); {home} = profil pengguna.
+     */
+    private const WINDOWS_BINARY_PATTERNS = [
+        '{home}/.config/herd/bin', '{home}/.config/herd/bin/*/bin', '{home}/.config/herd/bin/*/*/bin',
+        '{home}/.config/herd/bin/*/*/*/bin', '{home}/.config/herd/bin/*/*/*/*/bin',
+        'C:/laragon/bin/mysql/*/bin', 'C:/Program Files/MySQL/*/bin', 'C:/Program Files/MariaDB*/bin',
     ];
 
     public function directory(): string
@@ -214,7 +223,11 @@ class DatabaseBackup
         }
 
         $finder = new ExecutableFinder;
-        $directories = [...self::BINARY_DIRECTORIES, ...array_filter([getenv('HOME') ? getenv('HOME').'/Library/Application Support/Herd/bin' : null])];
+        $directories = [
+            ...self::BINARY_DIRECTORIES,
+            ...array_filter([getenv('HOME') ? getenv('HOME').'/Library/Application Support/Herd/bin' : null]),
+            ...$this->windowsDirectories(),
+        ];
 
         foreach ($names as $name) {
             if ($path = $finder->find($name, null, $directories)) {
@@ -223,6 +236,31 @@ class DatabaseBackup
         }
 
         throw new RuntimeException("Program {$names[0]} tidak ditemukan di server. Isi {$envKey} pada file .env dengan lokasi lengkapnya.");
+    }
+
+    /**
+     * Folder kandidat di Windows, versi terbaru lebih dulu.
+     *
+     * @return list<string>
+     */
+    private function windowsDirectories(): array
+    {
+        if (PHP_OS_FAMILY !== 'Windows') {
+            return [];
+        }
+
+        $home = str_replace('\\', '/', (string) (getenv('USERPROFILE') ?: getenv('HOME')));
+
+        return collect(self::WINDOWS_BINARY_PATTERNS)
+            ->reject(fn (string $pattern): bool => $home === '' && str_contains($pattern, '{home}'))
+            ->flatMap(function (string $pattern) use ($home): array {
+                $directories = glob(str_replace('{home}', $home, $pattern), GLOB_ONLYDIR) ?: [];
+                usort($directories, fn (string $a, string $b): int => strnatcasecmp($b, $a));
+
+                return $directories;
+            })
+            ->values()
+            ->all();
     }
 
     private function decompress(string $source, string $target): void
