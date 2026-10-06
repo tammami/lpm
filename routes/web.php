@@ -41,6 +41,9 @@ use App\Http\Controllers\Portal\PortalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Reports\MasterExportController;
 use App\Http\Controllers\Reports\ReportController;
+use App\Http\Controllers\Research\MyScientificWorkController;
+use App\Http\Controllers\Research\ResearchAnalysisController;
+use App\Http\Controllers\Research\ScientificWorkController;
 use App\Http\Controllers\System\AuditLogController;
 use App\Http\Controllers\System\BackupController;
 use App\Http\Controllers\System\ImportController;
@@ -419,6 +422,38 @@ Route::middleware('auth')->group(function (): void {
         Route::post('{evidence}/versi', [EvidenceController::class, 'addVersion'])->name('evidence.versions.store');
         Route::post('{evidence}/verifikasi', [EvidenceController::class, 'verify'])->middleware('permission:evidence.verify')->name('evidence.verify');
         Route::delete('{evidence}', [EvidenceController::class, 'destroy'])->name('evidence.destroy');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Karya Ilmiah Dosen
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('karya-ilmiah')->name('research.')->group(function (): void {
+        Route::middleware('permission:research.own')->group(function (): void {
+            Route::get('saya', [MyScientificWorkController::class, 'index'])->name('mine.index');
+            Route::post('saya', [MyScientificWorkController::class, 'store'])->name('mine.store');
+            Route::put('saya/{work}', [MyScientificWorkController::class, 'update'])->name('mine.update');
+            Route::delete('saya/{work}', [MyScientificWorkController::class, 'destroy'])->name('mine.destroy');
+        });
+
+        Route::middleware('permission:research.view')->group(function (): void {
+            Route::get('analisis', [ResearchAnalysisController::class, 'index'])->name('analysis');
+            Route::get('analisis/ekspor', [ResearchAnalysisController::class, 'export'])->name('analysis.export');
+        });
+
+        Route::middleware('permission:research.view|research.manage')->group(function (): void {
+            Route::get('/', [ScientificWorkController::class, 'index'])->name('works.index');
+            Route::get('ekspor', [ScientificWorkController::class, 'export'])->name('works.export');
+        });
+
+        Route::middleware('permission:research.manage')->group(function (): void {
+            Route::post('/', [ScientificWorkController::class, 'store'])->name('works.store');
+            Route::put('{work}', [ScientificWorkController::class, 'update'])->name('works.update');
+            Route::delete('{work}', [ScientificWorkController::class, 'destroy'])->name('works.destroy');
+        });
+
+        Route::post('{work}/verifikasi', [ScientificWorkController::class, 'verify'])->middleware('permission:research.verify')->name('works.verify');
     });
 
     Route::prefix('portal')->name('portal.')->middleware('permission:monev.fill')->group(function (): void {

@@ -4,6 +4,7 @@ import {
     BarChart3,
     Bell,
     BookOpenCheck,
+    BookOpenText,
     Building2,
     ClipboardCheck,
     ClipboardList,
@@ -48,6 +49,7 @@ export const navigation: NavGroup[] = [
         items: [
             { title: 'Dashboard', icon: LayoutDashboard, route: 'dashboard', permission: 'dashboard.view' },
             { title: 'Hasil Evaluasi Saya', icon: UserRoundSearch, route: 'my-evaluation.index', permission: 'monev.own_results', profile: 'lecturer' },
+            { title: 'Karya Ilmiah Saya', icon: BookOpenText, route: 'research.mine.index', match: 'research.mine.*', permission: 'research.own', profile: 'lecturer' },
             { title: 'Isi Survei', icon: ClipboardCheck, route: 'portal.home', match: 'portal.*', permission: 'monev.fill', profile: 'respondent' },
             { title: 'Notifikasi', icon: Bell, route: 'notifications.index', permission: 'notifications.view', badgeKey: 'unreadNotifications' },
         ],
@@ -80,6 +82,14 @@ export const navigation: NavGroup[] = [
                 children: [
                     { title: 'Rekomendasi', route: 'improvement.recommendations.index', match: 'improvement.recommendations.*', permission: 'improvement.view' },
                     { title: 'Monitoring Rencana Aksi', route: 'improvement.action-plans.index', match: 'improvement.action-plans.*', permission: 'improvement.view' },
+                ],
+            },
+            {
+                title: 'Karya Ilmiah Dosen',
+                icon: BookOpenText,
+                children: [
+                    { title: 'Data Karya Ilmiah', route: 'research.works.index', match: 'research.works.*', permission: ['research.view', 'research.manage'] },
+                    { title: 'Analisis & Statistik', route: 'research.analysis', match: 'research.analysis*', permission: 'research.view' },
                 ],
             },
             { title: 'Dokumen Bukti', icon: FolderArchive, route: 'evidence.index', match: 'evidence.*', permission: 'evidence.view' },

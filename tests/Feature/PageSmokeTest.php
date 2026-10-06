@@ -23,9 +23,10 @@ use Database\Seeders\InstrumentSeeder;
 use Database\Seeders\MonevDemoSeeder;
 use Database\Seeders\OrganizationSeeder;
 use Database\Seeders\ReferenceDataSeeder;
+use Database\Seeders\ResearchDemoSeeder;
 
 beforeEach(function () {
-    $this->seed([OrganizationSeeder::class, ReferenceDataSeeder::class, DemoUserSeeder::class, AcademicDemoSeeder::class, InstrumentSeeder::class, MonevDemoSeeder::class]);
+    $this->seed([OrganizationSeeder::class, ReferenceDataSeeder::class, DemoUserSeeder::class, AcademicDemoSeeder::class, InstrumentSeeder::class, MonevDemoSeeder::class, ResearchDemoSeeder::class]);
 });
 
 it('renders every staff page for an LPM admin without errors', function () {
@@ -67,6 +68,8 @@ it('renders every staff page for an LPM admin without errors', function () {
         route('audit-logs.index'),
         route('notifications.index'),
         route('profile.edit'),
+        route('research.works.index', ['search' => 'a', 'type' => 'journal_accredited', 'sort' => '-year']),
+        route('research.analysis', ['from' => now()->year - 4, 'verified_only' => 1]),
     ];
 
     foreach ($pages as $page) {
@@ -77,7 +80,7 @@ it('renders every staff page for an LPM admin without errors', function () {
 it('renders scoped pages for an admin prodi', function () {
     $admin = User::query()->where('username', 'prodi.tmtk')->firstOrFail();
 
-    foreach (['dashboard', 'lecturers.index', 'students.index', 'courses.index', 'classes.index', 'study-programs.index', 'analytics.index', 'surveys.index', 'reports.index'] as $name) {
+    foreach (['dashboard', 'lecturers.index', 'students.index', 'courses.index', 'classes.index', 'study-programs.index', 'analytics.index', 'surveys.index', 'reports.index', 'research.works.index', 'research.analysis'] as $name) {
         $this->actingAs($admin)->get(route($name))->assertOk();
     }
 });
@@ -88,6 +91,7 @@ it('renders the lecturer and student experiences', function () {
 
     $this->actingAs($lecturer)->get(route('dashboard'))->assertOk();
     $this->actingAs($lecturer)->get(route('my-evaluation.index'))->assertOk();
+    $this->actingAs($lecturer)->get(route('research.mine.index'))->assertOk();
     $this->actingAs($student)->get(route('portal.home'))->assertOk();
 });
 

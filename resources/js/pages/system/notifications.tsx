@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import { AlarmClock, BadgeCheck, Bell, CheckCheck, ClipboardCheck, FileWarning, ShieldAlert } from 'lucide-react';
+import { AlarmClock, BadgeCheck, Bell, BookOpenText, CheckCheck, ClipboardCheck, FileWarning, ShieldAlert } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { PaginationBar } from '@/components/pagination-bar';
@@ -16,7 +16,7 @@ interface Item {
     created_at: string;
 }
 
-const icons: Record<string, typeof Bell> = { survey: ClipboardCheck, reminder: AlarmClock, finding: ShieldAlert, evidence: FileWarning, accreditation: BadgeCheck };
+const icons: Record<string, typeof Bell> = { survey: ClipboardCheck, reminder: AlarmClock, finding: ShieldAlert, evidence: FileWarning, accreditation: BadgeCheck, research: BookOpenText };
 const tones: Record<string, string> = { primary: 'bg-secondary text-primary', warning: 'bg-warning-soft text-gold-foreground', danger: 'bg-danger-soft text-danger-foreground', info: 'bg-info-soft text-info-foreground' };
 
 export default function Notifications({ notifications, filter }: { notifications: Paginated<Item>; filter: string }) {

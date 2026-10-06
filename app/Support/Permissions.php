@@ -59,6 +59,12 @@ final class Permissions
                 'evidence.manage' => 'Mengunggah & mengelola dokumen',
                 'evidence.verify' => 'Memverifikasi dokumen',
             ],
+            'Karya Ilmiah' => [
+                'research.view' => 'Melihat data & statistik karya ilmiah dosen',
+                'research.manage' => 'Mengisi & mengelola karya ilmiah dosen',
+                'research.verify' => 'Memverifikasi karya ilmiah dosen',
+                'research.own' => 'Mengisi karya ilmiah sendiri (dosen)',
+            ],
             'Akreditasi' => [
                 'accreditation.view' => 'Melihat kesiapan akreditasi',
                 'accreditation.manage' => 'Mengelola instrumen & periode akreditasi',
@@ -92,24 +98,24 @@ final class Permissions
     {
         return match ($role) {
             UserRole::Superadmin => self::all(),
-            UserRole::AdminLpm => array_values(array_diff(self::all(), ['roles.manage', 'backups.restore', 'monev.fill', 'monev.own_results'])),
+            UserRole::AdminLpm => array_values(array_diff(self::all(), ['roles.manage', 'backups.restore', 'monev.fill', 'monev.own_results', 'research.own'])),
             UserRole::AdminFakultas, UserRole::AdminProdi => [
                 'dashboard.view', 'notifications.view', 'master.view', 'master.manage', 'instruments.view',
                 'surveys.view', 'analytics.view', 'analytics.lecturer', 'reports.export', 'ami.view',
                 'findings.respond', 'improvement.view', 'improvement.manage', 'evidence.view', 'evidence.manage',
-                'accreditation.view', 'import.manage',
+                'accreditation.view', 'import.manage', 'research.view', 'research.manage',
             ],
             UserRole::Pimpinan => [
                 'dashboard.view', 'notifications.view', 'master.view', 'instruments.view', 'surveys.view',
                 'analytics.view', 'analytics.lecturer', 'reports.export', 'ami.view', 'improvement.view',
-                'evidence.view', 'accreditation.view',
+                'evidence.view', 'accreditation.view', 'research.view',
             ],
             UserRole::Auditor => [
                 'dashboard.view', 'notifications.view', 'ami.view', 'ami.audit', 'evidence.view', 'instruments.view',
             ],
             UserRole::Dosen => [
                 'dashboard.view', 'notifications.view', 'monev.fill', 'monev.own_results', 'findings.respond',
-                'improvement.view', 'evidence.view', 'evidence.manage',
+                'improvement.view', 'evidence.view', 'evidence.manage', 'research.own',
             ],
             UserRole::Mahasiswa => ['monev.fill', 'notifications.view'],
         };

@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Models\Lecturer;
 use App\Models\Student;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * Membuat/menautkan akun login untuk dosen & mahasiswa.
@@ -13,6 +14,14 @@ use App\Models\User;
  */
 class AccountProvisioner
 {
+    /**
+     * Kata sandi awal = NIDN/NIM yang sudah diketahui umum, sehingga cost bcrypt penuh tidak
+     * menambah perlindungan — hanya membuat impor memakan ~0,25 detik per akun.
+     * Hash naik ke cost penuh otomatis saat login pertama (rehash on login),
+     * dan pengguna tetap wajib mengganti kata sandi.
+     */
+    private const INITIAL_PASSWORD_ROUNDS = 4;
+
     public function forLecturer(Lecturer $lecturer): ?User
     {
         $username = $lecturer->nidn ?: $lecturer->nip;
@@ -50,7 +59,7 @@ class AccountProvisioner
                 'username' => $username,
                 'name' => $name,
                 'email' => $this->availableEmail($email, $username),
-                'password' => $username,
+                'password' => Hash::make($username, ['rounds' => self::INITIAL_PASSWORD_ROUNDS]),
                 'must_change_password' => true,
                 'is_active' => true,
             ]);

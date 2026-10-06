@@ -39,6 +39,7 @@ export const statusTone: Record<string, Tone> = {
     verification: 'primary',
     verified: 'success',
     rejected: 'danger',
+    revision: 'danger',
     planned: 'info',
     completed: 'success',
     cancelled: 'neutral',

@@ -11,6 +11,7 @@ use App\Models\CorrectiveAction;
 use App\Models\Evidence;
 use App\Models\Finding;
 use App\Models\Recommendation;
+use App\Models\ScientificWork;
 use App\Models\Survey;
 use App\Models\User;
 use App\Services\AuditLogger;
@@ -65,6 +66,7 @@ class AppServiceProvider extends ServiceProvider
             'survey' => Survey::class,
             'accreditation_indicator' => AccreditationIndicator::class,
             'accreditation_period' => AccreditationPeriod::class,
+            'scientific_work' => ScientificWork::class,
         ]);
 
         Gate::before(fn (User $user): ?bool => $user->hasRole(UserRole::Superadmin->value) ? true : null);

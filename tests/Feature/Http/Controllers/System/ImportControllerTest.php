@@ -8,6 +8,7 @@ use App\Models\StudyProgram;
 use App\Models\User;
 use App\Services\Import\ImportManager;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer;
@@ -72,6 +73,27 @@ it('imports valid rows with login accounts after confirmation', function () {
         ->and($job->fresh()->imported_rows)->toBe(1)
         ->and(Student::query()->where('nim', '2511001')->value('name'))->toBe('Siti Aminah')
         ->and(User::query()->where('username', '2511001')->first()->hasRole('mahasiswa'))->toBeTrue();
+});
+
+it('creates imported accounts quickly and upgrades the initial password hash on first login', function () {
+    config(['hashing.bcrypt.rounds' => 10]);
+    Hash::forgetDrivers();
+
+    $this->actingAs($this->admin)->post(route('imports.store'), [
+        'type' => 'mahasiswa',
+        'file' => studentWorkbook([['2511001', 'Siti Aminah', 'TMTK', '2025', '3']]),
+    ]);
+    $this->actingAs($this->admin)->post(route('imports.confirm', ImportJob::query()->sole()));
+
+    $user = User::query()->where('username', '2511001')->firstOrFail();
+    expect(Hash::info($user->password)['options']['cost'])->toBe(4);
+
+    auth()->logout();
+    $this->post(route('login'), ['login' => '2511001', 'password' => '2511001']);
+
+    $this->assertAuthenticatedAs($user);
+    expect(Hash::info($user->fresh()->password)['options']['cost'])->toBe(10)
+        ->and($user->fresh()->must_change_password)->toBeTrue();
 });
 
 it('rejects rows outside the admin prodi scope', function () {

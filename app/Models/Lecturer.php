@@ -52,4 +52,9 @@ class Lecturer extends Model
     {
         return $this->hasMany(TeachingAssignment::class);
     }
+
+    public function scientificWorks(): HasMany
+    {
+        return $this->hasMany(ScientificWork::class);
+    }
 }
