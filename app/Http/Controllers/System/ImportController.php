@@ -57,11 +57,12 @@ class ImportController extends Controller
         return Spreadsheet::download(
             $importer->templateFilename(),
             array_map(fn (array $column): string => $column['label'].($column['required'] ? '*' : ''), $columns),
-            [array_column($columns, 'example')],
+            // Tanpa baris contoh: contoh yang tidak terhapus akan ikut terimpor sebagai data (mis. gelar "Dr."/"M.Pd.").
+            [],
             array_map(fn (array $column): float => max(14, mb_strlen($column['label']) + 6), $columns),
             $importer->label(),
             collect($columns)->mapWithKeys(fn (array $column): array => [
-                $column['label'].($column['required'] ? ' (wajib)' : '') => $column['note'] ?: '—',
+                $column['label'].($column['required'] ? ' (wajib)' : '') => trim(($column['note'] ?: '').($column['example'] !== '' ? " Contoh: {$column['example']}" : '')) ?: '—',
             ])->all(),
             array_keys(array_filter($columns, fn (array $column): bool => $column['text'] ?? false)),
         );

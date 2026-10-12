@@ -124,18 +124,21 @@ it('fails with a clear message when required columns are missing', function () {
         ->failure_message->toContain('Kode Prodi');
 });
 
-it('serves a readable xlsx template that can be uploaded back unchanged', function (string $type) {
+it('serves an xlsx template without example data rows whose documented examples import cleanly', function (string $type) {
     $response = $this->actingAs($this->admin)->get(route('imports.template', $type))->assertDownload("template_{$type}.xlsx");
-    $rows = downloadedRows($response);
+    $columns = app(ImportManager::class)->importer($type)->columns();
+    $headers = array_map(fn (array $column): string => $column['label'].($column['required'] ? '*' : ''), $columns);
 
-    expect($rows)->toHaveCount(2)
-        ->and($rows[0])->toBe(array_map(
-            fn (array $column): string => $column['label'].($column['required'] ? '*' : ''),
-            app(ImportManager::class)->importer($type)->columns(),
-        ));
+    // Hanya baris judul: tidak ada data contoh yang bisa ikut terimpor bila lupa dihapus.
+    expect(downloadedRows($response))->toBe([$headers])
+        ->and(collect(downloadedRows($response, 'Petunjuk'))->pluck(1)->implode(' '))->toContain('Contoh:');
 
     $path = tempnam(sys_get_temp_dir(), 'tpl').'.xlsx';
-    file_put_contents($path, $response->streamedContent());
+    $writer = new Writer;
+    $writer->openToFile($path);
+    $writer->addRow(Row::fromValues($headers));
+    $writer->addRow(Row::fromValues(array_column($columns, 'example')));
+    $writer->close();
 
     $this->actingAs($this->admin)->post(route('imports.store'), [
         'type' => $type,
@@ -291,5 +294,5 @@ it('formats identity columns of the lecturer template as text so Excel keeps all
 
     expect($styles)->toContain('numFmtId="49"')
         ->and(substr_count($sheet, '<c r="B300"'))->toBe(1)
-        ->and(downloadedRows($response))->toHaveCount(2);
+        ->and(downloadedRows($response))->toHaveCount(1);
 });
