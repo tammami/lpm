@@ -98,7 +98,7 @@ class CourseClassController extends Controller
                     'role' => $assignment->role,
                     'lecturer_id' => $assignment->lecturer_id,
                     'name' => $assignment->lecturer->full_name,
-                    'nidn' => $assignment->lecturer->nidn,
+                    'nidn' => $assignment->lecturer->identifier,
                     'study_program' => $assignment->lecturer->studyProgram?->full_name,
                 ])->all(),
                 'students' => $class->students->map(fn (Student $student): array => [

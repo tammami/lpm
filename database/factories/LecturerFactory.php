@@ -23,4 +23,12 @@ class LecturerFactory extends Factory
             'is_active' => true,
         ];
     }
+
+    /**
+     * Dosen baru yang baru memiliki NUPTK (belum ber-NIDN).
+     */
+    public function nuptkOnly(): static
+    {
+        return $this->state(fn (): array => ['nidn' => null, 'nuptk' => fake()->unique()->numerify('################')]);
+    }
 }

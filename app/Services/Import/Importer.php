@@ -2,6 +2,8 @@
 
 namespace App\Services\Import;
 
+use App\Support\Spreadsheet;
+
 /**
  * Kontrak satu jenis impor. Setiap baris sudah dipetakan: kunci kolom => nilai.
  */
@@ -14,9 +16,9 @@ abstract class Importer
     abstract public function description(): string;
 
     /**
-     * Definisi kolom template.
+     * Definisi kolom template. `text` = nomor identitas yang harus diketik sebagai teks di Excel.
      *
-     * @return list<array{key: string, label: string, required: bool, example: string, note: string}>
+     * @return list<array{key: string, label: string, required: bool, example: string, note: string, text?: bool}>
      */
     abstract public function columns(): array;
 
@@ -54,9 +56,37 @@ abstract class Importer
         return $row;
     }
 
+    /**
+     * Nama sheet yang dibaca (null = sheet pertama). Sheet tidak ditemukan → sheet pertama.
+     */
+    public function sheetName(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * Baris tanpa isian dilewati. Importer dapat mengabaikan kolom tertentu (mis. nomor urut bawaan template).
+     *
+     * @param  array<string, mixed>  $row
+     */
+    public function isBlankRow(array $row): bool
+    {
+        return array_filter($row, fn ($value): bool => $value !== null && $value !== '') === [];
+    }
+
     public function templateFilename(): string
     {
         return "template_{$this->type()}.xlsx";
+    }
+
+    /**
+     * Pesan bila nomor identitas panjang terbaca sebagai angka (digit terakhirnya sudah diubah Excel).
+     */
+    protected function impreciseNumberError(mixed $value, string $label): ?string
+    {
+        return Spreadsheet::isImpreciseNumber($value)
+            ? "{$label} terbaca sebagai angka sehingga digit terakhirnya diubah Excel. Format kolom sebagai Teks lalu ketik ulang."
+            : null;
     }
 
     /**

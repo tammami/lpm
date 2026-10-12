@@ -6,6 +6,7 @@ import {
     ArrowUpRight,
     BadgeCheck,
     BookOpenCheck,
+    BookOpenText,
     CalendarClock,
     CheckCircle2,
     ClipboardList,
@@ -69,6 +70,22 @@ interface ExecutiveProps {
     counts: { students: number; lecturers: number; programs: number };
     can: { manageSurveys: boolean; manageInstruments: boolean; import: boolean; analytics: boolean; accreditation: boolean };
     cycle: QualityCycle;
+    research: ResearchSummary | null;
+}
+
+interface ResearchSummary {
+    range: string;
+    rate: number | null;
+    productive: number;
+    lecturers: number;
+    works: number;
+    sinta: number;
+    scopus: number;
+    wos: number;
+    student_rate: number | null;
+    with_students: number;
+    students: number;
+    pending: number;
 }
 
 interface QualityCycle {
@@ -120,7 +137,7 @@ function Hero({ greeting, scopeLabel, children }: { greeting: string; scopeLabel
     );
 }
 
-function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSurveys, accreditation, accreditationWarningDays, counts, can, cycle }: ExecutiveProps) {
+function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSurveys, accreditation, accreditationWarningDays, counts, can, cycle, research }: ExecutiveProps) {
     const delta = quality?.score !== null && quality?.score !== undefined && quality.previous_score !== null ? quality.score - quality.previous_score : null;
     const max = quality?.scheme?.scale_max ?? 4;
     const min = quality?.scheme?.scale_min ?? 0;
@@ -339,6 +356,8 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
                 </Card>
             </div>
 
+            {research && <ResearchCard research={research} />}
+
             <div className="mt-6 grid grid-cols-3 gap-4">
                 <MiniCount icon={GraduationCap} label="Mahasiswa aktif" value={counts.students} />
                 <MiniCount icon={Users} label="Dosen aktif" value={counts.lecturers} />
@@ -477,6 +496,54 @@ function CycleSection({ cycle }: { cycle: QualityCycle }) {
                 </CardContent>
             </Card>
         </div>
+    );
+}
+
+/** Ringkasan karya ilmiah dosen untuk pimpinan, LPM, LP2M, dan kaprodi. */
+function ResearchCard({ research }: { research: ResearchSummary }) {
+    const metrics = [
+        { label: 'Dosen berkarya', value: formatPercent(research.rate, 0), hint: `${research.productive} dari ${research.lecturers} dosen` },
+        { label: 'Jumlah karya', value: formatNumber(research.works), hint: `Sinta ${research.sinta} · Scopus ${research.scopus} · WoS ${research.wos}` },
+        { label: 'Melibatkan mahasiswa', value: formatPercent(research.student_rate, 0), hint: `${research.with_students} karya · ${research.students} mahasiswa` },
+        { label: 'Belum diverifikasi', value: formatNumber(research.pending), hint: 'menunggu verifikasi LPM', href: route('research.works.index', { status: 'pending' }) },
+    ];
+
+    return (
+        <Card className="mt-6">
+            <CardHeader className="flex flex-row items-start justify-between gap-4">
+                <div>
+                    <CardTitle className="flex items-center gap-2">
+                        <BookOpenText className="size-4 text-primary" /> Karya ilmiah dosen
+                    </CardTitle>
+                    <CardDescription>TS-2 s.d. TS ({research.range}).</CardDescription>
+                </div>
+                <Button variant="ghost" size="sm" asChild>
+                    <Link href={route('research.analysis')}>
+                        Analisis <ArrowRight />
+                    </Link>
+                </Button>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                {metrics.map((metric) => {
+                    const body = (
+                        <>
+                            <div className="text-xs font-semibold text-muted-foreground">{metric.label}</div>
+                            <div className="mt-0.5 text-xl font-extrabold tabular">{metric.value}</div>
+                            <div className="text-[11px] text-muted-foreground">{metric.hint}</div>
+                        </>
+                    );
+                    return metric.href ? (
+                        <Link key={metric.label} href={metric.href} className="rounded-xl border px-3 py-2.5 transition hover:border-primary/40 hover:bg-secondary/40">
+                            {body}
+                        </Link>
+                    ) : (
+                        <div key={metric.label} className="rounded-xl border px-3 py-2.5">
+                            {body}
+                        </div>
+                    );
+                })}
+            </CardContent>
+        </Card>
     );
 }
 

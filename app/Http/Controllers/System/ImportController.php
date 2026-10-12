@@ -63,6 +63,7 @@ class ImportController extends Controller
             collect($columns)->mapWithKeys(fn (array $column): array => [
                 $column['label'].($column['required'] ? ' (wajib)' : '') => $column['note'] ?: '—',
             ])->all(),
+            array_keys(array_filter($columns, fn (array $column): bool => $column['text'] ?? false)),
         );
     }
 

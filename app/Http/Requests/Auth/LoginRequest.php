@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\Lecturer;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -28,11 +29,11 @@ class LoginRequest extends FormRequest
 
     public function attributes(): array
     {
-        return ['login' => 'email / NIM / NIDN', 'password' => 'kata sandi'];
+        return ['login' => 'email / NIM / NIDN / NUPTK', 'password' => 'kata sandi'];
     }
 
     /**
-     * Autentikasi menggunakan email atau username (NIM/NIDN).
+     * Autentikasi menggunakan email atau username (NIM/NIDN/NUPTK).
      *
      * @throws ValidationException
      */
@@ -40,6 +41,11 @@ class LoginRequest extends FormRequest
     {
         $login = trim((string) $this->string('login'));
         $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        // Dosen boleh masuk dengan NIDN maupun NUPTK, apa pun yang menjadi username akunnya.
+        if ($field === 'username' && ctype_digit($login) && ! User::query()->where('username', $login)->exists()) {
+            $login = Lecturer::query()->identifiedBy($login)->first()?->user?->username ?? $login;
+        }
 
         $credentials = [$field => $login, 'password' => (string) $this->string('password')];
 
@@ -49,7 +55,7 @@ class LoginRequest extends FormRequest
             throw ValidationException::withMessages([
                 'login' => $inactive
                     ? 'Akun Anda dinonaktifkan. Hubungi admin LPM.'
-                    : 'Email/NIM/NIDN atau kata sandi tidak sesuai.',
+                    : 'Email/NIM/NIDN/NUPTK atau kata sandi tidak sesuai.',
             ]);
         }
     }

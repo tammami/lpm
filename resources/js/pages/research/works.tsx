@@ -1,11 +1,11 @@
 import { Link } from '@inertiajs/react';
-import { BarChart3, Download, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
+import { BarChart3, Download, Eye, GraduationCap, Pencil, Plus, Trash2, UsersRound } from 'lucide-react';
 import { useState } from 'react';
 import { Combobox } from '@/components/combobox';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { type Column, DataTable } from '@/components/data-table';
 import { PageHeader } from '@/components/page-header';
-import { WorkDetail, workStatusTone } from '@/components/research/work-detail';
+import { WorkDetail } from '@/components/research/work-detail';
 import { WorkForm } from '@/components/research/work-form';
 import { RowActions } from '@/components/row-actions';
 import { SelectField } from '@/components/select-field';
@@ -14,7 +14,7 @@ import { TableToolbar } from '@/components/table-toolbar';
 import { Button } from '@/components/ui/button';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useQueryFilters } from '@/hooks/use-query-filters';
-import type { ScientificWork, WorkFormOptions } from '@/lib/research';
+import { type ScientificWork, type WorkFormOptions, type WorkStatus, workStatusTone } from '@/lib/research';
 import { cleanQuery, cn } from '@/lib/utils';
 import type { Option, Paginated } from '@/types';
 
@@ -24,7 +24,7 @@ interface Props extends WorkFormOptions {
     studyPrograms: Option[];
     lecturers: Option[];
     years: Option[];
-    statusCounts: Record<'pending' | 'verified' | 'revision', number>;
+    statusCounts: Record<WorkStatus, number>;
     can: { manage: boolean; verify: boolean; analysis: boolean };
 }
 
@@ -34,9 +34,12 @@ export default function ResearchWorks({ works, filters, studyPrograms, lecturers
         sort: filters.sort ?? '',
         study_program_id: filters.study_program_id ?? 'all',
         lecturer_id: filters.lecturer_id ?? 'all',
+        category: filters.category ?? 'all',
         type: filters.type ?? 'all',
+        indexation_family: filters.indexation_family ?? 'all',
         year: filters.year ?? 'all',
         status: filters.status ?? 'all',
+        with_students: filters.with_students ?? 'all',
     });
     const [editing, setEditing] = useState<ScientificWork | 'new' | null>(null);
     const [viewing, setViewing] = useState<ScientificWork | null>(null);
@@ -50,7 +53,19 @@ export default function ResearchWorks({ works, filters, studyPrograms, lecturers
             cell: (row) => (
                 <div>
                     <div className="line-clamp-2 font-semibold">{row.title}</div>
-                    <div className="mt-0.5 truncate text-xs text-muted-foreground">{row.venue}</div>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+                        {row.venue && <span className="max-w-72 truncate">{row.venue}</span>}
+                        {row.students.length > 0 && (
+                            <span className="inline-flex items-center gap-1 font-semibold text-gold-foreground" title={row.students.map((s) => s.name).join(', ')}>
+                                <GraduationCap className="size-3.5" /> {row.students.length} mahasiswa
+                            </span>
+                        )}
+                        {row.lecturers.length > 0 && (
+                            <span className="inline-flex items-center gap-1 font-semibold text-primary" title={row.lecturers.map((l) => l.name).join(', ')}>
+                                <UsersRound className="size-3.5" /> {row.lecturers.length} dosen rekan
+                            </span>
+                        )}
+                    </div>
                 </div>
             ),
         },
@@ -67,13 +82,13 @@ export default function ResearchWorks({ works, filters, studyPrograms, lecturers
         },
         {
             key: 'type',
-            header: 'Jenis',
+            header: 'Subjenis',
             cell: (row) => (
                 <div className="min-w-0">
-                    <div className="max-w-56 truncate" title={row.type_label}>
+                    <div className="max-w-56 truncate" title={`${row.category_label} · ${row.type_label}`}>
                         {row.type_label}
                     </div>
-                    {row.rank_label && <div className="text-xs font-semibold text-primary">{row.rank_label}</div>}
+                    {row.indexation && row.indexation !== 'not_applicable' && <div className="text-xs font-semibold text-primary">{row.indexation_label}</div>}
                 </div>
             ),
         },
@@ -112,17 +127,15 @@ export default function ResearchWorks({ works, filters, studyPrograms, lecturers
     ];
 
     const statusChips = [
-        { value: 'all', label: 'Semua', count: statusCounts.pending + statusCounts.verified + statusCounts.revision },
-        { value: 'pending', label: 'Menunggu verifikasi', count: statusCounts.pending },
-        { value: 'revision', label: 'Perlu perbaikan', count: statusCounts.revision },
-        { value: 'verified', label: 'Terverifikasi', count: statusCounts.verified },
+        { value: 'all', label: 'Semua', count: Object.values(statusCounts).reduce((sum, count) => sum + count, 0) },
+        ...options.statuses.map((status) => ({ value: status.value, label: status.label, count: statusCounts[status.value as WorkStatus] ?? 0 })),
     ];
 
     return (
         <>
             <PageHeader
                 title="Karya Ilmiah Dosen"
-                description="Publikasi, buku, dan HKI dosen untuk kontrol mutu dan rekap riset. Cukup isian data, tanpa unggah berkas."
+                description="Artikel, buku, HKI, dan karya lain dosen sesuai template LPM — termasuk mahasiswa yang ikut menulis. Bukti berupa tautan, tanpa unggah berkas."
                 breadcrumbs={[{ label: 'Karya Ilmiah' }, { label: 'Data Karya' }]}
                 actions={
                     <>
@@ -135,7 +148,7 @@ export default function ResearchWorks({ works, filters, studyPrograms, lecturers
                         )}
                         <Button variant="outline" asChild>
                             <a href={route('research.works.export', cleanQuery(query))}>
-                                <Download /> Ekspor
+                                <Download /> Ekspor Excel
                             </a>
                         </Button>
                         {can.manage && (
@@ -175,11 +188,14 @@ export default function ResearchWorks({ works, filters, studyPrograms, lecturers
                 onSort={(sort) => setFilter('sort', sort)}
                 onRowClick={setViewing}
                 toolbar={
-                    <TableToolbar search={query.search} onSearch={(v) => setFilter('search', v)} placeholder="Cari judul, jurnal, nama dosen…">
+                    <TableToolbar search={query.search} onSearch={(v) => setFilter('search', v)} placeholder="Cari judul, jurnal, DOI, dosen, mahasiswa…">
                         <SelectField value={query.study_program_id} onChange={(v) => setFilter('study_program_id', v)} options={studyPrograms} allLabel="Semua prodi" />
                         <Combobox value={query.lecturer_id} onChange={(v) => setFilter('lecturer_id', v)} options={[{ value: 'all', label: 'Semua dosen' }, ...lecturers]} searchPlaceholder="Cari dosen…" className="h-9" />
-                        <SelectField value={query.type} onChange={(v) => setFilter('type', v)} options={options.types} allLabel="Semua jenis" />
+                        <SelectField value={query.category} onChange={(v) => setFilter('category', v)} options={options.categories} allLabel="Semua jenis" />
+                        <SelectField value={query.type} onChange={(v) => setFilter('type', v)} options={options.types} allLabel="Semua subjenis" />
+                        <SelectField value={query.indexation_family} onChange={(v) => setFilter('indexation_family', v)} options={options.indexationFamilies} allLabel="Semua indeksasi" />
                         <SelectField value={query.year} onChange={(v) => setFilter('year', v)} options={years} allLabel="Semua tahun" />
+                        <SelectField value={query.with_students} onChange={(v) => setFilter('with_students', v)} options={[{ value: '1', label: 'Melibatkan mahasiswa' }]} allLabel="Semua karya" />
                     </TableToolbar>
                 }
                 emptyTitle="Belum ada karya ilmiah"

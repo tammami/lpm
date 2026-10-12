@@ -37,14 +37,14 @@ class MasterExportController extends Controller
             ),
             'dosen' => Spreadsheet::download(
                 'dosen-'.now()->format('Ymd').'.xlsx',
-                ['NIDN', 'Nama', 'Gelar Depan', 'Gelar Belakang', 'Kode Prodi', 'Homebase', 'Jabatan Fungsional', 'Status Kepegawaian', 'Email', 'No HP'],
+                ['NIDN/NIDK', 'NUPTK', 'Nama', 'Gelar Depan', 'Gelar Belakang', 'Kode Prodi', 'Homebase', 'Jabatan Fungsional', 'Status Kepegawaian', 'Email', 'No HP'],
                 TableQuery::for(Lecturer::query()->visibleTo($user)->with('studyProgram'), $request)
-                    ->search(['name', 'nidn', 'nip', 'email'])
+                    ->search(['name', 'nidn', 'nuptk', 'nip', 'email'])
                     ->filter(['study_program_id' => 'study_program_id', 'academic_rank' => 'academic_rank', 'employment_status' => 'employment_status'])
                     ->sort(['name'], 'name')
                     ->builder()->lazy()
-                    ->map(fn (Lecturer $l): array => [$l->nidn, $l->name, $l->front_title, $l->back_title, $l->studyProgram?->code, $l->studyProgram?->full_name, $l->academic_rank, $l->employment_status, $l->email, $l->phone]),
-                [14, 30, 10, 16, 12, 32, 18, 18, 30, 16],
+                    ->map(fn (Lecturer $l): array => [$l->nidn, $l->nuptk, $l->name, $l->front_title, $l->back_title, $l->studyProgram?->code, $l->studyProgram?->full_name, $l->academic_rank, $l->employment_status, $l->email, $l->phone]),
+                [14, 20, 30, 10, 16, 12, 32, 18, 18, 30, 16],
                 'Dosen',
             ),
             'mata-kuliah' => Spreadsheet::download(

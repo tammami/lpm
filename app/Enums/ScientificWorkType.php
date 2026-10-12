@@ -3,36 +3,50 @@
 namespace App\Enums;
 
 /**
- * Jenis karya ilmiah dosen, mengikuti pengelompokan publikasi pada LKPS.
+ * Subjenis karya dosen, mengikuti daftar "Subjenis Karya" pada template Data Karya Dosen LPM.
  */
 enum ScientificWorkType: string
 {
     use HasOptions;
 
     case JournalNational = 'journal_national';
-    case JournalAccredited = 'journal_accredited';
     case JournalInternational = 'journal_international';
-    case JournalReputable = 'journal_reputable';
     case ProceedingNational = 'proceeding_national';
     case ProceedingInternational = 'proceeding_international';
-    case Book = 'book';
+    case TextBook = 'book_text';
+    case ReferenceBook = 'book_reference';
+    case Monograph = 'book_monograph';
     case BookChapter = 'book_chapter';
-    case IntellectualProperty = 'ip';
+    case PopularArticle = 'popular';
+    case Copyright = 'ip_copyright';
+    case Patent = 'ip_patent';
+    case SimplePatent = 'ip_simple_patent';
+    case IndustrialDesign = 'ip_industrial_design';
+    case AppropriateTechnology = 'appropriate_technology';
+    case Art = 'art';
+    case Innovation = 'innovation';
     case Other = 'other';
 
     public function label(): string
     {
         return match ($this) {
-            self::JournalNational => 'Jurnal nasional (belum terakreditasi)',
-            self::JournalAccredited => 'Jurnal nasional terakreditasi (SINTA)',
-            self::JournalInternational => 'Jurnal internasional',
-            self::JournalReputable => 'Jurnal internasional bereputasi (Scopus/WoS)',
-            self::ProceedingNational => 'Prosiding seminar nasional',
-            self::ProceedingInternational => 'Prosiding seminar internasional',
-            self::Book => 'Buku (ajar/referensi/monograf)',
-            self::BookChapter => 'Bab buku (book chapter)',
-            self::IntellectualProperty => 'HKI (hak cipta/paten)',
-            self::Other => 'Karya lain (media massa, policy brief, dll.)',
+            self::JournalNational => 'Jurnal Nasional',
+            self::JournalInternational => 'Jurnal Internasional',
+            self::ProceedingNational => 'Prosiding Seminar Nasional',
+            self::ProceedingInternational => 'Prosiding Seminar Internasional',
+            self::TextBook => 'Buku Ajar',
+            self::ReferenceBook => 'Buku Referensi',
+            self::Monograph => 'Buku Monograf',
+            self::BookChapter => 'Book Chapter/Bunga Rampai',
+            self::PopularArticle => 'Karya Ilmiah Populer',
+            self::Copyright => 'HKI - Hak Cipta',
+            self::Patent => 'HKI - Paten',
+            self::SimplePatent => 'HKI - Paten Sederhana',
+            self::IndustrialDesign => 'HKI - Desain Industri',
+            self::AppropriateTechnology => 'Teknologi Tepat Guna',
+            self::Art => 'Karya Seni',
+            self::Innovation => 'Karya/Produk Inovasi',
+            self::Other => 'Karya Lainnya',
         };
     }
 
@@ -43,44 +57,72 @@ enum ScientificWorkType: string
     {
         return match ($this) {
             self::JournalNational => 'Jurnal nasional',
-            self::JournalAccredited => 'Jurnal SINTA',
             self::JournalInternational => 'Jurnal internasional',
-            self::JournalReputable => 'Jurnal bereputasi',
             self::ProceedingNational => 'Prosiding nasional',
             self::ProceedingInternational => 'Prosiding internasional',
-            self::Book => 'Buku',
-            self::BookChapter => 'Bab buku',
-            self::IntellectualProperty => 'HKI',
-            self::Other => 'Karya lain',
+            self::TextBook => 'Buku ajar',
+            self::ReferenceBook => 'Buku referensi',
+            self::Monograph => 'Buku monograf',
+            self::BookChapter => 'Book chapter',
+            self::PopularArticle => 'Ilmiah populer',
+            self::Copyright => 'Hak cipta',
+            self::Patent => 'Paten',
+            self::SimplePatent => 'Paten sederhana',
+            self::IndustrialDesign => 'Desain industri',
+            self::AppropriateTechnology => 'Teknologi tepat guna',
+            self::Art => 'Karya seni',
+            self::Innovation => 'Produk inovasi',
+            self::Other => 'Karya lainnya',
         };
     }
 
     /**
-     * Peringkat/indeksasi yang wajib dipilih untuk jenis ini (kosong = tidak berlaku).
-     *
-     * @return array<string, string>
+     * Jenis Karya. Template tidak memetakan subjenis ke jenis; "Karya Ilmiah Populer" dimasukkan ke artikel.
      */
-    public function ranks(): array
+    public function category(): ScientificWorkCategory
     {
         return match ($this) {
-            self::JournalAccredited => ['S1' => 'SINTA 1', 'S2' => 'SINTA 2', 'S3' => 'SINTA 3', 'S4' => 'SINTA 4', 'S5' => 'SINTA 5', 'S6' => 'SINTA 6'],
-            self::JournalReputable => ['Q1' => 'Q1', 'Q2' => 'Q2', 'Q3' => 'Q3', 'Q4' => 'Q4', 'indexed' => 'Terindeks, tanpa kuartil'],
-            default => [],
+            self::JournalNational, self::JournalInternational, self::ProceedingNational,
+            self::ProceedingInternational, self::PopularArticle => ScientificWorkCategory::Article,
+            self::TextBook, self::ReferenceBook, self::Monograph, self::BookChapter => ScientificWorkCategory::Book,
+            default => ScientificWorkCategory::Other,
         };
-    }
-
-    /**
-     * Seluruh peringkat lintas jenis, untuk menampilkan label.
-     *
-     * @return array<string, string>
-     */
-    public static function allRanks(): array
-    {
-        return [...self::JournalAccredited->ranks(), ...self::JournalReputable->ranks()];
     }
 
     public function isJournal(): bool
     {
-        return in_array($this, [self::JournalNational, self::JournalAccredited, self::JournalInternational, self::JournalReputable], true);
+        return in_array($this, [self::JournalNational, self::JournalInternational], true);
+    }
+
+    public function isProceeding(): bool
+    {
+        return in_array($this, [self::ProceedingNational, self::ProceedingInternational], true);
+    }
+
+    /**
+     * Indeksasi/akreditasi wajib dipilih untuk jurnal dan prosiding; selain itu "Tidak Berlaku".
+     */
+    public function usesIndexation(): bool
+    {
+        return $this->isJournal() || $this->isProceeding();
+    }
+
+    public function isIntellectualProperty(): bool
+    {
+        return in_array($this, [self::Copyright, self::Patent, self::SimplePatent, self::IndustrialDesign], true);
+    }
+
+    /**
+     * Kelompok rekap yang saling lepas, untuk grafik bertumpuk (lihat ResearchAnalytics::GROUPS).
+     */
+    public function recapGroup(): string
+    {
+        return match (true) {
+            $this->isJournal() => 'journal',
+            $this->isProceeding() => 'proceeding',
+            $this->category() === ScientificWorkCategory::Book => 'book',
+            $this->isIntellectualProperty() => 'ip',
+            default => 'other',
+        };
     }
 }

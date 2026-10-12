@@ -68,7 +68,8 @@ it('renders every staff page for an LPM admin without errors', function () {
         route('audit-logs.index'),
         route('notifications.index'),
         route('profile.edit'),
-        route('research.works.index', ['search' => 'a', 'type' => 'journal_accredited', 'sort' => '-year']),
+        route('research.works.index', ['search' => 'a', 'type' => 'journal_national', 'indexation_family' => 'sinta', 'with_students' => 1, 'sort' => '-year']),
+        route('research.works.index', ['category' => 'book', 'status' => 'revision']),
         route('research.analysis', ['from' => now()->year - 4, 'verified_only' => 1]),
     ];
 
@@ -84,6 +85,17 @@ it('renders scoped pages for an admin prodi', function () {
         $this->actingAs($admin)->get(route($name))->assertOk();
     }
 });
+
+it('renders the research pages and dashboard for LP2M and pimpinan', function (string $username) {
+    $user = User::query()->where('username', $username)->firstOrFail();
+
+    foreach (['dashboard', 'research.works.index', 'research.analysis', 'research.works.export', 'research.analysis.export'] as $name) {
+        $this->actingAs($user)->get(route($name))->assertOk();
+    }
+
+    $this->actingAs($user)->get(route('dashboard'))->assertInertia(fn ($page) => $page->whereNot('research', null));
+    $this->actingAs($user)->get(route('lecturers.index'))->assertStatus($username === 'lp2m' ? 403 : 200);
+})->with(['lp2m', 'rektor']);
 
 it('renders the lecturer and student experiences', function () {
     $lecturer = User::query()->where('email', 'dosen@simutu.test')->firstOrFail();
@@ -111,7 +123,7 @@ it('exports master data to readable xlsx files', function (string $type, string 
 
     expect($rows[0][0])->toBe($firstHeader)
         ->and(count($rows))->toBeGreaterThan(1);
-})->with([['mahasiswa', 'NIM'], ['dosen', 'NIDN'], ['mata-kuliah', 'Kode MK']]);
+})->with([['mahasiswa', 'NIM'], ['dosen', 'NIDN/NIDK'], ['mata-kuliah', 'Kode MK']]);
 
 it('renders the dashboard for pimpinan and auditor accounts', function () {
     foreach (['rektor', 'auditor', 'ftk'] as $username) {

@@ -6,6 +6,7 @@ use App\Models\Lecturer;
 use App\Models\Student;
 use App\Models\StudyProgram;
 use App\Models\User;
+use App\Services\AccountProvisioner;
 use App\Services\Import\ImportManager;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -194,4 +195,101 @@ it('downloads the validation errors of an import as xlsx', function () {
 
     expect($rows[0])->toBe(['Baris', 'Kolom', 'Nilai', 'Keterangan'])
         ->and($rows[1])->toBe(['2', 'kode_prodi', 'XXXX', 'Kode prodi tidak valid']);
+});
+
+/**
+ * @param  list<list<mixed>>  $rows
+ */
+function lecturerWorkbook(array $rows): UploadedFile
+{
+    $path = tempnam(sys_get_temp_dir(), 'imp').'.xlsx';
+    $writer = new Writer;
+    $writer->openToFile($path);
+    $writer->addRow(Row::fromValues(['NIDN/NIDK', 'NUPTK', 'Nama*', 'Kode Prodi*']));
+    foreach ($rows as $row) {
+        $writer->addRow(Row::fromValues($row));
+    }
+    $writer->close();
+
+    return new UploadedFile($path, 'dosen.xlsx', null, null, true);
+}
+
+it('imports a new lecturer who only has a NUPTK and lets them log in with it', function () {
+    $this->actingAs($this->admin)->post(route('imports.store'), [
+        'type' => 'dosen',
+        'file' => lecturerWorkbook([[null, '7350765666130123', 'Dosen Baru', 'TMTK']]),
+    ])->assertSessionHasNoErrors();
+
+    $job = ImportJob::query()->sole();
+    expect($job->valid_rows)->toBe(1);
+
+    $this->actingAs($this->admin)->post(route('imports.confirm', $job), ['update_existing' => true]);
+
+    $lecturer = Lecturer::query()->where('nuptk', '7350765666130123')->firstOrFail();
+    expect($lecturer->nidn)->toBeNull()
+        ->and($lecturer->user->username)->toBe('7350765666130123');
+
+    auth()->logout();
+    $this->post(route('login'), ['login' => '7350765666130123', 'password' => '7350765666130123']);
+    $this->assertAuthenticatedAs($lecturer->user);
+});
+
+it('adds the NUPTK to an existing lecturer matched by NIDN and logs in with either number', function () {
+    $lecturer = Lecturer::factory()->for($this->program)->create(['nidn' => '0812345678']);
+    app(AccountProvisioner::class)->forLecturer($lecturer);
+
+    $this->actingAs($this->admin)->post(route('imports.store'), [
+        'type' => 'dosen',
+        'file' => lecturerWorkbook([['0812345678', '7350765666130123', 'Nama Baru', 'TMTK']]),
+    ]);
+    $job = ImportJob::query()->sole();
+    expect($job->duplicate_rows)->toBe(1);
+
+    $this->actingAs($this->admin)->post(route('imports.confirm', $job), ['update_existing' => true]);
+
+    expect(Lecturer::query()->count())->toBe(1)
+        ->and($lecturer->fresh())->nuptk->toBe('7350765666130123')->name->toBe('Nama Baru');
+
+    auth()->logout();
+    $this->post(route('login'), ['login' => '7350765666130123', 'password' => '0812345678']);
+    $this->assertAuthenticatedAs($lecturer->fresh()->user);
+});
+
+it('rejects lecturer rows without any identity number, with a NUPTK stored as a number, or with numbers of two lecturers', function () {
+    Lecturer::factory()->for($this->program)->create(['nidn' => '0811111111']);
+    Lecturer::factory()->for($this->program)->create(['nidn' => null, 'nuptk' => '1111222233334444']);
+
+    $this->actingAs($this->admin)->post(route('imports.store'), [
+        'type' => 'dosen',
+        'file' => lecturerWorkbook([
+            [null, null, 'Tanpa Nomor', 'TMTK'],
+            [null, 7350765666130123, 'Diketik Angka', 'TMTK'],
+            [null, '73507656661301', 'Kurang Digit', 'TMTK'],
+            ['0811111111', '1111222233334444', 'Dua Dosen', 'TMTK'],
+        ]),
+    ]);
+
+    $messages = ImportJob::query()->sole()->errors()->orderBy('row_number')->pluck('message')->all();
+
+    expect($messages)->toHaveCount(4)
+        ->and($messages[0])->toBe('Isi NIDN/NIDK atau NUPTK (minimal salah satu)')
+        ->and($messages[1])->toContain('terbaca sebagai angka')
+        ->and($messages[2])->toBe('NUPTK harus 16 digit angka')
+        ->and($messages[3])->toBe('NIDN/NIDK dan NUPTK ini tercatat pada dua dosen berbeda');
+});
+
+it('formats identity columns of the lecturer template as text so Excel keeps all 16 digits', function () {
+    $response = $this->actingAs($this->admin)->get(route('imports.template', 'dosen'));
+    $path = tempnam(sys_get_temp_dir(), 'tpl').'.xlsx';
+    file_put_contents($path, $response->streamedContent());
+
+    $zip = new ZipArchive;
+    $zip->open($path);
+    $sheet = $zip->getFromName('xl/worksheets/sheet1.xml');
+    $styles = $zip->getFromName('xl/styles.xml');
+    $zip->close();
+
+    expect($styles)->toContain('numFmtId="49"')
+        ->and(substr_count($sheet, '<c r="B300"'))->toBe(1)
+        ->and(downloadedRows($response))->toHaveCount(2);
 });

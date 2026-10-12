@@ -28,7 +28,7 @@ class StudentImporter extends Importer
     public function columns(): array
     {
         return [
-            ['key' => 'nim', 'label' => 'NIM', 'required' => true, 'example' => '2511001', 'note' => 'Nomor Induk Mahasiswa, unik.'],
+            ['key' => 'nim', 'label' => 'NIM', 'required' => true, 'example' => '2511001', 'note' => 'Nomor Induk Mahasiswa, unik.', 'text' => true],
             ['key' => 'nama', 'label' => 'Nama', 'required' => true, 'example' => 'Siti Aminah', 'note' => 'Nama lengkap.'],
             ['key' => 'kode_prodi', 'label' => 'Kode Prodi', 'required' => true, 'example' => 'TMTK', 'note' => 'Sesuai master Program Studi.'],
             ['key' => 'angkatan', 'label' => 'Angkatan', 'required' => true, 'example' => '2025', 'note' => 'Tahun masuk (4 digit).'],

@@ -27,7 +27,7 @@ it('rejects a wrong password with a generic message', function () {
     userWithRole(UserRole::AdminLpm, ['email' => 'lpm@example.test']);
 
     $this->post(route('login'), ['login' => 'lpm@example.test', 'password' => 'wrong'])
-        ->assertSessionHasErrors(['login' => 'Email/NIM/NIDN atau kata sandi tidak sesuai.']);
+        ->assertSessionHasErrors(['login' => 'Email/NIM/NIDN/NUPTK atau kata sandi tidak sesuai.']);
 
     $this->assertGuest();
     expect(AuditLog::query()->where('event', 'login_failed')->count())->toBe(1);

@@ -30,7 +30,7 @@ class EnrollmentImporter extends Importer
             ['key' => 'kode_prodi', 'label' => 'Kode Prodi', 'required' => true, 'example' => 'TMTK', 'note' => 'Prodi pemilik mata kuliah.'],
             ['key' => 'kode_mk', 'label' => 'Kode MK', 'required' => true, 'example' => 'TMTK301', 'note' => ''],
             ['key' => 'kelas', 'label' => 'Kelas', 'required' => true, 'example' => 'A', 'note' => 'Kelas harus sudah dibuka (impor Kelas & Dosen Pengampu dulu).'],
-            ['key' => 'nim', 'label' => 'NIM', 'required' => true, 'example' => '2511001', 'note' => ''],
+            ['key' => 'nim', 'label' => 'NIM', 'required' => true, 'example' => '2511001', 'note' => '', 'text' => true],
         ];
     }
 

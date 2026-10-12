@@ -2,11 +2,12 @@ import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { useState } from 'react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { cn, groupOptions } from '@/lib/utils';
 import type { Option } from '@/types';
 
 interface BaseProps {
-    options: Option[];
+    /** Opsi dengan `group` ditampilkan berkelompok di bawah judulnya. */
+    options: (Option & { group?: string })[];
     placeholder?: string;
     searchPlaceholder?: string;
     emptyText?: string;
@@ -47,21 +48,23 @@ export function Combobox({
                     <CommandInput placeholder={searchPlaceholder} />
                     <CommandList>
                         <CommandEmpty>{emptyText}</CommandEmpty>
-                        <CommandGroup>
-                            {options.map((option) => (
-                                <CommandItem
-                                    key={String(option.value)}
-                                    value={`${option.label} ${option.value}`}
-                                    onSelect={() => {
-                                        onChange(String(option.value));
-                                        setOpen(false);
-                                    }}
-                                >
-                                    <Check className={cn('size-4', String(option.value) === String(value) ? 'opacity-100' : 'opacity-0')} />
-                                    <span className="truncate">{option.label}</span>
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
+                        {groupOptions(options).map(({ group, items }) => (
+                            <CommandGroup key={group ?? ''} heading={group ?? undefined}>
+                                {items.map((option) => (
+                                    <CommandItem
+                                        key={String(option.value)}
+                                        value={`${option.label} ${option.value}`}
+                                        onSelect={() => {
+                                            onChange(String(option.value));
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        <Check className={cn('size-4', String(option.value) === String(value) ? 'opacity-100' : 'opacity-0')} />
+                                        <span className="truncate">{option.label}</span>
+                                    </CommandItem>
+                                ))}
+                            </CommandGroup>
+                        ))}
                     </CommandList>
                 </Command>
             </PopoverContent>

@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\Hash;
 
 /**
  * Membuat/menautkan akun login untuk dosen & mahasiswa.
- * Kata sandi awal = NIDN/NIM dan wajib diganti saat login pertama.
+ * Kata sandi awal = NIDN/NUPTK/NIM dan wajib diganti saat login pertama.
  */
 class AccountProvisioner
 {
     /**
-     * Kata sandi awal = NIDN/NIM yang sudah diketahui umum, sehingga cost bcrypt penuh tidak
+     * Kata sandi awal = NIDN/NUPTK/NIM yang sudah diketahui umum, sehingga cost bcrypt penuh tidak
      * menambah perlindungan — hanya membuat impor memakan ~0,25 detik per akun.
      * Hash naik ke cost penuh otomatis saat login pertama (rehash on login),
      * dan pengguna tetap wajib mengganti kata sandi.
@@ -24,7 +24,8 @@ class AccountProvisioner
 
     public function forLecturer(Lecturer $lecturer): ?User
     {
-        $username = $lecturer->nidn ?: $lecturer->nip;
+        // Dosen baru dapat belum memiliki NIDN; NUPTK menjadi username-nya.
+        $username = $lecturer->nidn ?: $lecturer->nuptk ?: $lecturer->nip;
 
         if (! $username) {
             return null;

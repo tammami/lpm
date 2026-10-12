@@ -2,11 +2,15 @@
 
 namespace App\Notifications;
 
+use App\Enums\ScientificWorkStatus;
 use App\Models\ScientificWork;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
-class ScientificWorkRevisionNotification extends Notification
+/**
+ * Hasil verifikasi LPM yang perlu ditindaklanjuti dosen: valid dengan perbaikan, tidak valid, atau duplikat.
+ */
+class ScientificWorkReviewedNotification extends Notification
 {
     public function __construct(public ScientificWork $work) {}
 
@@ -24,11 +28,15 @@ class ScientificWorkRevisionNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'title' => 'Data karya ilmiah perlu diperbaiki',
+            'title' => match ($this->work->status) {
+                ScientificWorkStatus::Invalid => 'Karya ilmiah dinyatakan tidak valid',
+                ScientificWorkStatus::Duplicate => 'Karya ilmiah ditandai duplikat',
+                default => 'Data karya ilmiah perlu diperbaiki',
+            },
             'body' => Str::limit($this->work->title, 80).($this->work->verification_note ? " — {$this->work->verification_note}" : ''),
             'url' => route('research.mine.index'),
             'icon' => 'research',
-            'tone' => 'warning',
+            'tone' => $this->work->status === ScientificWorkStatus::Revision ? 'warning' : 'danger',
         ];
     }
 }

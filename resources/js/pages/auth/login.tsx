@@ -22,7 +22,7 @@ export default function Login({ status }: { status?: string }) {
             <Head title="Masuk" />
             <div className="mb-8">
                 <h2 className="text-2xl font-extrabold tracking-tight">Selamat datang</h2>
-                <p className="mt-1.5 text-sm text-muted-foreground">Masuk menggunakan email, NIM, atau NIDN Anda.</p>
+                <p className="mt-1.5 text-sm text-muted-foreground">Masuk menggunakan email, NIM, NIDN, atau NUPTK Anda.</p>
             </div>
 
             {status && (
@@ -32,14 +32,14 @@ export default function Login({ status }: { status?: string }) {
             )}
 
             <form onSubmit={submit} className="flex flex-col gap-5">
-                <FormField label="Email / NIM / NIDN" htmlFor="login" error={errors.login}>
+                <FormField label="Email / NIM / NIDN / NUPTK" htmlFor="login" error={errors.login}>
                     <Input
                         id="login"
                         autoFocus
                         autoComplete="username"
                         value={data.login}
                         onChange={(e) => setData('login', e.target.value)}
-                        placeholder="Email, NIM, atau NIDN"
+                        placeholder="Email, NIM, NIDN, atau NUPTK"
                         className="h-11"
                         aria-invalid={!!errors.login}
                     />

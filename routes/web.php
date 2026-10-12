@@ -435,7 +435,10 @@ Route::middleware('auth')->group(function (): void {
             Route::post('saya', [MyScientificWorkController::class, 'store'])->name('mine.store');
             Route::put('saya/{work}', [MyScientificWorkController::class, 'update'])->name('mine.update');
             Route::delete('saya/{work}', [MyScientificWorkController::class, 'destroy'])->name('mine.destroy');
+            Route::delete('saya/ditandai/{work}', [MyScientificWorkController::class, 'untag'])->name('mine.untag');
         });
+
+        Route::get('cari-orang', [ScientificWorkController::class, 'people'])->middleware('permission:research.own|research.manage')->name('people');
 
         Route::middleware('permission:research.view')->group(function (): void {
             Route::get('analisis', [ResearchAnalysisController::class, 'index'])->name('analysis');

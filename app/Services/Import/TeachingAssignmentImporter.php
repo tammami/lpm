@@ -33,13 +33,16 @@ class TeachingAssignmentImporter extends Importer
             ['key' => 'kode_prodi', 'label' => 'Kode Prodi', 'required' => true, 'example' => 'TMTK', 'note' => 'Prodi pemilik mata kuliah.'],
             ['key' => 'kode_mk', 'label' => 'Kode MK', 'required' => true, 'example' => 'TMTK301', 'note' => ''],
             ['key' => 'kelas', 'label' => 'Kelas', 'required' => true, 'example' => 'A', 'note' => 'Kode kelas/rombel.'],
-            ['key' => 'nidn', 'label' => 'NIDN', 'required' => true, 'example' => '0812345678', 'note' => 'Dosen pengampu. Satu baris per dosen (team teaching = beberapa baris).'],
+            ['key' => 'nidn', 'label' => 'NIDN/NUPTK', 'required' => true, 'example' => '0812345678', 'note' => 'Dosen pengampu: NIDN/NIDK, atau NUPTK bila belum ber-NIDN. Satu baris per dosen (team teaching = beberapa baris).', 'text' => true],
             ['key' => 'peran', 'label' => 'Peran', 'required' => false, 'example' => 'koordinator', 'note' => 'koordinator, anggota, atau pengampu. Default pengampu.'],
         ];
     }
 
     public function normalize(array $row): array
     {
+        if (is_string($row['nidn'] ?? null)) {
+            $row['nidn'] = preg_replace('/\s+/', '', $row['nidn']) ?: null;
+        }
         if (isset($row['nidn']) && ctype_digit((string) $row['nidn']) && strlen((string) $row['nidn']) === 9) {
             $row['nidn'] = '0'.$row['nidn'];
         }
@@ -74,8 +77,10 @@ class TeachingAssignmentImporter extends Importer
         } elseif (! empty($row['kode_mk']) && ! $context->course($context->program($row['kode_prodi']), $row['kode_mk'])) {
             $errors['kode_mk'] = 'Mata kuliah tidak ditemukan pada prodi ini';
         }
-        if (! empty($row['nidn']) && ! Lecturer::query()->where('nidn', $row['nidn'])->exists()) {
-            $errors['nidn'] = 'NIDN tidak ditemukan';
+        if (! empty($row['nidn']) && $error = $this->impreciseNumberError($row['nidn'], 'NIDN/NUPTK')) {
+            $errors['nidn'] = $error;
+        } elseif (! empty($row['nidn']) && ! Lecturer::query()->identifiedBy((string) $row['nidn'])->exists()) {
+            $errors['nidn'] = 'Dosen dengan NIDN/NUPTK ini tidak ditemukan';
         }
         if (! empty($row['peran']) && ! in_array($row['peran'], ['koordinator', 'anggota', 'pengampu'], true)) {
             $errors['peran'] = 'Peran tidak dikenal';
@@ -91,7 +96,7 @@ class TeachingAssignmentImporter extends Importer
             ['course_id' => $course->id, 'academic_period_id' => $context->period($row['kode_periode'])->id, 'code' => $row['kelas']],
             ['capacity' => 40],
         );
-        $lecturerId = Lecturer::query()->where('nidn', $row['nidn'])->value('id');
+        $lecturerId = Lecturer::query()->identifiedBy((string) $row['nidn'])->value('id');
         $existing = TeachingAssignment::query()->where('course_class_id', $class->id)->where('lecturer_id', $lecturerId)->first();
 
         if ($existing) {
@@ -121,7 +126,7 @@ class TeachingAssignmentImporter extends Importer
 
         return TeachingAssignment::query()
             ->whereHas('courseClass', fn ($q) => $q->where('course_id', $course->id)->where('academic_period_id', $period->id)->where('code', $classCode))
-            ->whereHas('lecturer', fn ($q) => $q->where('nidn', $nidn))
+            ->whereHas('lecturer', fn ($q) => $q->identifiedBy($nidn))
             ->first();
     }
 }

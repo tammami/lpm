@@ -117,7 +117,7 @@ class AnalyticsController extends Controller
         return [
             'id' => $lecturer->id,
             'name' => $lecturer->full_name,
-            'nidn' => $lecturer->nidn,
+            'nidn' => $lecturer->identifier,
             'academic_rank' => $lecturer->academic_rank,
             'study_program' => $lecturer->studyProgram?->full_name,
         ];

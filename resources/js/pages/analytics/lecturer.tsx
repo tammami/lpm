@@ -46,7 +46,7 @@ export default function LecturerAnalytics(props: Props) {
             <Head title={title} />
             <PageHeader
                 title={title}
-                description={selfView ? 'Umpan balik mahasiswa atas pembelajaran Anda. Seluruh jawaban anonim.' : `${lecturer.academic_rank ?? 'Dosen'} · ${lecturer.study_program ?? '—'} · NIDN ${lecturer.nidn ?? '—'}`}
+                description={selfView ? 'Umpan balik mahasiswa atas pembelajaran Anda. Seluruh jawaban anonim.' : `${lecturer.academic_rank ?? 'Dosen'} · ${lecturer.study_program ?? '—'} · NIDN/NUPTK ${lecturer.nidn ?? '—'}`}
                 breadcrumbs={selfView ? [{ label: 'Hasil Evaluasi Saya' }] : [{ label: 'Analitik', href: props.backUrl }, { label: lecturer.name }]}
                 actions={
                     <>

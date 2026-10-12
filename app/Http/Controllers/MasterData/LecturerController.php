@@ -26,13 +26,13 @@ class LecturerController extends Controller
             ->withCount('teachingAssignments');
 
         $lecturers = TableQuery::for($query, $request)
-            ->search(['name', 'nidn', 'nip', 'email'])
+            ->search(['name', 'nidn', 'nuptk', 'nip', 'email'])
             ->filter(['study_program_id' => 'study_program_id', 'academic_rank' => 'academic_rank', 'employment_status' => 'employment_status'])
             ->sort(['name', 'nidn', 'academic_rank'], 'name')
             ->paginate()
             ->through(fn (Lecturer $lecturer): array => [
                 ...$lecturer->only([
-                    'id', 'nidn', 'nip', 'name', 'front_title', 'back_title', 'full_name', 'email', 'phone', 'gender',
+                    'id', 'nidn', 'nuptk', 'nip', 'name', 'front_title', 'back_title', 'full_name', 'email', 'phone', 'gender',
                     'academic_rank', 'employment_status', 'study_program_id', 'is_active', 'teaching_assignments_count',
                 ]),
                 'study_program' => $lecturer->studyProgram?->full_name,
@@ -83,7 +83,7 @@ class LecturerController extends Controller
 
         $accounts->resetPassword($lecturer->user);
         AuditLogger::log('password_reset', 'master', $lecturer->user, "Reset kata sandi dosen {$lecturer->full_name}");
-        $this->toast('Kata sandi direset ke NIDN. Dosen wajib menggantinya saat masuk.');
+        $this->toast('Kata sandi direset ke username (NIDN/NUPTK). Dosen wajib menggantinya saat masuk.');
 
         return back();
     }
@@ -104,6 +104,7 @@ class LecturerController extends Controller
         $validated = $request->validate([
             'study_program_id' => ['required', 'exists:study_programs,id'],
             'nidn' => ['nullable', 'string', 'max:20', Rule::unique('lecturers')->ignore($lecturer)],
+            'nuptk' => ['nullable', 'digits:16', Rule::unique('lecturers')->ignore($lecturer)],
             'nip' => ['nullable', 'string', 'max:30'],
             'name' => ['required', 'string', 'max:255'],
             'front_title' => ['nullable', 'string', 'max:30'],

@@ -24,16 +24,16 @@ function userWithRole(UserRole $role, array $attributes = []): User
 }
 
 /**
- * Jalankan unduhan XLSX sampai selesai lalu baca kembali baris sheet pertamanya.
+ * Jalankan unduhan XLSX sampai selesai lalu baca kembali baris sheet pertamanya (atau sheet bernama `$sheet`).
  *
  * @return list<list<mixed>>
  */
-function downloadedRows(TestResponse $response): array
+function downloadedRows(TestResponse $response, ?string $sheet = null): array
 {
     $response->assertOk()->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
     $path = tempnam(sys_get_temp_dir(), 'xlsx').'.xlsx';
     file_put_contents($path, $response->streamedContent());
 
-    return array_values(iterator_to_array(Spreadsheet::read($path)));
+    return array_values(iterator_to_array(Spreadsheet::read($path, $sheet)));
 }

@@ -23,6 +23,7 @@ import type { Option, Paginated } from '@/types';
 interface Lecturer {
     id: number;
     nidn: string | null;
+    nuptk: string | null;
     nip: string | null;
     name: string;
     front_title: string | null;
@@ -84,7 +85,7 @@ export default function Lecturers({ lecturers, filters, studyPrograms, ranks, ca
                     </Avatar>
                     <div className="min-w-0">
                         <div className="truncate font-semibold">{row.full_name}</div>
-                        <div className="text-xs text-muted-foreground">NIDN {row.nidn ?? '—'}</div>
+                        <div className="text-xs text-muted-foreground">{row.nidn ? `NIDN ${row.nidn}` : row.nuptk ? `NUPTK ${row.nuptk}` : 'NIDN —'}</div>
                     </div>
                 </div>
             ),
@@ -133,7 +134,7 @@ export default function Lecturers({ lecturers, filters, studyPrograms, ranks, ca
                                     </DropdownMenuItem>
                                 }
                                 title="Reset kata sandi dosen?"
-                                description={`Kata sandi ${row.full_name} akan direset menjadi NIDN dan wajib diganti saat login berikutnya.`}
+                                description={`Kata sandi ${row.full_name} akan direset menjadi username-nya (NIDN/NUPTK) dan wajib diganti saat login berikutnya.`}
                                 href={route('lecturers.reset-password', row.id)}
                                 method="post"
                                 destructive={false}
@@ -161,7 +162,7 @@ export default function Lecturers({ lecturers, filters, studyPrograms, ranks, ca
         <>
             <PageHeader
                 title="Dosen"
-                description="Data dosen per homebase prodi. Akun login otomatis menggunakan NIDN."
+                description="Data dosen per homebase prodi. Akun login otomatis menggunakan NIDN, atau NUPTK bila belum ber-NIDN."
                 breadcrumbs={[{ label: 'Master Akademik' }, { label: 'Dosen' }]}
                 actions={
                     <>
@@ -186,7 +187,7 @@ export default function Lecturers({ lecturers, filters, studyPrograms, ranks, ca
                 sort={query.sort}
                 onSort={(sort) => setFilter('sort', sort)}
                 toolbar={
-                    <TableToolbar search={query.search} onSearch={(v) => setFilter('search', v)} placeholder="Cari nama, NIDN, email…">
+                    <TableToolbar search={query.search} onSearch={(v) => setFilter('search', v)} placeholder="Cari nama, NIDN, NUPTK, email…">
                         <SelectField value={query.study_program_id} onChange={(v) => setFilter('study_program_id', v)} options={studyPrograms} allLabel="Semua prodi" />
                         <SelectField value={query.academic_rank} onChange={(v) => setFilter('academic_rank', v)} options={ranks} allLabel="Semua jabatan" />
                         <SelectField value={query.employment_status} onChange={(v) => setFilter('employment_status', v)} options={employmentOptions} allLabel="Semua status" />
@@ -203,6 +204,7 @@ function LecturerForm({ lecturer, studyPrograms, ranks, onClose }: { lecturer: L
     const form = useForm({
         study_program_id: lecturer ? String(lecturer.study_program_id) : studyPrograms.length === 1 ? String(studyPrograms[0].value) : '',
         nidn: lecturer?.nidn ?? '',
+        nuptk: lecturer?.nuptk ?? '',
         nip: lecturer?.nip ?? '',
         name: lecturer?.name ?? '',
         front_title: lecturer?.front_title ?? '',
@@ -234,13 +236,16 @@ function LecturerForm({ lecturer, studyPrograms, ranks, onClose }: { lecturer: L
                 <FormField label="Gelar belakang" error={form.errors.back_title} className="sm:col-span-2">
                     <Input value={form.data.back_title} onChange={(e) => form.setData('back_title', e.target.value)} placeholder="M.Pd." />
                 </FormField>
-                <FormField label="NIDN" error={form.errors.nidn} className="sm:col-span-2" hint="Dipakai sebagai username.">
+                <FormField label="NIDN / NIDK" error={form.errors.nidn} className="sm:col-span-3" hint="Dipakai sebagai username.">
                     <Input value={form.data.nidn} onChange={(e) => form.setData('nidn', e.target.value)} inputMode="numeric" />
                 </FormField>
-                <FormField label="NIP / NIY" error={form.errors.nip} className="sm:col-span-2">
+                <FormField label="NUPTK" error={form.errors.nuptk} className="sm:col-span-3" hint="16 digit. Username bila belum ber-NIDN.">
+                    <Input value={form.data.nuptk} onChange={(e) => form.setData('nuptk', e.target.value)} inputMode="numeric" maxLength={16} />
+                </FormField>
+                <FormField label="NIP / NIY" error={form.errors.nip} className="sm:col-span-3">
                     <Input value={form.data.nip} onChange={(e) => form.setData('nip', e.target.value)} />
                 </FormField>
-                <FormField label="Jenis kelamin" error={form.errors.gender} className="sm:col-span-2">
+                <FormField label="Jenis kelamin" error={form.errors.gender} className="sm:col-span-3">
                     <SelectField value={form.data.gender} onChange={(v) => form.setData('gender', v)} options={[{ value: 'L', label: 'Laki-laki' }, { value: 'P', label: 'Perempuan' }]} />
                 </FormField>
                 <FormField label="Homebase prodi" error={form.errors.study_program_id} required className="sm:col-span-3">
@@ -269,7 +274,7 @@ function LecturerForm({ lecturer, studyPrograms, ranks, onClose }: { lecturer: L
                                     <UserRoundCheck className="size-4 text-primary" /> Buatkan akun login
                                 </span>
                             }
-                            description="Username & kata sandi awal = NIDN. Dosen wajib mengganti kata sandi saat login pertama."
+                            description="Username & kata sandi awal = NIDN (atau NUPTK bila belum ber-NIDN). Dosen wajib mengganti kata sandi saat login pertama."
                         />
                     )}
                 </div>

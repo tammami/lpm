@@ -1,11 +1,12 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn, groupOptions } from '@/lib/utils';
 import type { Option } from '@/types';
 
 interface Props {
     value: string | number | null | undefined;
     onChange: (value: string) => void;
-    options: Option[];
+    /** Opsi dengan `group` ditampilkan berkelompok di bawah judulnya. */
+    options: (Option & { group?: string })[];
     placeholder?: string;
     /** Tambahkan opsi "semua" (nilai "all") untuk filter. */
     allLabel?: string;
@@ -25,11 +26,22 @@ export function SelectField({ value, onChange, options, placeholder = 'Pilih…'
             </SelectTrigger>
             <SelectContent>
                 {allLabel && <SelectItem value="all">{allLabel}</SelectItem>}
-                {options.map((option) => (
-                    <SelectItem key={String(option.value)} value={String(option.value)}>
-                        {option.label}
-                    </SelectItem>
-                ))}
+                {groupOptions(options).map(({ group, items }) => {
+                    const rendered = items.map((option) => (
+                        <SelectItem key={String(option.value)} value={String(option.value)}>
+                            {option.label}
+                        </SelectItem>
+                    ));
+
+                    return group ? (
+                        <SelectGroup key={group}>
+                            <SelectLabel>{group}</SelectLabel>
+                            {rendered}
+                        </SelectGroup>
+                    ) : (
+                        rendered
+                    );
+                })}
             </SelectContent>
         </Select>
     );

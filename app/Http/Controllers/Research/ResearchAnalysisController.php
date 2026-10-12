@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Research;
 use App\Http\Controllers\Controller;
 use App\Services\AuditLogger;
 use App\Services\Research\ResearchAnalytics;
+use App\Services\Research\WorkRecap;
 use App\Support\Options;
 use App\Support\Spreadsheet;
 use Illuminate\Http\Request;
@@ -41,6 +42,7 @@ class ResearchAnalysisController extends Controller
         $result = $this->analytics->analyze($request->user(), $filters);
         $range = $filters['from'] === $filters['to'] ? (string) $filters['from'] : "{$filters['from']}-{$filters['to']}";
         $groupLabels = array_values(ResearchAnalytics::GROUPS);
+        $recapLabels = array_values(WorkRecap::COLUMNS);
         $lecturers = collect($result['lecturers']);
 
         AuditLogger::log('exported', 'research', null, "Ekspor analisis karya ilmiah {$range}");
@@ -48,27 +50,29 @@ class ResearchAnalysisController extends Controller
         return Spreadsheet::downloadSheets("analisis-karya-ilmiah-{$range}.xlsx", [
             [
                 'title' => 'Rekap per dosen',
-                'headers' => ['NIDN', 'Dosen', 'Program Studi', 'Jabatan', 'Status', ...$groupLabels, "Total {$range}", 'Karya terakhir (tahun)'],
+                'headers' => ['NIDN/NIDK', 'NUPTK', 'Dosen', 'Program Studi', 'Jabatan', 'Status', ...$recapLabels, 'Karya terakhir (tahun)'],
                 'rows' => $lecturers->map(fn (array $row): array => [
-                    $row['nidn'], $row['name'], $row['study_program'], $row['academic_rank'], $this->employment($row['employment_status']),
-                    ...array_values($row['groups']), $row['works'], $row['last_year'],
+                    $row['nidn'], $row['nuptk'], $row['name'], $row['study_program'], $row['academic_rank'], $this->employment($row['employment_status']),
+                    ...array_values($row['recap']), $row['last_year'],
                 ]),
-                'widths' => [14, 32, 30, 16, 12, ...array_fill(0, count($groupLabels), 12), 12, 14],
+                'widths' => [14, 20, 32, 30, 16, 12, ...array_fill(0, count($recapLabels), 12), 14],
             ],
             [
                 'title' => 'Belum punya karya',
-                'headers' => ['NIDN', 'Dosen', 'Program Studi', 'Jabatan', 'Status', 'Karya terakhir (tahun)', 'Total karya tercatat'],
+                'headers' => ['NIDN/NIDK', 'NUPTK', 'Dosen', 'Program Studi', 'Jabatan', 'Status', 'Karya terakhir (tahun)', 'Total karya tercatat'],
                 'rows' => $lecturers->where('works', 0)->sortBy(['study_program', 'name'])->map(fn (array $row): array => [
-                    $row['nidn'], $row['name'], $row['study_program'], $row['academic_rank'], $this->employment($row['employment_status']),
+                    $row['nidn'], $row['nuptk'], $row['name'], $row['study_program'], $row['academic_rank'], $this->employment($row['employment_status']),
                     $row['last_year'] ?? 'Belum pernah', $row['all_time'],
                 ]),
-                'widths' => [14, 32, 30, 16, 12, 18, 16],
+                'widths' => [14, 20, 32, 30, 16, 12, 18, 16],
             ],
             [
                 'title' => 'Per program studi',
-                'headers' => ['Program Studi', 'Dosen aktif', 'Dosen berkarya', 'Persentase (%)', 'Jumlah karya', 'Rata-rata per dosen', 'Jurnal SINTA/bereputasi'],
-                'rows' => array_map(fn (array $row): array => [$row['name'], $row['lecturers'], $row['productive'], $row['rate'], $row['works'], $row['per_lecturer'], $row['reputable']], $result['byProgram']),
-                'widths' => [32, 12, 14, 14, 12, 16, 20],
+                'headers' => ['Program Studi', 'Dosen aktif', 'Dosen berkarya', 'Persentase (%)', 'Rata-rata per dosen', ...$recapLabels, 'Melibatkan mahasiswa (%)'],
+                'rows' => array_map(fn (array $row): array => [
+                    $row['name'], $row['lecturers'], $row['productive'], $row['rate'], $row['per_lecturer'], ...array_values($row['recap']), $row['student_rate'],
+                ], $result['byProgram']),
+                'widths' => [32, 12, 14, 14, 16, ...array_fill(0, count($recapLabels), 12), 18],
             ],
             [
                 'title' => 'Per tahun',

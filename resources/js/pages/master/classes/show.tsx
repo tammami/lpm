@@ -108,7 +108,7 @@ export default function ClassShow({ courseClass, lecturers, entryYears, canManag
                                 <div className="min-w-0 flex-1">
                                     <div className="truncate text-sm font-semibold">{assignment.name}</div>
                                     <div className="text-xs text-muted-foreground">
-                                        {roleLabels[assignment.role] ?? assignment.role} · NIDN {assignment.nidn ?? '—'}
+                                        {roleLabels[assignment.role] ?? assignment.role} · NIDN/NUPTK {assignment.nidn ?? '—'}
                                     </div>
                                 </div>
                                 {canManage && (

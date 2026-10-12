@@ -27,6 +27,7 @@ class ImportManager
         'penugasan_mengajar' => TeachingAssignmentImporter::class,
         'peserta_kelas' => EnrollmentImporter::class,
         'butir_instrumen' => InstrumentQuestionImporter::class,
+        'karya_ilmiah' => ScientificWorkImporter::class,
     ];
 
     private const PREVIEW_ROWS = 25;
@@ -210,7 +211,7 @@ class ImportManager
     private function mappedRows(ImportJob $job, Importer $importer): array
     {
         $path = Storage::disk('local')->path($job->file_path);
-        $reader = Spreadsheet::read($path);
+        $reader = Spreadsheet::read($path, $importer->sheetName());
 
         $headerRow = $reader->current();
         $labelsToKeys = collect($importer->columns())
@@ -224,13 +225,13 @@ class ImportManager
                 $values = $reader->current();
                 $reader->next();
 
-                if (array_filter($values, fn ($value) => $value !== null && $value !== '') === []) {
-                    continue;
-                }
-
                 $row = [];
                 foreach ($header as $index => $key) {
                     $row[$key] = $values[$index] ?? null;
+                }
+
+                if ($importer->isBlankRow($row)) {
+                    continue;
                 }
 
                 yield $number => $importer->normalize($row);

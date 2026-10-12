@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ScientificWorkIndexation;
 use App\Enums\ScientificWorkStatus;
 use App\Enums\ScientificWorkType;
 use App\Models\Lecturer;
@@ -21,16 +22,17 @@ class ScientificWorkFactory extends Factory
             'type' => ScientificWorkType::JournalNational,
             'year' => now()->year,
             'venue' => 'Jurnal '.fake()->words(2, true),
-            'rank' => null,
+            'indexation' => ScientificWorkIndexation::NotAccredited,
             'author_role' => 'first',
             'source' => 'research',
             'funding' => 'self',
+            'url' => 'https://jurnal.contoh.ac.id/'.fake()->unique()->numberBetween(1000, 99999),
             'status' => ScientificWorkStatus::Pending,
         ];
     }
 
-    public function accredited(string $rank = 'S3'): static
+    public function indexed(ScientificWorkIndexation $indexation = ScientificWorkIndexation::Sinta3): static
     {
-        return $this->state(['type' => ScientificWorkType::JournalAccredited, 'rank' => $rank]);
+        return $this->state(['indexation' => $indexation]);
     }
 }

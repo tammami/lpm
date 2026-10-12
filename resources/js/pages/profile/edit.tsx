@@ -42,7 +42,7 @@ export default function ProfileEdit({ profile }: Props) {
                             <FormField label="No. HP / WhatsApp" error={errors.phone}>
                                 <Input value={data.phone} onChange={(e) => setData('phone', e.target.value)} />
                             </FormField>
-                            <FormField label="Username (NIM/NIDN)" hint="Diatur oleh admin.">
+                            <FormField label="Username (NIM/NIDN/NUPTK)" hint="Diatur oleh admin.">
                                 <Input value={profile.username ?? '—'} disabled />
                             </FormField>
                             <div className="flex items-end justify-end sm:col-span-2">

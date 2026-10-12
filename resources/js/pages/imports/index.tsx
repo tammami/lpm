@@ -1,5 +1,5 @@
 import { Link, useForm } from '@inertiajs/react';
-import { BookOpen, ClipboardList, Download, FileSpreadsheet, GraduationCap, LoaderCircle, School, Upload, Users, UsersRound } from 'lucide-react';
+import { BookOpen, BookOpenText, ClipboardList, Download, FileSpreadsheet, GraduationCap, LoaderCircle, School, Upload, Users, UsersRound } from 'lucide-react';
 import { useState } from 'react';
 import { type Column, DataTable } from '@/components/data-table';
 import { FormField } from '@/components/form-field';
@@ -54,9 +54,10 @@ const icons: Record<string, typeof Users> = {
     penugasan_mengajar: School,
     peserta_kelas: UsersRound,
     butir_instrumen: ClipboardList,
+    karya_ilmiah: BookOpenText,
 };
 
-const order = ['mahasiswa', 'dosen', 'mata_kuliah', 'penugasan_mengajar', 'peserta_kelas', 'butir_instrumen'];
+const order = ['mahasiswa', 'dosen', 'mata_kuliah', 'penugasan_mengajar', 'peserta_kelas', 'karya_ilmiah', 'butir_instrumen'];
 
 export default function ImportsIndex({ importers, jobs, draftVersions, maxUploadMb }: { importers: ImporterDef[]; jobs: Paginated<ImportJobRow>; draftVersions: Option[]; maxUploadMb: number }) {
     const sorted = [...importers].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
@@ -173,6 +174,11 @@ export default function ImportsIndex({ importers, jobs, draftVersions, maxUpload
                                 }}
                                 className="flex flex-col gap-4"
                             >
+                                {current.type === 'karya_ilmiah' && (
+                                    <p className="rounded-lg bg-secondary/60 px-3 py-2 text-xs text-secondary-foreground">
+                                        File Excel template LPM (Template Data Karya Dosen) bisa langsung diunggah — sheet <b>Data Karya Dosen</b> dibaca otomatis dan baris kosong bernomor dilewati. Data dosen harus sudah diimpor lebih dulu.
+                                    </p>
+                                )}
                                 {current.type === 'butir_instrumen' && (
                                     <FormField label="Versi instrumen tujuan" error={form.errors.instrument_version_id} required hint="Hanya versi berstatus draf.">
                                         <SelectField value={form.data.instrument_version_id} onChange={(v) => form.setData('instrument_version_id', v)} options={draftVersions} placeholder="Pilih versi draf" />

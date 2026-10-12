@@ -27,7 +27,7 @@ class RoleController extends Controller
                 'permissions' => $role === UserRole::Superadmin ? Permissions::all() : ($roles[$role->value]?->permissions->pluck('name')->all() ?? []),
                 'locked' => $role === UserRole::Superadmin,
                 'scope' => match ($role) {
-                    UserRole::Superadmin, UserRole::AdminLpm, UserRole::Pimpinan => 'Seluruh institusi',
+                    UserRole::Superadmin, UserRole::AdminLpm, UserRole::Pimpinan, UserRole::Lp2m => 'Seluruh institusi',
                     UserRole::AdminFakultas => 'Prodi dalam fakultasnya',
                     UserRole::AdminProdi => 'Prodinya sendiri',
                     UserRole::Auditor => 'Audit yang ditugaskan',

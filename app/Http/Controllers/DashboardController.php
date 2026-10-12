@@ -8,6 +8,7 @@ use App\Enums\AuditStatus;
 use App\Enums\EvidenceStatus;
 use App\Enums\FindingStatus;
 use App\Enums\RecommendationStatus;
+use App\Enums\ScientificWorkStatus;
 use App\Enums\SurveyMode;
 use App\Enums\SurveyStatus;
 use App\Enums\UserRole;
@@ -19,12 +20,14 @@ use App\Models\Audit;
 use App\Models\Evidence;
 use App\Models\Finding;
 use App\Models\Recommendation;
+use App\Models\ScientificWork;
 use App\Models\StudyProgram;
 use App\Models\Survey;
 use App\Models\User;
 use App\Services\Accreditation\ReadinessCalculator;
 use App\Services\Analytics\MonevAnalytics;
 use App\Services\Monev\SurveyProgress;
+use App\Services\Research\ResearchAnalytics;
 use App\Services\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -112,6 +115,7 @@ class DashboardController extends Controller
             ])->sortBy(fn (array $row) => $row['days_left'] ?? PHP_INT_MAX)->values()->all(),
             'accreditationWarningDays' => $warningDays,
             'cycle' => $this->qualityCycle($user),
+            'research' => $user->can('research.view') ? $this->researchSummary($user) : null,
             'counts' => [
                 'students' => DB::table('students')->where('status', 'aktif')->when($scope !== null, fn ($q) => $q->whereIn('study_program_id', $scope))->count(),
                 'lecturers' => DB::table('lecturers')->where('is_active', true)->when($scope !== null, fn ($q) => $q->whereIn('study_program_id', $scope))->count(),
@@ -125,6 +129,34 @@ class DashboardController extends Controller
                 'accreditation' => $user->can('accreditation.view'),
             ],
         ]);
+    }
+
+    /**
+     * Ringkasan karya ilmiah dosen TS-2 s.d. TS untuk pimpinan, LPM, LP2M, dan kaprodi.
+     *
+     * @return array<string, mixed>
+     */
+    private function researchSummary(User $user): array
+    {
+        $to = now()->year;
+        $summary = app(ResearchAnalytics::class)->analyze($user, [
+            'from' => $to - 2, 'to' => $to, 'study_program_id' => null, 'employment_status' => null, 'verified_only' => false,
+        ])['summary'];
+
+        return [
+            'range' => ($to - 2).'–'.$to,
+            'rate' => $summary['rate'],
+            'productive' => $summary['productive'],
+            'lecturers' => $summary['lecturers'],
+            'works' => $summary['works'],
+            'sinta' => $summary['sinta'],
+            'scopus' => $summary['scopus'],
+            'wos' => $summary['wos'],
+            'student_rate' => $summary['student_rate'],
+            'with_students' => $summary['with_students'],
+            'students' => $summary['students'],
+            'pending' => ScientificWork::query()->visibleTo($user)->where('status', ScientificWorkStatus::Pending)->count(),
+        ];
     }
 
     /**

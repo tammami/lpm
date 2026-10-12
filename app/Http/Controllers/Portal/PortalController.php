@@ -80,7 +80,7 @@ class PortalController extends Controller
         return Inertia::render('portal/home', [
             'profile' => [
                 'name' => $user->name,
-                'identifier' => $user->student?->nim ?? $user->lecturer?->nidn ?? $user->username,
+                'identifier' => $user->student?->nim ?? $user->lecturer?->identifier ?? $user->username,
                 'study_program' => $profile?->studyProgram?->full_name,
                 'semester' => $user->student?->semester,
             ],

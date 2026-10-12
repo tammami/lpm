@@ -2,18 +2,23 @@
 
 namespace App\Http\Controllers\Research;
 
+use App\Enums\ScientificWorkCategory;
+use App\Enums\ScientificWorkIndexation;
 use App\Enums\ScientificWorkStatus;
 use App\Enums\ScientificWorkType;
 use App\Http\Controllers\Controller;
 use App\Models\Lecturer;
 use App\Models\ScientificWork;
-use App\Notifications\ScientificWorkRevisionNotification;
+use App\Models\Student;
+use App\Notifications\ScientificWorkReviewedNotification;
 use App\Services\AuditLogger;
 use App\Services\Research\ScientificWorks;
+use App\Services\Research\WorkWorkbook;
 use App\Support\Options;
 use App\Support\Spreadsheet;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -22,11 +27,11 @@ use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Data karya ilmiah seluruh dosen dalam cakupan pengguna: pengisian atas nama dosen, verifikasi, ekspor.
+ * Data karya ilmiah seluruh dosen dalam cakupan pengguna: pengisian atas nama dosen, verifikasi, ekspor format template LPM.
  */
 class ScientificWorkController extends Controller
 {
-    private const FILTERS = ['study_program_id', 'lecturer_id', 'type', 'year', 'status'];
+    private const FILTERS = ['study_program_id', 'lecturer_id', 'category', 'type', 'indexation_family', 'year', 'status', 'with_students'];
 
     public function __construct(private ScientificWorks $works) {}
 
@@ -34,9 +39,14 @@ class ScientificWorkController extends Controller
     {
         $user = $request->user();
 
-        $works = $this->query($request, ['lecturer.studyProgram:id,name,degree', 'verifier:id,name'])
+        $works = $this->query($request, ScientificWorks::payloadRelations())
             ->paginate()
-            ->through(fn (ScientificWork $work): array => $this->works->payload($work));
+            ->through(fn (ScientificWork $work): array => [
+                ...$this->works->payload($work),
+                'possible_duplicates' => $user->can('research.verify') && $work->status === ScientificWorkStatus::Pending
+                    ? $this->works->possibleDuplicates($work)
+                    : [],
+            ]);
 
         $statusCounts = ScientificWork::query()->visibleTo($user)
             ->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status');
@@ -61,7 +71,7 @@ class ScientificWorkController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $lecturer = $this->lecturer($request);
-        $this->works->save(null, [...$this->works->validate($request), 'lecturer_id' => $lecturer->id], $request->user());
+        $this->works->save(null, [...$this->works->validate($request, $lecturer->id), 'lecturer_id' => $lecturer->id], $request->user());
         $this->toast('Karya ilmiah berhasil ditambahkan.');
 
         return back();
@@ -71,7 +81,7 @@ class ScientificWorkController extends Controller
     {
         $this->authorizeWork($request, $work);
         $lecturer = $this->lecturer($request);
-        $this->works->save($work, [...$this->works->validate($request), 'lecturer_id' => $lecturer->id], $request->user());
+        $this->works->save($work, [...$this->works->validate($request, $lecturer->id), 'lecturer_id' => $lecturer->id], $request->user());
         $this->toast('Karya ilmiah berhasil diperbarui.');
 
         return back();
@@ -90,58 +100,93 @@ class ScientificWorkController extends Controller
         $this->authorizeWork($request, $work);
 
         $validated = $request->validate([
-            'decision' => ['required', Rule::in([ScientificWorkStatus::Verified->value, ScientificWorkStatus::Revision->value])],
-            'note' => ['nullable', 'required_if:decision,revision', 'string', 'max:1000'],
-        ], ['note.required_if' => 'Tuliskan apa yang perlu diperbaiki dosen.']);
+            'decision' => ['required', Rule::in(array_map(fn (ScientificWorkStatus $status): string => $status->value, ScientificWorkStatus::decisions()))],
+            'note' => ['nullable', Rule::requiredIf(fn (): bool => $request->input('decision') !== ScientificWorkStatus::Verified->value), 'string', 'max:1000'],
+        ], ['note.required' => 'Tuliskan catatan untuk dosen (apa yang perlu diperbaiki, atau mengapa tidak valid/duplikat).']);
 
-        $verified = $validated['decision'] === ScientificWorkStatus::Verified->value;
+        $status = ScientificWorkStatus::from($validated['decision']);
 
         $work->update([
-            'status' => $validated['decision'],
-            'verification_note' => $verified ? null : $validated['note'],
+            'status' => $status,
+            'verification_note' => $validated['note'] ?? null,
             'verified_by' => $request->user()->id,
             'verified_at' => now(),
         ]);
 
-        if (! $verified && ($owner = $work->lecturer()->with('user')->first()?->user) && $owner->id !== $request->user()->id) {
-            $owner->notify(new ScientificWorkRevisionNotification($work));
+        if ($status !== ScientificWorkStatus::Verified && ($owner = $work->lecturer()->with('user')->first()?->user) && $owner->id !== $request->user()->id) {
+            $owner->notify(new ScientificWorkReviewedNotification($work));
         }
 
-        $this->toast($verified ? 'Karya ilmiah terverifikasi.' : 'Dikembalikan ke dosen untuk diperbaiki.');
+        $this->toast(match ($status) {
+            ScientificWorkStatus::Verified => 'Karya ilmiah dinyatakan valid.',
+            ScientificWorkStatus::Revision => 'Dikembalikan ke dosen untuk diperbaiki.',
+            ScientificWorkStatus::Invalid => 'Karya ilmiah dinyatakan tidak valid.',
+            default => 'Karya ilmiah ditandai duplikat.',
+        });
 
         return back();
     }
 
-    public function export(Request $request): StreamedResponse
+    public function export(Request $request, WorkWorkbook $workbook): StreamedResponse
     {
         AuditLogger::log('exported', 'research', null, 'Ekspor data karya ilmiah dosen');
 
-        return Spreadsheet::download(
-            'karya-ilmiah-dosen-'.now()->format('Ymd').'.xlsx',
-            ['NIDN', 'Dosen', 'Program Studi', 'Tahun', 'Judul', 'Jenis', 'Peringkat/Indeksasi', 'Jurnal/Penerbit/Kegiatan', 'Volume/Halaman', 'ISSN/ISBN/No. HKI', 'DOI/Tautan', 'Peran Penulis', 'Penulis Lain', 'Asal Kegiatan', 'Sumber Dana', 'Status Verifikasi', 'Catatan Verifikasi'],
-            $this->query($request, ['lecturer.studyProgram:id,name,degree'])->builder()->lazy()
-                ->map(fn (ScientificWork $work): array => array_values([
-                    $work->lecturer->nidn,
-                    $work->lecturer->full_name,
-                    $work->lecturer->studyProgram?->full_name,
-                    $work->year,
-                    $work->title,
-                    $work->type->label(),
-                    $work->rank ? (ScientificWorkType::allRanks()[$work->rank] ?? $work->rank) : null,
-                    $work->venue,
-                    $work->volume,
-                    $work->identifier,
-                    $work->url,
-                    ScientificWork::AUTHOR_ROLES[$work->author_role] ?? $work->author_role,
-                    $work->co_authors,
-                    ScientificWork::SOURCES[$work->source] ?? $work->source,
-                    ScientificWork::FUNDINGS[$work->funding] ?? $work->funding,
-                    $work->status->label(),
-                    $work->verification_note,
-                ])),
-            [14, 30, 30, 8, 60, 34, 16, 36, 20, 20, 36, 20, 36, 22, 30, 20, 36],
-            'Karya Ilmiah',
-        );
+        $works = $this->query($request, WorkWorkbook::relations())->builder()->get();
+        $lecturers = Lecturer::query()
+            ->visibleTo($request->user())
+            ->where(fn (Builder $query) => $query->where('is_active', true)->orWhereIn('id', $works->pluck('lecturer_id')))
+            ->when($this->filled($request, 'study_program_id'), fn (Builder $q) => $q->where('study_program_id', $request->integer('study_program_id')))
+            ->when($this->filled($request, 'lecturer_id'), fn (Builder $q) => $q->whereKey($request->integer('lecturer_id')))
+            ->with('studyProgram:id,name,degree')
+            ->orderBy('name')
+            ->get();
+
+        return Spreadsheet::downloadSheets('karya-dosen-'.now()->format('Ymd').'.xlsx', $workbook->sheets($works, $lecturers));
+    }
+
+    /**
+     * Pencarian dosen rekan / mahasiswa untuk ditandai sebagai penulis bersama.
+     */
+    public function people(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'jenis' => ['required', Rule::in(['dosen', 'mahasiswa'])],
+            'q' => ['nullable', 'string', 'max:100'],
+        ]);
+        $term = trim($validated['q'] ?? '');
+
+        if ($validated['jenis'] === 'dosen') {
+            $items = Lecturer::query()
+                ->where('is_active', true)
+                ->when($term !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
+                    ->where('name', 'like', "%{$term}%")->orWhere('nidn', 'like', "{$term}%")->orWhere('nuptk', 'like', "{$term}%")))
+                ->with('studyProgram:id,name,degree')
+                ->orderBy('name')
+                ->limit(20)
+                ->get()
+                ->map(fn (Lecturer $lecturer): array => [
+                    'id' => $lecturer->id,
+                    'name' => $lecturer->full_name,
+                    'number' => $lecturer->identifier,
+                    'study_program' => $lecturer->studyProgram?->full_name,
+                ]);
+        } else {
+            $items = Student::query()
+                ->when($term !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
+                    ->where('name', 'like', "%{$term}%")->orWhere('nim', 'like', "{$term}%")))
+                ->with('studyProgram:id,name,degree')
+                ->orderBy('name')
+                ->limit(20)
+                ->get()
+                ->map(fn (Student $student): array => [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'number' => $student->nim,
+                    'study_program' => $student->studyProgram?->full_name,
+                ]);
+        }
+
+        return response()->json($items);
     }
 
     /**
@@ -155,14 +200,43 @@ class ScientificWorkController extends Controller
         $query = ScientificWork::query()
             ->with($with)
             ->visibleTo($request->user())
-            ->when($request->filled('study_program_id') && $request->input('study_program_id') !== 'all', fn (Builder $q) => $q->whereHas(
-                'lecturer', fn (Builder $lecturer) => $lecturer->where('study_program_id', $request->integer('study_program_id')),
-            ));
+            ->when($this->filled($request, 'study_program_id'), fn (Builder $q) => $q->creditedTo(
+                Lecturer::query()->where('study_program_id', $request->integer('study_program_id'))->pluck('id')->all(),
+            ))
+            ->when($this->filled($request, 'lecturer_id'), fn (Builder $q) => $q->creditedTo($request->integer('lecturer_id')))
+            ->when($this->filled($request, 'category'), fn (Builder $q) => $q->whereIn('type', $this->typesOf((string) $request->input('category'))))
+            ->when($this->filled($request, 'indexation_family'), fn (Builder $q) => $q->whereIn('indexation', $this->indexationsOf((string) $request->input('indexation_family'))))
+            ->when($request->boolean('with_students'), fn (Builder $q) => $q->has('studentMembers'));
 
         return TableQuery::for($query, $request)
-            ->search(['title', 'venue', 'co_authors', 'lecturer.name', 'lecturer.nidn'])
-            ->filter(['lecturer_id' => 'lecturer_id', 'type' => 'type', 'year' => 'year', 'status' => 'status'])
+            ->search(['title', 'venue', 'doi', 'co_authors', 'lecturer.name', 'lecturer.nidn', 'lecturer.nuptk', 'members.name', 'members.nim'])
+            ->filter(['type' => 'type', 'year' => 'year', 'status' => 'status'])
             ->sort(['year', 'title', 'updated_at'], '-year');
+    }
+
+    private function filled(Request $request, string $key): bool
+    {
+        return $request->filled($key) && $request->input($key) !== 'all';
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function typesOf(string $category): array
+    {
+        return collect(ScientificWorkType::cases())
+            ->filter(fn (ScientificWorkType $type): bool => $type->category() === ScientificWorkCategory::tryFrom($category))
+            ->map->value->values()->all();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function indexationsOf(string $family): array
+    {
+        return collect(ScientificWorkIndexation::cases())
+            ->filter(fn (ScientificWorkIndexation $case): bool => $case->family() === $family)
+            ->map->value->values()->all();
     }
 
     /**
