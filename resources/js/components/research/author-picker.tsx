@@ -11,6 +11,9 @@ interface Person {
     study_program: string | null;
 }
 
+/** Server hanya mencari bila kata kunci minimal sepanjang ini. */
+const MIN_SEARCH = 3;
+
 /** Pencarian orang di server dengan jeda ketik, dibatalkan bila kata kunci berubah. */
 function usePeopleSearch(kind: 'dosen' | 'mahasiswa', query: string, enabled: boolean) {
     const [items, setItems] = useState<Person[]>([]);
@@ -18,6 +21,10 @@ function usePeopleSearch(kind: 'dosen' | 'mahasiswa', query: string, enabled: bo
 
     useEffect(() => {
         if (!enabled) return;
+        if (query.trim().length < MIN_SEARCH) {
+            setItems([]);
+            return;
+        }
         const controller = new AbortController();
         const timer = setTimeout(() => {
             setLoading(true);
@@ -114,7 +121,7 @@ export function LecturerTagInput({ value, onChange, excludeId, invalid }: { valu
                 <Chip key={lecturer.id} icon={UserRound} label={lecturer.name} sub={lecturer.identifier} onRemove={() => onChange(value.filter((item) => item.id !== lecturer.id))} />
             ))}
             <PickerShell label="Tandai dosen" open={open} onOpenChange={setOpen} query={query} onQuery={setQuery} placeholder="Cari nama, NIDN, atau NUPTK…" loading={loading} invalid={invalid}>
-                {!loading && <CommandEmpty>Dosen tidak ditemukan.</CommandEmpty>}
+                {!loading && <CommandEmpty>{query.trim().length < MIN_SEARCH ? 'Ketik minimal 3 huruf nama, NIDN, atau NUPTK.' : 'Dosen tidak ditemukan.'}</CommandEmpty>}
                 <CommandGroup>
                     {results.map((person) => (
                         <CommandItem
@@ -185,7 +192,7 @@ export function StudentTagInput({ value, onChange, invalid }: { value: TaggedStu
                     </CommandGroup>
                 ) : (
                     !loading &&
-                    results.length === 0 && <div className="px-3 py-3 text-xs text-muted-foreground">Ketik nama atau NIM. Bila belum terdaftar (mis. alumni), ketik nama lengkap — boleh dengan NIM dalam kurung.</div>
+                    results.length === 0 && <div className="px-3 py-3 text-xs text-muted-foreground">Ketik minimal 3 huruf nama atau NIM. Bila belum terdaftar (mis. alumni), ketik nama lengkap — boleh dengan NIM dalam kurung.</div>
                 )}
             </PickerShell>
         </div>

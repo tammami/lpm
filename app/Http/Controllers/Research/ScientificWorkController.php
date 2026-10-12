@@ -31,6 +31,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class ScientificWorkController extends Controller
 {
+    /** Panjang minimal kata kunci pencarian orang untuk ditandai. */
+    private const MIN_SEARCH = 3;
+
     private const FILTERS = ['study_program_id', 'lecturer_id', 'category', 'type', 'indexation_family', 'year', 'status', 'with_students'];
 
     public function __construct(private ScientificWorks $works) {}
@@ -44,7 +47,7 @@ class ScientificWorkController extends Controller
             ->through(fn (ScientificWork $work): array => [
                 ...$this->works->payload($work),
                 'possible_duplicates' => $user->can('research.verify') && $work->status === ScientificWorkStatus::Pending
-                    ? $this->works->possibleDuplicates($work)
+                    ? $this->works->possibleDuplicates($work, $user)
                     : [],
             ]);
 
@@ -155,11 +158,16 @@ class ScientificWorkController extends Controller
         ]);
         $term = trim($validated['q'] ?? '');
 
+        // Wajib ada kata kunci agar daftar mahasiswa/dosen tidak dapat ditelusuri seluruhnya.
+        if (mb_strlen($term) < self::MIN_SEARCH) {
+            return response()->json([]);
+        }
+
         if ($validated['jenis'] === 'dosen') {
             $items = Lecturer::query()
                 ->where('is_active', true)
-                ->when($term !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
-                    ->where('name', 'like', "%{$term}%")->orWhere('nidn', 'like', "{$term}%")->orWhere('nuptk', 'like', "{$term}%")))
+                ->where(fn (Builder $inner) => $inner
+                    ->where('name', 'like', "%{$term}%")->orWhere('nidn', 'like', "{$term}%")->orWhere('nuptk', 'like', "{$term}%"))
                 ->with('studyProgram:id,name,degree')
                 ->orderBy('name')
                 ->limit(20)
@@ -172,8 +180,8 @@ class ScientificWorkController extends Controller
                 ]);
         } else {
             $items = Student::query()
-                ->when($term !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
-                    ->where('name', 'like', "%{$term}%")->orWhere('nim', 'like', "{$term}%")))
+                ->where(fn (Builder $inner) => $inner
+                    ->where('name', 'like', "%{$term}%")->orWhere('nim', 'like', "{$term}%"))
                 ->with('studyProgram:id,name,degree')
                 ->orderBy('name')
                 ->limit(20)

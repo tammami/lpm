@@ -111,7 +111,7 @@ final class Permissions
                 'evidence.view', 'accreditation.view', 'research.view',
             ],
             UserRole::Lp2m => [
-                'dashboard.view', 'notifications.view', 'reports.export', 'research.view',
+                'dashboard.view', 'notifications.view', 'research.view',
             ],
             UserRole::Auditor => [
                 'dashboard.view', 'notifications.view', 'ami.view', 'ami.audit', 'evidence.view', 'instruments.view',

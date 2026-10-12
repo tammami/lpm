@@ -138,7 +138,11 @@ it('finds students and lecturers to tag', function () {
     $this->actingAs($this->dosenUser)->getJson(route('research.people', ['jenis' => 'dosen', 'q' => 'Rahma']))
         ->assertOk()->assertJsonPath('0.number', '7350765666130123');
 
-    $this->actingAs(userWithRole(UserRole::Mahasiswa))->getJson(route('research.people', ['jenis' => 'mahasiswa']))->assertForbidden();
+    // Tanpa kata kunci (atau terlalu pendek) daftar tidak dibuka, agar tidak dapat ditelusuri seluruhnya.
+    $this->actingAs($this->dosenUser)->getJson(route('research.people', ['jenis' => 'mahasiswa']))->assertOk()->assertExactJson([]);
+    $this->actingAs($this->dosenUser)->getJson(route('research.people', ['jenis' => 'dosen', 'q' => 'Ra']))->assertOk()->assertExactJson([]);
+
+    $this->actingAs(userWithRole(UserRole::Mahasiswa))->getJson(route('research.people', ['jenis' => 'mahasiswa', 'q' => 'Rahmat']))->assertForbidden();
 });
 
 it('keeps lecturers away from works of other lecturers', function () {
@@ -228,6 +232,14 @@ it('lets LP2M and pimpinan see and export the works, but not change or verify th
     $this->actingAs($viewer)->post(route('research.works.store'), workPayload(['lecturer_id' => $this->lecturer->id]))->assertForbidden();
     $this->actingAs($viewer)->post(route('research.works.verify', $work), ['decision' => 'verified'])->assertForbidden();
 })->with([UserRole::Lp2m, UserRole::Pimpinan]);
+
+it('limits LP2M to research data, without Monev reports or master data', function () {
+    $lp2m = userWithRole(UserRole::Lp2m);
+
+    $this->actingAs($lp2m)->get(route('reports.index'))->assertForbidden();
+    $this->actingAs($lp2m)->get(route('reports.monev.responses'))->assertForbidden();
+    $this->actingAs($lp2m)->get(route('lecturers.index'))->assertForbidden();
+});
 
 it('credits shared works to every lecturer involved without counting them twice', function () {
     $year = now()->year;

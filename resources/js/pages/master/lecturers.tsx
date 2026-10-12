@@ -85,7 +85,9 @@ export default function Lecturers({ lecturers, filters, studyPrograms, ranks, ca
                     </Avatar>
                     <div className="min-w-0">
                         <div className="truncate font-semibold">{row.full_name}</div>
-                        <div className="text-xs text-muted-foreground">{row.nidn ? `NIDN ${row.nidn}` : row.nuptk ? `NUPTK ${row.nuptk}` : 'NIDN —'}</div>
+                        <div className="text-xs text-muted-foreground tabular">
+                            NIDN {row.nidn ?? '—'} · NUPTK {row.nuptk ?? <span className="text-gold-foreground">belum diisi</span>}
+                        </div>
                     </div>
                 </div>
             ),

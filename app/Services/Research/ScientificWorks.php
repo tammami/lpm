@@ -243,11 +243,12 @@ class ScientificWorks
      *
      * @return list<array{id: int, title: string, lecturer: ?string, status_label: string}>
      */
-    public function possibleDuplicates(ScientificWork $work): array
+    public function possibleDuplicates(ScientificWork $work, User $user): array
     {
         $title = self::normalizedTitle($work->title);
 
         return ScientificWork::query()
+            ->visibleTo($user)
             ->whereKeyNot($work->id)
             ->where(fn (Builder $query) => $query
                 ->when($work->doi, fn (Builder $q) => $q->orWhere('doi', $work->doi))
