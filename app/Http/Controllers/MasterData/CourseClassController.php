@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\CourseClass;
 use App\Models\Student;
 use App\Models\TeachingAssignment;
+use App\Models\User;
 use App\Services\AuditLogger;
 use App\Support\Options;
 use Illuminate\Database\Eloquent\Builder;
@@ -69,6 +70,7 @@ class CourseClassController extends Controller
             'courses' => Course::query()->visibleTo($user)->where('is_active', true)->orderBy('code')->get(['id', 'code', 'name', 'study_program_id'])
                 ->map(fn (Course $course): array => ['value' => $course->id, 'label' => "{$course->code} — {$course->name}", 'study_program_id' => $course->study_program_id])->all(),
             'lecturers' => Options::lecturers($user, scoped: false),
+            'cohorts' => $this->cohorts($user),
             'canManage' => $user->can('master.manage'),
         ]);
     }
@@ -121,7 +123,8 @@ class CourseClassController extends Controller
     {
         $validated = $this->validated($request);
         $lecturerIds = $validated['lecturer_ids'] ?? [];
-        unset($validated['lecturer_ids']);
+        $entryYear = $validated['entry_year'] ?? null;
+        unset($validated['lecturer_ids'], $validated['entry_year'], $validated['study_program_id']);
 
         $class = CourseClass::query()->create($validated);
 
@@ -129,7 +132,12 @@ class CourseClassController extends Controller
             $class->teachingAssignments()->create(['lecturer_id' => $lecturerId, 'role' => $index === 0 ? 'koordinator' : 'anggota']);
         }
 
-        $this->toast('Kelas berhasil dibuat. Tambahkan mahasiswa melalui halaman detail kelas.');
+        if ($entryYear !== null) {
+            $added = $this->enrollCohort($class, (int) $entryYear);
+            $this->toast("Kelas berhasil dibuat. {$added} mahasiswa angkatan {$entryYear} langsung ditambahkan sebagai peserta.");
+        } else {
+            $this->toast('Kelas berhasil dibuat. Tambahkan mahasiswa melalui halaman detail kelas.');
+        }
 
         return redirect()->route('classes.show', $class);
     }
@@ -199,23 +207,17 @@ class CourseClassController extends Controller
         ]);
 
         if ($validated['mode'] === 'cohort') {
-            $students = Student::query()
-                ->where('study_program_id', $class->course->study_program_id)
-                ->where('entry_year', $validated['entry_year'])
-                ->where('status', 'aktif')
-                ->pluck('id');
+            $added = $this->enrollCohort($class, (int) $validated['entry_year']);
             $missing = [];
         } else {
             $nims = collect(preg_split('/[\s,;]+/', (string) $validated['nims']))->filter()->unique()->values();
             $found = Student::query()->whereIn('nim', $nims)->pluck('id', 'nim');
-            $students = $found->values();
             $missing = $nims->diff($found->keys())->values()->all();
+
+            $result = $class->students()->syncWithoutDetaching($found->values()->all());
+            $added = count($result['attached']);
+            AuditLogger::log('enrolled', 'master', $class, "Menambahkan {$added} mahasiswa ke kelas");
         }
-
-        $result = $class->students()->syncWithoutDetaching($students->all());
-        $added = count($result['attached']);
-
-        AuditLogger::log('enrolled', 'master', $class, "Menambahkan {$added} mahasiswa ke kelas");
 
         $message = "{$added} mahasiswa ditambahkan ke kelas.";
         if ($missing !== []) {
@@ -238,12 +240,57 @@ class CourseClassController extends Controller
     }
 
     /**
+     * Daftarkan seluruh mahasiswa aktif satu angkatan pada prodi pemilik mata kuliah.
+     *
+     * @return int Jumlah mahasiswa yang baru ditambahkan
+     */
+    private function enrollCohort(CourseClass $class, int $entryYear): int
+    {
+        $students = Student::query()
+            ->where('study_program_id', $class->course->study_program_id)
+            ->where('entry_year', $entryYear)
+            ->where('status', 'aktif')
+            ->pluck('id');
+
+        $result = $class->students()->syncWithoutDetaching($students->all());
+        $added = count($result['attached']);
+
+        AuditLogger::log('enrolled', 'master', $class, "Menambahkan {$added} mahasiswa angkatan {$entryYear} ke kelas");
+
+        return $added;
+    }
+
+    /**
+     * Angkatan per prodi beserta jumlah mahasiswa aktif, untuk memilih peserta saat membuka kelas.
+     *
+     * @return list<array{study_program_id: int, entry_year: int, students_count: int}>
+     */
+    private function cohorts(User $user): array
+    {
+        return Student::query()
+            ->visibleTo($user)
+            ->where('status', 'aktif')
+            ->selectRaw('study_program_id, entry_year, count(*) as students_count')
+            ->groupBy('study_program_id', 'entry_year')
+            ->orderBy('study_program_id')
+            ->orderByDesc('entry_year')
+            ->get()
+            ->map(fn (Student $row): array => [
+                'study_program_id' => $row->study_program_id,
+                'entry_year' => $row->entry_year,
+                'students_count' => (int) $row->students_count,
+            ])
+            ->all();
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function validated(Request $request): array
     {
         $validated = $request->validate([
-            'course_id' => ['required', 'exists:courses,id'],
+            'study_program_id' => ['required', 'exists:study_programs,id'],
+            'course_id' => ['required', Rule::exists('courses', 'id')->where('study_program_id', $request->integer('study_program_id'))],
             'academic_period_id' => ['required', 'exists:academic_periods,id'],
             'code' => [
                 'required', 'string', 'max:10',
@@ -254,7 +301,11 @@ class CourseClassController extends Controller
             'capacity' => ['nullable', 'integer', 'min:1', 'max:500'],
             'lecturer_ids' => ['array'],
             'lecturer_ids.*' => ['integer', 'exists:lecturers,id'],
-        ], ['code.unique' => 'Kode kelas sudah dipakai untuk mata kuliah ini pada periode tersebut.']);
+            'entry_year' => ['nullable', 'integer', 'min:1990', 'max:2100'],
+        ], [
+            'code.unique' => 'Kode kelas sudah dipakai untuk mata kuliah ini pada periode tersebut.',
+            'course_id.exists' => 'Mata kuliah tidak termasuk prodi yang dipilih.',
+        ]);
 
         $this->authorizeStudyProgram($request, Course::query()->findOrFail($validated['course_id'])->study_program_id);
 

@@ -67,16 +67,24 @@ final class Options
     }
 
     /**
-     * @return list<array{value: int, label: string, study_program_id: int}>
+     * Opsi dosen beserta homebase dan nomor identitas, agar dosen bernama sama dari prodi berbeda tetap bisa dibedakan.
+     *
+     * @return list<array{value: int, label: string, description: string, study_program_id: int, study_program: string|null}>
      */
     public static function lecturers(User $user, bool $scoped = true): array
     {
-        return Lecturer::query()->when($scoped, fn ($query) => $query->visibleTo($user))->where('is_active', true)->orderBy('name')
-            ->get(['id', 'name', 'front_title', 'back_title', 'study_program_id'])
+        return Lecturer::query()->when($scoped, fn ($query) => $query->visibleTo($user))->where('is_active', true)
+            ->with('studyProgram:id,name,degree')->orderBy('name')
+            ->get(['id', 'name', 'front_title', 'back_title', 'nidn', 'nuptk', 'study_program_id'])
             ->map(fn (Lecturer $lecturer): array => [
                 'value' => $lecturer->id,
                 'label' => $lecturer->full_name,
+                'description' => implode(' · ', array_filter([
+                    $lecturer->studyProgram?->full_name,
+                    $lecturer->identifier ? ($lecturer->nidn ? 'NIDN ' : 'NUPTK ').$lecturer->identifier : null,
+                ])),
                 'study_program_id' => $lecturer->study_program_id,
+                'study_program' => $lecturer->studyProgram?->full_name,
             ])
             ->all();
     }

@@ -31,6 +31,8 @@ export interface SharedProps {
 export interface Option<T = string | number> {
     value: T;
     label: string;
+    /** Keterangan kecil di bawah label (mis. prodi & NIDN) agar opsi bernama sama tetap bisa dibedakan. */
+    description?: string;
 }
 
 export interface PaginationLink {

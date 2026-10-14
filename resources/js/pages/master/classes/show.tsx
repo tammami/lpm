@@ -27,11 +27,12 @@ interface Props {
         capacity: number | null;
         course: { id: number; code: string; name: string; credits: number; semester: number };
         study_program: string;
+        study_program_id: number;
         period: { id: number; name: string };
         assignments: { id: number; role: string; lecturer_id: number; name: string; nidn: string | null; study_program: string | null }[];
         students: { id: number; nim: string; name: string; entry_year: number; study_program: string | null }[];
     };
-    lecturers: Option[];
+    lecturers: (Option & { study_program_id: number })[];
     entryYears: Option[];
     canManage: boolean;
 }
@@ -49,7 +50,11 @@ export default function ClassShow({ courseClass, lecturers, entryYears, canManag
         return courseClass.students.filter((s) => !term || s.name.toLowerCase().includes(term) || s.nim.includes(term));
     }, [search, courseClass.students]);
 
-    const available = lecturers.filter((l) => !courseClass.assignments.some((a) => a.lecturer_id === Number(l.value)));
+    /** Dosen homebase prodi kelas ini tampil lebih dulu; dosen prodi lain tetap bisa ditambahkan. Keterangan prodi & NIDN membedakan nama yang sama. */
+    const available = lecturers
+        .filter((l) => !courseClass.assignments.some((a) => a.lecturer_id === Number(l.value)))
+        .sort((a, b) => Number(b.study_program_id === courseClass.study_program_id) - Number(a.study_program_id === courseClass.study_program_id))
+        .map((l) => ({ ...l, group: l.study_program_id === courseClass.study_program_id ? `Dosen ${courseClass.study_program}` : 'Dosen prodi lain' }));
 
     return (
         <>
@@ -109,6 +114,7 @@ export default function ClassShow({ courseClass, lecturers, entryYears, canManag
                                     <div className="truncate text-sm font-semibold">{assignment.name}</div>
                                     <div className="text-xs text-muted-foreground">
                                         {roleLabels[assignment.role] ?? assignment.role} · NIDN/NUPTK {assignment.nidn ?? '—'}
+                                        {assignment.study_program && ` · ${assignment.study_program}`}
                                     </div>
                                 </div>
                                 {canManage && (
@@ -134,7 +140,7 @@ export default function ClassShow({ courseClass, lecturers, entryYears, canManag
                                     lecturerForm.post(route('classes.lecturers.store', courseClass.id), { preserveScroll: true, onSuccess: () => lecturerForm.reset('lecturer_id') });
                                 }}
                             >
-                                <Combobox value={lecturerForm.data.lecturer_id} onChange={(v) => lecturerForm.setData('lecturer_id', v)} options={available} placeholder="Tambah dosen…" />
+                                <Combobox value={lecturerForm.data.lecturer_id} onChange={(v) => lecturerForm.setData('lecturer_id', v)} options={available} placeholder="Tambah dosen…" searchPlaceholder="Cari nama / prodi / NIDN…" />
                                 <div className="flex gap-2">
                                     <SelectField
                                         value={lecturerForm.data.role}

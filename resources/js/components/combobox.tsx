@@ -5,6 +5,18 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn, groupOptions } from '@/lib/utils';
 import type { Option } from '@/types';
 
+/** Teks yang dicocokkan saat mengetik: label, keterangan (prodi/NIDN), dan nilai. */
+const searchValue = (option: Option) => [option.label, option.description, option.value].filter(Boolean).join(' ');
+
+function OptionLabel({ option }: { option: Option }) {
+    return (
+        <span className="flex min-w-0 flex-col">
+            <span className="truncate">{option.label}</span>
+            {option.description && <span className="truncate text-[11px] text-muted-foreground">{option.description}</span>}
+        </span>
+    );
+}
+
 interface BaseProps {
     /** Opsi dengan `group` ditampilkan berkelompok di bawah judulnya. */
     options: (Option & { group?: string })[];
@@ -53,14 +65,14 @@ export function Combobox({
                                 {items.map((option) => (
                                     <CommandItem
                                         key={String(option.value)}
-                                        value={`${option.label} ${option.value}`}
+                                        value={searchValue(option)}
                                         onSelect={() => {
                                             onChange(String(option.value));
                                             setOpen(false);
                                         }}
                                     >
-                                        <Check className={cn('size-4', String(option.value) === String(value) ? 'opacity-100' : 'opacity-0')} />
-                                        <span className="truncate">{option.label}</span>
+                                        <Check className={cn('size-4 shrink-0', String(option.value) === String(value) ? 'opacity-100' : 'opacity-0')} />
+                                        <OptionLabel option={option} />
                                     </CommandItem>
                                 ))}
                             </CommandGroup>
@@ -102,19 +114,21 @@ export function MultiCombobox({
                         <CommandInput placeholder={searchPlaceholder} />
                         <CommandList>
                             <CommandEmpty>{emptyText}</CommandEmpty>
-                            <CommandGroup>
-                                {options.map((option) => {
-                                    const active = current.includes(String(option.value));
-                                    return (
-                                        <CommandItem key={String(option.value)} value={`${option.label} ${option.value}`} onSelect={() => toggle(String(option.value))}>
-                                            <span className={cn('flex size-4 items-center justify-center rounded border', active ? 'border-primary bg-primary text-primary-foreground' : 'border-input')}>
-                                                {active && <Check className="size-3" />}
-                                            </span>
-                                            <span className="truncate">{option.label}</span>
-                                        </CommandItem>
-                                    );
-                                })}
-                            </CommandGroup>
+                            {groupOptions(options).map(({ group, items }) => (
+                                <CommandGroup key={group ?? ''} heading={group ?? undefined}>
+                                    {items.map((option) => {
+                                        const active = current.includes(String(option.value));
+                                        return (
+                                            <CommandItem key={String(option.value)} value={searchValue(option)} onSelect={() => toggle(String(option.value))}>
+                                                <span className={cn('flex size-4 shrink-0 items-center justify-center rounded border', active ? 'border-primary bg-primary text-primary-foreground' : 'border-input')}>
+                                                    {active && <Check className="size-3" />}
+                                                </span>
+                                                <OptionLabel option={option} />
+                                            </CommandItem>
+                                        );
+                                    })}
+                                </CommandGroup>
+                            ))}
                         </CommandList>
                     </Command>
                 </PopoverContent>
@@ -124,7 +138,8 @@ export function MultiCombobox({
                     {selected.map((option, index) => (
                         <span key={String(option.value)} className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
                             {index === 0 && firstLabel && <span className="rounded bg-primary px-1 text-[11px] text-primary-foreground">{firstLabel}</span>}
-                            {option.label}
+                            <span title={option.description}>{option.label}</span>
+                            {option.description && <span className="font-normal text-muted-foreground">· {option.description}</span>}
                             <button type="button" onClick={() => toggle(String(option.value))} className="opacity-60 hover:opacity-100" aria-label={`Hapus ${option.label}`}>
                                 <X className="size-3" />
                             </button>
