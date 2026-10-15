@@ -72,9 +72,9 @@ export default function ImportShow({ job, columns, preview, errors, errorCount }
             )}
             {running && (
                 <Alert className="mb-6 border-info/30 bg-info-soft">
-                    <LoaderCircle className="animate-spin text-info" />
-                    <AlertTitle className="text-info">{importStatusLabels[job.status]}…</AlertTitle>
-                    <AlertDescription className="text-info">{formatNumber(job.imported_rows)} baris telah diproses. Halaman diperbarui otomatis.</AlertDescription>
+                    <LoaderCircle className="animate-spin text-info-foreground" />
+                    <AlertTitle className="text-info-foreground">{importStatusLabels[job.status]}…</AlertTitle>
+                    <AlertDescription className="text-info-foreground">{formatNumber(job.imported_rows)} baris telah diproses. Halaman diperbarui otomatis.</AlertDescription>
                 </Alert>
             )}
             {job.status === 'completed' && job.result && (
@@ -122,7 +122,7 @@ export default function ImportShow({ job, columns, preview, errors, errorCount }
                 <Card className="mt-6 gap-0 overflow-hidden pb-0">
                     <CardHeader className="flex flex-row items-start justify-between pb-4">
                         <div>
-                            <CardTitle className="text-destructive">Kesalahan validasi ({formatNumber(errorCount)})</CardTitle>
+                            <CardTitle className="text-danger-foreground">Kesalahan validasi ({formatNumber(errorCount)})</CardTitle>
                             <CardDescription>Nomor baris sesuai baris pada file Excel.</CardDescription>
                         </div>
                         <Button variant="outline" size="sm" asChild>
@@ -147,7 +147,7 @@ export default function ImportShow({ job, columns, preview, errors, errorCount }
                                         <TableCell className="px-6 font-mono text-xs font-bold">Row {error.row_number}</TableCell>
                                         <TableCell className="text-xs">{error.column ? labelFor(error.column) : '—'}</TableCell>
                                         <TableCell className="font-mono text-xs text-muted-foreground">{error.value ?? '—'}</TableCell>
-                                        <TableCell className="text-[13px] font-medium text-destructive">{error.message}</TableCell>
+                                        <TableCell className="text-[13px] font-medium text-danger-foreground">{error.message}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -162,7 +162,7 @@ export default function ImportShow({ job, columns, preview, errors, errorCount }
                         <CardTitle>Pratinjau data</CardTitle>
                         <CardDescription>{preview.rows.length} baris pertama.</CardDescription>
                     </CardHeader>
-                    <div className="overflow-x-auto">
+                    <div className="relative overflow-x-auto outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset" tabIndex={0} role="region" aria-label="Pratinjau data impor">
                         <Table>
                             <TableHeader>
                                 <TableRow className="bg-muted/50">
@@ -181,7 +181,7 @@ export default function ImportShow({ job, columns, preview, errors, errorCount }
                                             <span
                                                 className={cn(
                                                     'rounded-md px-1.5 py-0.5 text-[11px] font-semibold',
-                                                    row.status === 'invalid' ? 'bg-destructive/10 text-destructive' : row.status === 'existing' ? 'bg-gold-soft text-gold-foreground' : 'bg-secondary text-secondary-foreground',
+                                                    row.status === 'invalid' ? 'bg-destructive/10 text-danger-foreground' : row.status === 'existing' ? 'bg-gold-soft text-gold-foreground' : 'bg-secondary text-secondary-foreground',
                                                 )}
                                             >
                                                 {row.status === 'invalid' ? 'Error' : row.status === 'existing' ? 'Sudah ada' : 'Baru'}

@@ -19,13 +19,15 @@ export function Heatmap({ sections, rows, min, max, onSelectRow, format = format
     const step = (value: number) => Math.min(ramp.length - 1, Math.max(0, Math.floor(((value - min) / (max - min)) * ramp.length)));
 
     return (
-        <div className="overflow-x-auto">
+        <div className="relative overflow-x-auto rounded-lg focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none" tabIndex={0} role="region" aria-label="Peta skor (geser ke samping bila perlu)">
             <table className="w-full border-separate border-spacing-[3px] text-xs">
                 <thead>
                     <tr>
-                        <th className="w-48 px-2 text-left font-semibold text-muted-foreground" />
+                        <th scope="col" className="w-48 px-2 text-left font-semibold text-muted-foreground">
+                            <span className="sr-only">Nama</span>
+                        </th>
                         {sections.map((section) => (
-                            <th key={section.code} className="px-1 pb-1 text-center font-bold text-muted-foreground" title={section.title}>
+                            <th key={section.code} scope="col" className="px-1 pb-1 text-center font-bold text-muted-foreground" title={section.title}>
                                 {section.code}
                                 <div className="truncate text-[11px] font-medium">{section.title.split(' ')[0]}</div>
                             </th>
@@ -35,9 +37,9 @@ export function Heatmap({ sections, rows, min, max, onSelectRow, format = format
                 <tbody>
                     {rows.map((row) => (
                         <tr key={row.id}>
-                            <th className="max-w-48 truncate px-2 text-left font-semibold">
+                            <th scope="row" className="max-w-48 truncate px-2 text-left font-semibold">
                                 {onSelectRow ? (
-                                    <button type="button" onClick={() => onSelectRow(row.id)} className="truncate hover:text-primary">
+                                    <button type="button" onClick={() => onSelectRow(row.id)} className="min-h-6 truncate rounded hover:text-primary focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none">
                                         {row.name}
                                     </button>
                                 ) : (
@@ -54,7 +56,7 @@ export function Heatmap({ sections, rows, min, max, onSelectRow, format = format
                                         className={cn(
                                             'h-10 min-w-14 rounded-md text-center font-bold tabular transition hover:ring-2 hover:ring-foreground/20',
                                             level < 0 ? 'bg-muted text-muted-foreground' : ramp[level],
-                                            level >= 3 ? 'text-white' : 'text-foreground',
+                                            level >= 4 ? 'text-white' : level >= 2 ? 'text-seq-ink' : 'text-foreground',
                                         )}
                                     >
                                         {format(value)}

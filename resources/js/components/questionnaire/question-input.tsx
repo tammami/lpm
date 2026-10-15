@@ -120,7 +120,7 @@ function LikertInput({ question, value, onChange, disabled }: { question: Questi
                             count % 2 === 1 && index === count - 1 && 'col-span-2 sm:col-span-1',
                         )}
                     >
-                        <span className={cn('text-lg leading-none font-extrabold tabular', selected ? 'text-gold' : 'text-primary/80')}>{option.value}</span>
+                        <span className={cn('text-lg leading-none font-extrabold tabular', selected ? 'text-gold-foreground' : 'text-primary/80')}>{option.value}</span>
                         <span className={cn('text-[12px] leading-tight font-semibold', selected ? 'text-primary-foreground' : 'text-foreground/80')}>{option.label}</span>
                     </button>
                 );
@@ -229,7 +229,7 @@ function RatingInput({ max, value, onChange, disabled }: { max: number; value?: 
                     onClick={() => onChange(star)}
                     className="rounded-md p-1 transition hover:scale-110"
                 >
-                    <Star className={cn('size-8', value && star <= value ? 'fill-gold text-gold' : 'text-muted-foreground/30')} />
+                    <Star className={cn('size-8', value && star <= value ? 'fill-gold text-gold-foreground' : 'text-muted-foreground/60')} />
                 </button>
             ))}
             {value ? <span className="ml-2 text-sm font-semibold text-muted-foreground tabular">{value}/{max}</span> : null}

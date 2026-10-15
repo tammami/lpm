@@ -113,7 +113,7 @@ export function EvidenceUploadDialog({ onClose, mapTo, categories, units, period
                                     }}
                                 />
                             </label>
-                            {sourceError && <p className="mt-1.5 text-xs font-medium text-destructive">{sourceError}</p>}
+                            {sourceError && <p className="mt-1.5 text-xs font-medium text-danger-foreground">{sourceError}</p>}
                         </TabsContent>
                         <TabsContent value="link">
                             <FormField error={form.errors.url} hint="Mis. tautan Google Drive/OneDrive/SIAKAD yang dapat diakses tim mutu.">

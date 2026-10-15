@@ -60,7 +60,7 @@ export default function AuditsIndex({ audits, filters, statuses, programs, isAud
             header: 'Temuan',
             cell: (row) => (
                 <span className="text-xs">
-                    <b>{row.findings_count}</b> {row.open_findings_count > 0 && <span className="text-destructive">({row.open_findings_count} terbuka)</span>}
+                    <b>{row.findings_count}</b> {row.open_findings_count > 0 && <span className="text-danger-foreground">({row.open_findings_count} terbuka)</span>}
                 </span>
             ),
         },

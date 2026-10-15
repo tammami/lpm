@@ -163,9 +163,9 @@ export default function InstrumentBuilder(props: Props) {
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[220px_minmax(0,1fr)_320px]">
                 {/* Outline */}
-                <aside className="hidden xl:block">
+                <aside aria-label="Struktur instrumen" className="hidden xl:block">
                     <div className="sticky top-24 flex flex-col gap-1">
-                        <div className="px-2 pb-2 text-[11px] font-bold tracking-wider text-muted-foreground uppercase">Struktur</div>
+                        <div className="px-2 pb-2 text-[11px] font-bold text-muted-foreground">Struktur</div>
                         {sections.map((section) => (
                             <a key={section.id} href={`#section-${section.id}`} className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-muted">
                                 <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-secondary text-[11px] font-bold text-secondary-foreground">{section.code}</span>
@@ -210,7 +210,7 @@ export default function InstrumentBuilder(props: Props) {
                                         <ConfirmDialog
                                             trigger={
                                                 <Button variant="ghost" size="icon-sm" aria-label="Hapus bagian">
-                                                    <Trash2 className="text-destructive" />
+                                                    <Trash2 className="text-danger-foreground" />
                                                 </Button>
                                             }
                                             title={`Hapus bagian ${section.code}?`}
@@ -251,7 +251,7 @@ export default function InstrumentBuilder(props: Props) {
                                                 <ConfirmDialog
                                                     trigger={
                                                         <Button variant="ghost" size="icon-sm" aria-label="Hapus butir">
-                                                            <Trash2 className="text-destructive" />
+                                                            <Trash2 className="text-danger-foreground" />
                                                         </Button>
                                                     }
                                                     title={`Hapus butir ${question.code}?`}
@@ -285,7 +285,7 @@ export default function InstrumentBuilder(props: Props) {
                 </div>
 
                 {/* Settings */}
-                <aside className="flex flex-col gap-5">
+                <aside aria-label="Pengaturan dan riwayat versi" className="flex flex-col gap-5">
                     <div className="grid grid-cols-3 gap-2">
                         <Stat label="Bagian" value={sections.length} />
                         <Stat label="Butir" value={totalQuestions} />
@@ -321,7 +321,7 @@ export default function InstrumentBuilder(props: Props) {
                             {version.status === 'draft' && versions.length > 1 && can.manage && (
                                 <ConfirmDialog
                                     trigger={
-                                        <Button variant="ghost" size="sm" className="mt-2 justify-start text-destructive">
+                                        <Button variant="ghost" size="sm" className="mt-2 justify-start text-danger-foreground">
                                             <Trash2 /> Hapus draf ini
                                         </Button>
                                     }
@@ -359,7 +359,7 @@ export default function InstrumentBuilder(props: Props) {
 function VersionSwitcher({ current, versions }: { current: BuilderVersion; versions: Props['versions'] }) {
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex items-center gap-1.5 rounded-full bg-card px-2.5 py-0.5 text-xs font-semibold ring-1 ring-border hover:bg-muted">
+            <DropdownMenuTrigger className="inline-flex min-h-7 items-center gap-1.5 rounded-full bg-card px-3 py-1 text-xs font-semibold ring-1 ring-border hover:bg-muted">
                 <span className={cn('size-1.5 rounded-full', current.status === 'published' ? 'bg-success' : current.status === 'draft' ? 'bg-muted-foreground' : 'bg-info')} />
                 v{current.version} · {current.status_label}
                 <ChevronDown className="size-3" />

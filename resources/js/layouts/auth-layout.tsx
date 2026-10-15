@@ -14,7 +14,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
     return (
         <div className="grid grid-cols-1 min-h-svh lg:grid-cols-[1.05fr_1fr]">
-            <section className="relative hidden overflow-hidden bg-hero text-white lg:flex lg:flex-col">
+            <aside aria-label={`Tentang SIMUTU ${app.institution_short}`} className="relative hidden overflow-hidden bg-hero text-white lg:flex lg:flex-col">
                 <div className="bg-pattern-star absolute inset-0 opacity-60" />
                 <div className="absolute -top-40 -right-40 size-[520px] rounded-full bg-primary/40 blur-3xl" />
                 <div className="absolute -bottom-48 -left-24 size-[420px] rounded-full bg-hero-shade/40 blur-3xl" />
@@ -24,9 +24,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
 
                     <div className="max-w-lg">
                         <LogoMark variant="seal" label={`Lambang ${app.institution}`} className="mb-7 size-28 drop-shadow-seal" />
-                        <h1 className="text-4xl leading-[1.12] font-extrabold tracking-tight">
+                        <p className="text-4xl leading-[1.12] font-extrabold tracking-tight">
                             Platform Digital Penjaminan Mutu <span className="whitespace-nowrap text-hero-accent">{app.institution_short}</span>
-                        </h1>
+                        </p>
                         <p className="mt-4 text-[16px] leading-relaxed text-white/85">
                             Dari pengumpulan data hingga bukti akreditasi — satu siklus mutu yang terukur, terlacak, dan berkelanjutan.
                         </p>
@@ -48,9 +48,9 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                         © {new Date().getFullYear()} {app.institution}
                     </p>
                 </div>
-            </section>
+            </aside>
 
-            <section className="flex flex-col items-center justify-center px-5 py-10 sm:px-10">
+            <main className="flex flex-col items-center justify-center px-5 py-10 sm:px-10">
                 <div className="mb-8 flex flex-col items-center gap-3 text-center lg:hidden">
                     <LogoMark variant="seal" label={`Lambang ${app.institution}`} className="size-20" />
                     <div>
@@ -59,7 +59,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                     </div>
                 </div>
                 <div className="w-full max-w-[440px] rounded-3xl border border-white/80 surface-glass p-6 sm:p-9">{children}</div>
-            </section>
+            </main>
         </div>
     );
 }

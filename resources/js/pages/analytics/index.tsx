@@ -115,8 +115,8 @@ function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, thresh
             />
 
             <div className="mb-6 flex flex-col gap-2 rounded-2xl border bg-card p-3 sm:flex-row sm:items-center">
-                <span className="px-1 text-xs font-bold tracking-wide text-muted-foreground uppercase">Filter</span>
-                <SelectField value={String(filters.survey)} onChange={(v) => navigate({ survey: v, study_program_id: undefined })} options={surveys} className="sm:w-96" />
+                <span className="px-1 text-xs font-bold text-muted-foreground">Filter</span>
+                <SelectField label="Kegiatan Monev" value={String(filters.survey)} onChange={(v) => navigate({ survey: v, study_program_id: undefined })} options={surveys} className="sm:w-96" />
                 <SelectField value={filters.study_program_id ?? 'all'} onChange={(v) => navigate({ study_program_id: v === 'all' ? undefined : v })} options={studyPrograms} allLabel="Seluruh cakupan saya" className="sm:w-72" />
                 {survey.status === 'active' && (
                     <span className="inline-flex items-center gap-1.5 text-xs text-gold-foreground sm:ml-auto">
@@ -139,7 +139,7 @@ function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, thresh
                 </div>
                 <StatTile label="Respons masuk" value={formatNumber(summary.responses)} icon={ClipboardCheck} tone="gold" hint={`dari ${formatNumber(progress.eligible)} responden eligible (seluruh cakupan)`} />
                 <StatTile label="Response rate" value={formatPercent(progress.rate)} icon={Users} tone="info">
-                    <Meter value={progress.rate} />
+                    <Meter label="Response rate" value={progress.rate} />
                 </StatTile>
                 <StatTile
                     label="Perlu perhatian"
@@ -199,7 +199,7 @@ function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, thresh
                 <CardHeader>
                     <CardTitle>Analisis per indikator</CardTitle>
                     <CardDescription>
-                        Skor rata-rata dan sebaran jawaban setiap butir. {lowQuestions.length > 0 && <b className="text-destructive">{lowQuestions.length} butir di bawah ambang.</b>}
+                        Skor rata-rata dan sebaran jawaban setiap butir. {lowQuestions.length > 0 && <b className="text-danger-foreground">{lowQuestions.length} butir di bawah ambang.</b>}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -207,7 +207,7 @@ function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, thresh
                         {bySection.map((section) => (
                             <div key={section.id} className="rounded-xl border p-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-xs font-extrabold text-gold">{section.code}</span>
+                                    <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-xs font-extrabold text-gold-foreground">{section.code}</span>
                                     <span className="text-lg font-extrabold tabular">{formatScore(section.score)}</span>
                                 </div>
                                 <div className="mt-2 truncate text-xs font-semibold text-muted-foreground">{section.title}</div>
@@ -243,7 +243,7 @@ function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, thresh
                         {comments.length === 0 && <p className="text-sm text-muted-foreground">Belum ada komentar.</p>}
                         {comments.map((comment, index) => (
                             <figure key={index} className="relative rounded-xl bg-muted/50 py-3 pr-4 pl-10">
-                                <Quote className="absolute top-3.5 left-3.5 size-4 fill-gold/30 text-gold" aria-hidden="true" />
+                                <Quote className="absolute top-3.5 left-3.5 size-4 fill-gold/30 text-gold-foreground" aria-hidden="true" />
                                 <blockquote className="text-[13px] leading-relaxed">{comment.text}</blockquote>
                                 <figcaption className="mt-1 text-[11px] text-muted-foreground">{comment.question}</figcaption>
                             </figure>

@@ -105,7 +105,7 @@ export default function SurveysIndex({ surveys, filters, statuses, periods, mode
                                         )}
                                         <span className="font-mono text-[11px] text-muted-foreground">{survey.code}</span>
                                     </div>
-                                    <h3 className="mt-2 truncate text-[16px] font-bold group-hover:text-primary">{survey.title}</h3>
+                                    <h2 className="mt-2 truncate text-[16px] font-bold group-hover:text-primary">{survey.title}</h2>
                                     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                                         <span>
                                             {survey.instrument} v{survey.instrument_version}
@@ -129,7 +129,7 @@ export default function SurveysIndex({ surveys, filters, statuses, periods, mode
                                             </span>
                                         </span>
                                     </div>
-                                    <Meter value={survey.progress.rate} />
+                                    <Meter label="Response rate" value={survey.progress.rate} />
                                 </div>
                             </Link>
                         );

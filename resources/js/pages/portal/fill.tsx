@@ -86,7 +86,7 @@ export default function PortalFill({ survey, target, reopenReason, sections }: P
             </Link>
 
             <section className="rounded-3xl border bg-card p-5">
-                <div className="text-xs font-semibold tracking-wide text-primary uppercase">{survey.title}</div>
+                <div className="text-xs font-semibold text-primary">{survey.title}</div>
                 {target.course ? (
                     <>
                         <h1 className="mt-1 text-xl leading-snug font-extrabold">{target.course}</h1>
@@ -125,7 +125,7 @@ export default function PortalFill({ survey, target, reopenReason, sections }: P
                     </span>
                     <span className="tabular">{percent}%</span>
                 </div>
-                <Progress value={percent} className="h-1.5" />
+                <Progress value={percent} aria-label="Progres pengisian pertanyaan wajib" className="h-1.5" />
             </div>
 
             <div className="mt-5">

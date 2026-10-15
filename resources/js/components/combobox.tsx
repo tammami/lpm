@@ -1,5 +1,6 @@
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import { useState } from 'react';
+import { useFormFieldControl } from '@/components/form-field';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn, groupOptions } from '@/lib/utils';
@@ -25,6 +26,8 @@ interface BaseProps {
     emptyText?: string;
     className?: string;
     invalid?: boolean;
+    /** Nama aksesibel bila tidak berada di dalam FormField berlabel. */
+    ariaLabel?: string;
 }
 
 export function Combobox({
@@ -36,8 +39,11 @@ export function Combobox({
     emptyText = 'Tidak ditemukan.',
     className,
     invalid,
+    ariaLabel,
 }: BaseProps & { value: string | number | null | undefined; onChange: (value: string) => void }) {
     const [open, setOpen] = useState(false);
+    // Tombol tidak mendukung aria-required; status wajib sudah tersampaikan lewat label field.
+    const { 'aria-required': _required, ...field } = useFormFieldControl({ 'aria-invalid': invalid });
     const selected = options.find((option) => String(option.value) === String(value ?? ''));
 
     return (
@@ -45,7 +51,10 @@ export function Combobox({
             <PopoverTrigger asChild>
                 <button
                     type="button"
-                    aria-invalid={invalid}
+                    {...field}
+                    aria-label={ariaLabel}
+                    aria-expanded={open}
+                    aria-haspopup="listbox"
                     className={cn(
                         'flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 text-left text-sm shadow-xs outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive',
                         className,
@@ -95,6 +104,7 @@ export function MultiCombobox({
     firstLabel,
 }: BaseProps & { values: (string | number)[]; onChange: (values: string[]) => void; firstLabel?: string }) {
     const [open, setOpen] = useState(false);
+    const { 'aria-required': _required, ...field } = useFormFieldControl();
     const current = values.map(String);
     const selected = options.filter((option) => current.includes(String(option.value)));
 
@@ -104,7 +114,11 @@ export function MultiCombobox({
         <div className={cn('flex flex-col gap-2', className)}>
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
-                    <button type="button" className="flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 text-left text-sm shadow-xs">
+                    <button
+                        type="button"
+                        {...field}
+                        className="flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 text-left text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/80"
+                    >
                         <span className="text-muted-foreground">{selected.length ? `${selected.length} dipilih` : placeholder}</span>
                         <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
                     </button>

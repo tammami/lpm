@@ -28,7 +28,7 @@ export function FormDialog({ open, onOpenChange, title, description, onSubmit, p
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className={cn('max-h-[92svh] gap-0 overflow-hidden p-0', sizes[size])}>
                 <form onSubmit={submit} className="flex max-h-[92svh] flex-col">
-                    <DialogHeader className="border-b px-6 pt-6 pb-4">
+                    <DialogHeader className="border-b pt-6 pr-14 pb-4 pl-6">
                         <DialogTitle className="text-lg font-bold">{title}</DialogTitle>
                         {description ? <DialogDescription>{description}</DialogDescription> : <DialogDescription className="sr-only">{title}</DialogDescription>}
                     </DialogHeader>

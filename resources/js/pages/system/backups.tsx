@@ -84,7 +84,7 @@ export default function Backups({ backups, directory, database, keepFiles, canRe
                     </Button>
                     <ConfirmDialog
                         trigger={
-                            <Button variant="ghost" size="sm" className="text-destructive" aria-label={`Hapus ${row.name}`}>
+                            <Button variant="ghost" size="sm" className="text-danger-foreground" aria-label={`Hapus ${row.name}`}>
                                 <Trash2 />
                             </Button>
                         }

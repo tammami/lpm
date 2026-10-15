@@ -35,6 +35,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     return (
         <div className="flex min-h-svh">
             <aside
+                aria-label="Menu samping"
                 className={cn(
                     'sticky top-0 hidden h-svh shrink-0 transition-[width] duration-200 lg:block',
                     collapsed ? 'w-[76px]' : 'w-[272px]',

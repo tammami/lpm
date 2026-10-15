@@ -136,7 +136,7 @@ export function QuestionEditor({ open, onClose, question, sectionId, sections, q
                                         </DropdownMenu>
                                     )}
                                 </div>
-                                <div className="grid grid-cols-[16px_1fr_72px_72px_32px] items-center gap-2 px-1 pb-1 text-[11px] font-semibold text-muted-foreground uppercase">
+                                <div className="grid grid-cols-[16px_1fr_72px_72px_32px] items-center gap-2 px-1 pb-1 text-[11px] font-semibold text-muted-foreground">
                                     <span />
                                     <span>Label</span>
                                     <span>Nilai</span>

@@ -101,7 +101,7 @@ export default function RecommendationsIndex({ recommendations, filters, statuse
                         <span>{row.plans_count ?? 0} rencana</span>
                         <span className="tabular">{row.progress ?? 0}%</span>
                     </div>
-                    <Meter value={row.progress ?? 0} severity="good" size="sm" />
+                    <Meter label="Progres rencana aksi" value={row.progress ?? 0} severity="good" size="sm" />
                 </div>
             ),
         },
@@ -112,7 +112,7 @@ export default function RecommendationsIndex({ recommendations, filters, statuse
             cell: (row) => (
                 <div className="text-xs">
                     <div className="max-w-44 truncate font-medium">{row.pic ?? '—'}</div>
-                    <div className={row.overdue ? 'font-semibold text-destructive' : 'text-muted-foreground'}>{formatDate(row.due_date)}</div>
+                    <div className={row.overdue ? 'font-semibold text-danger-foreground' : 'text-muted-foreground'}>{formatDate(row.due_date)}</div>
                 </div>
             ),
         },

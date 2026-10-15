@@ -14,6 +14,7 @@ import {
     FolderArchive,
     GraduationCap,
     LayoutDashboard,
+    LifeBuoy,
     type LucideIcon,
     Settings2,
     ShieldCheck,
@@ -155,6 +156,10 @@ export const navigation: NavGroup[] = [
             { title: 'Log Audit', icon: Activity, route: 'audit-logs.index', match: 'audit-logs.*', permission: 'audit_logs.view' },
             { title: 'Cadangan Database', icon: DatabaseBackup, route: 'backups.index', match: 'backups.*', permission: 'backups.manage' },
         ],
+    },
+    {
+        label: 'Bantuan',
+        items: [{ title: 'Panduan Penggunaan', icon: LifeBuoy, route: 'guide.index', match: 'guide.*' }],
     },
 ];
 

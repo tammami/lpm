@@ -28,6 +28,8 @@ interface Props<T> {
     onRowClick?: (row: T) => void;
     toolbar?: ReactNode;
     className?: string;
+    /** Nama area tabel untuk pembaca layar. */
+    label?: string;
 }
 
 /**
@@ -46,6 +48,7 @@ export function DataTable<T>({
     onRowClick,
     toolbar,
     className,
+    label = 'Tabel data',
 }: Props<T>) {
     const [sortKey, sortDir] = sort?.startsWith('-') ? [sort.slice(1), 'desc'] : [sort, 'asc'];
 
@@ -60,17 +63,22 @@ export function DataTable<T>({
             {data.length === 0 ? (
                 <EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} />
             ) : (
-                <div className="overflow-x-auto">
-                    <Table>
+                <div className="relative overflow-x-auto">
+                    <Table aria-label={label}>
                         <TableHeader>
                             <TableRow className="bg-white/40 hover:bg-white/40">
                                 {columns.map((column) => (
                                     <TableHead
                                         key={column.key}
-                                        className={cn('h-11 px-4 text-[12px] font-bold tracking-wide text-muted-foreground uppercase', column.headerClassName)}
+                                        aria-sort={column.sortable && onSort ? (sortKey === column.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none') : undefined}
+                                        className={cn('h-11 px-4 text-[12px] font-bold text-muted-foreground', column.headerClassName)}
                                     >
                                         {column.sortable && onSort ? (
-                                            <button type="button" onClick={() => toggleSort(column.key)} className="-ml-1 inline-flex items-center gap-1 rounded px-1 tracking-wide uppercase hover:text-foreground">
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleSort(column.key)}
+                                                className="-ml-1 inline-flex min-h-8 items-center gap-1 rounded-md px-1 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none"
+                                            >
                                                 {column.header}
                                                 {sortKey === column.key ? (
                                                     sortDir === 'asc' ? <ArrowUp className="size-3.5" /> : <ArrowDown className="size-3.5" />
@@ -78,6 +86,8 @@ export function DataTable<T>({
                                                     <ArrowUpDown className="size-3.5 opacity-40" />
                                                 )}
                                             </button>
+                                        ) : column.header === '' ? (
+                                            <span className="sr-only">Aksi</span>
                                         ) : (
                                             column.header
                                         )}
@@ -90,7 +100,20 @@ export function DataTable<T>({
                                 <TableRow
                                     key={rowKey ? rowKey(row) : index}
                                     onClick={onRowClick ? () => onRowClick(row) : undefined}
-                                    className={cn(onRowClick && 'cursor-pointer')}
+                                    // Baris yang bisa diklik juga harus bisa dibuka lewat keyboard (Enter/Spasi).
+                                    tabIndex={onRowClick ? 0 : undefined}
+                                    onKeyDown={
+                                        onRowClick
+                                            ? (event) => {
+                                                  if (event.target !== event.currentTarget) return;
+                                                  if (event.key === 'Enter' || event.key === ' ') {
+                                                      event.preventDefault();
+                                                      onRowClick(row);
+                                                  }
+                                              }
+                                            : undefined
+                                    }
+                                    className={cn(onRowClick && 'cursor-pointer focus-visible:bg-white/70 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring')}
                                 >
                                     {columns.map((column) => (
                                         <TableCell key={column.key} className={cn('px-4 py-3 text-[14px]', column.className)}>

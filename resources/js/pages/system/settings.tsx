@@ -70,19 +70,33 @@ export default function SettingsPage({ settings }: { settings: Setting[] }) {
                                 return (
                                     <div key={setting.key} className="grid grid-cols-1 gap-3 py-4 first:pt-0 last:pb-0 sm:grid-cols-[1fr_220px] sm:items-center">
                                         <div>
-                                            <div className="text-sm font-semibold">{setting.label}</div>
-                                            {setting.help && <p className="mt-0.5 text-xs text-muted-foreground">{setting.help}</p>}
+                                            <label htmlFor={`setting-${keyOf(setting.key)}`} className="text-sm font-semibold">
+                                                {setting.label}
+                                            </label>
+                                            {setting.help && (
+                                                <p id={`setting-${keyOf(setting.key)}-help`} className="mt-0.5 text-xs text-muted-foreground">
+                                                    {setting.help}
+                                                </p>
+                                            )}
                                             {value !== setting.default && (
-                                                <button type="button" onClick={() => set(setting.key, setting.default)} className="mt-1 inline-flex items-center gap-1 text-[11px] text-primary hover:underline">
+                                                <button type="button" onClick={() => set(setting.key, setting.default)} className="mt-1 inline-flex min-h-6 items-center gap-1 rounded text-[11px] text-primary hover:underline">
                                                     <RotateCcw className="size-3" /> Kembalikan bawaan ({String(setting.default)})
                                                 </button>
                                             )}
                                         </div>
                                         <FormField error={errors[`values.${keyOf(setting.key)}`]}>
                                             {setting.type === 'boolean' ? (
-                                                <Switch checked={Boolean(value)} onCheckedChange={(v) => set(setting.key, v)} className="justify-self-end" />
+                                                <Switch
+                                                    id={`setting-${keyOf(setting.key)}`}
+                                                    aria-describedby={setting.help ? `setting-${keyOf(setting.key)}-help` : undefined}
+                                                    checked={Boolean(value)}
+                                                    onCheckedChange={(v) => set(setting.key, v)}
+                                                    className="justify-self-end"
+                                                />
                                             ) : (
                                                 <Input
+                                                    id={`setting-${keyOf(setting.key)}`}
+                                                    aria-describedby={setting.help ? `setting-${keyOf(setting.key)}-help` : undefined}
                                                     type={setting.type === 'text' ? 'text' : 'number'}
                                                     step={setting.type === 'decimal' ? '0.01' : '1'}
                                                     value={String(value ?? '')}

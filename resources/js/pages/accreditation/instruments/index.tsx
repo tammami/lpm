@@ -71,7 +71,7 @@ export default function AccreditationInstruments({ instruments, bodies }: { inst
                                     {instrument.versions.every((version) => version.periods_count === 0) && (
                                         <ConfirmDialog
                                             trigger={
-                                                <Button variant="ghost" size="icon-sm" className="text-destructive" aria-label="Hapus instrumen">
+                                                <Button variant="ghost" size="icon-sm" className="text-danger-foreground" aria-label="Hapus instrumen">
                                                     <Trash2 />
                                                 </Button>
                                             }

@@ -92,7 +92,7 @@ export default function ImportsIndex({ importers, jobs, draftVersions, maxUpload
             header: 'Baris',
             cell: (row) => (
                 <span className="text-xs text-muted-foreground tabular">
-                    {row.total_rows} total · <span className="text-primary">{row.valid_rows} valid</span> · <span className="text-destructive">{row.invalid_rows} error</span>
+                    {row.total_rows} total · <span className="text-primary">{row.valid_rows} valid</span> · <span className="text-danger-foreground">{row.invalid_rows} error</span>
                 </span>
             ),
         },
@@ -123,7 +123,7 @@ export default function ImportsIndex({ importers, jobs, draftVersions, maxUpload
                                     )}
                                 >
                                     <span className="absolute top-3 right-3 font-mono text-[11px] font-bold text-muted-foreground">{index + 1}</span>
-                                    <span className={cn('flex size-10 items-center justify-center rounded-xl', active ? 'bg-primary text-gold' : 'bg-secondary text-primary')}>
+                                    <span className={cn('flex size-10 items-center justify-center rounded-xl', active ? 'bg-primary text-gold-foreground' : 'bg-secondary text-primary')}>
                                         <Icon className="size-5" />
                                     </span>
                                     <span className="text-sm font-bold">{importer.label}</span>
@@ -135,7 +135,7 @@ export default function ImportsIndex({ importers, jobs, draftVersions, maxUpload
                     <p className="mt-3 text-xs text-muted-foreground">Urutan disarankan: Mahasiswa & Dosen → Mata Kuliah → Kelas & Dosen Pengampu → Peserta Kelas.</p>
 
                     <div className="mt-6">
-                        <h3 className="mb-3 text-sm font-bold">Riwayat impor</h3>
+                        <h2 className="mb-3 text-sm font-bold">Riwayat impor</h2>
                         <DataTable columns={columns} data={jobs.data} pagination={jobs} rowKey={(row) => row.id} emptyTitle="Belum ada riwayat impor" />
                     </div>
                 </div>
@@ -153,7 +153,7 @@ export default function ImportsIndex({ importers, jobs, draftVersions, maxUpload
                                 </a>
                             </Button>
                             <div className="rounded-xl bg-muted/50 p-3">
-                                <div className="mb-2 text-xs font-bold text-muted-foreground uppercase">Kolom</div>
+                                <div className="mb-2 text-xs font-bold text-muted-foreground">Kolom</div>
                                 <div className="flex flex-wrap gap-1.5">
                                     {current.columns.map((column) => (
                                         <span

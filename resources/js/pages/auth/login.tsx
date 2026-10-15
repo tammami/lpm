@@ -1,5 +1,5 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Eye, EyeOff, LoaderCircle, LogIn } from 'lucide-react';
+import { Eye, EyeOff, LifeBuoy, LoaderCircle, LogIn } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { FormField } from '@/components/form-field';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -21,13 +21,13 @@ export default function Login({ status }: { status?: string }) {
         <>
             <Head title="Masuk" />
             <div className="mb-8">
-                <h2 className="text-2xl font-extrabold tracking-tight">Selamat datang</h2>
+                <h1 className="text-2xl font-extrabold tracking-tight">Selamat datang</h1>
                 <p className="mt-1.5 text-sm text-muted-foreground">Masuk menggunakan email, NIM, NIDN, atau NUPTK Anda.</p>
             </div>
 
             {status && (
-                <Alert className="mb-6 border-success/30 bg-success-soft text-success">
-                    <AlertDescription className="text-success">{status}</AlertDescription>
+                <Alert className="mb-6 border-success/30 bg-success-soft text-success-foreground">
+                    <AlertDescription className="text-success-foreground">{status}</AlertDescription>
                 </Alert>
             )}
 
@@ -89,8 +89,21 @@ export default function Login({ status }: { status?: string }) {
                 </Button>
             </form>
 
-            <p className="mt-8 text-center text-xs leading-relaxed text-muted-foreground">
-                Kesulitan masuk? Hubungi admin LPM atau admin program studi Anda.
+            <Link
+                href={route('guide.index', { kategori: 'akun' })}
+                className="mt-6 flex items-center gap-3 rounded-2xl border border-gold/45 bg-linear-to-r from-gold-soft to-white/70 p-3.5 text-left transition hover:border-gold focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:outline-none"
+            >
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/80 text-gold-foreground shadow-soft">
+                    <LifeBuoy className="size-5" aria-hidden="true" />
+                </span>
+                <span className="min-w-0">
+                    <span className="block text-sm font-bold text-gold-foreground">Panduan masuk & lupa kata sandi</span>
+                    <span className="block text-xs text-muted-foreground">Username apa yang dipakai? Kata sandi awal? Baca di sini.</span>
+                </span>
+            </Link>
+
+            <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
+                Masih kesulitan? Hubungi admin LPM atau admin program studi Anda.
                 <br />
                 Data evaluasi Anda dijaga kerahasiaannya.
             </p>

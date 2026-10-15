@@ -47,7 +47,7 @@ export default function ProgramShow({ program, audits, statuses, periods, canMan
                 actions={
                     canManage && (
                         <>
-                            <SelectField value={program.status} onChange={(v) => router.post(route('ami.programs.transition', program.id), { status: v }, { preserveScroll: true })} options={statuses} className="w-40" />
+                            <SelectField label="Status program" value={program.status} onChange={(v) => router.post(route('ami.programs.transition', program.id), { status: v }, { preserveScroll: true })} options={statuses} className="w-40" />
                             <Button variant="outline" onClick={() => setEditing(true)}>
                                 <Pencil /> Ubah
                             </Button>
@@ -55,7 +55,7 @@ export default function ProgramShow({ program, audits, statuses, periods, canMan
                                 <ConfirmDialog
                                     trigger={
                                         <Button variant="ghost" size="icon" aria-label="Hapus">
-                                            <Trash2 className="text-destructive" />
+                                            <Trash2 className="text-danger-foreground" />
                                         </Button>
                                     }
                                     title="Hapus program?"
@@ -86,7 +86,7 @@ export default function ProgramShow({ program, audits, statuses, periods, canMan
                     {audits.map((audit) => (
                         <Link key={audit.id} href={route('ami.audits.show', audit.id)} className="group grid grid-cols-1 gap-3 rounded-2xl border bg-card p-4 transition hover:border-primary/30 hover:shadow-sm sm:grid-cols-[88px_minmax(0,1fr)_auto] sm:items-center">
                             <div className="flex flex-col items-center justify-center rounded-xl bg-secondary py-2 text-secondary-foreground">
-                                <span className="text-[11px] font-semibold uppercase">{audit.scheduled_on ? formatDate(audit.scheduled_on, 'MMM') : '—'}</span>
+                                <span className="text-[11px] font-semibold">{audit.scheduled_on ? formatDate(audit.scheduled_on, 'MMM') : '—'}</span>
                                 <span className="text-2xl leading-none font-extrabold">{audit.scheduled_on ? formatDate(audit.scheduled_on, 'd') : '?'}</span>
                             </div>
                             <div className="min-w-0">
@@ -109,7 +109,7 @@ export default function ProgramShow({ program, audits, statuses, periods, canMan
                             </div>
                             <div className="text-right text-xs">
                                 <div className="font-bold">{audit.findings_count} temuan</div>
-                                {audit.open_findings_count > 0 && <div className="text-destructive">{audit.open_findings_count} belum tuntas</div>}
+                                {audit.open_findings_count > 0 && <div className="text-danger-foreground">{audit.open_findings_count} belum tuntas</div>}
                             </div>
                         </Link>
                     ))}
@@ -136,7 +136,7 @@ export default function ProgramShow({ program, audits, statuses, periods, canMan
 function Block({ label, value }: { label: string; value: string | null }) {
     return (
         <div>
-            <div className="text-[11px] font-semibold text-muted-foreground uppercase">{label}</div>
+            <div className="text-[11px] font-semibold text-muted-foreground">{label}</div>
             <div className="mt-0.5 whitespace-pre-line">{value ?? '—'}</div>
         </div>
     );

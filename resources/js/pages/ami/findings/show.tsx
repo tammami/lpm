@@ -118,7 +118,7 @@ export default function FindingShow({ finding, actions, evidence, verifications,
                                 <ConfirmDialog
                                     trigger={
                                         <Button variant="ghost" size="icon" aria-label="Hapus">
-                                            <Trash2 className="text-destructive" />
+                                            <Trash2 className="text-danger-foreground" />
                                         </Button>
                                     }
                                     title="Hapus temuan draf?"
@@ -159,7 +159,7 @@ export default function FindingShow({ finding, actions, evidence, verifications,
                         )}
                         {can.verify && (
                             <>
-                                <Button variant="outline" className="text-destructive" onClick={() => setVerifying('rejected')}>
+                                <Button variant="outline" className="text-danger-foreground" onClick={() => setVerifying('rejected')}>
                                     <XCircle /> Kembalikan
                                 </Button>
                                 <Button onClick={() => setVerifying('accepted')}>
@@ -214,9 +214,9 @@ export default function FindingShow({ finding, actions, evidence, verifications,
                     <Card className="gap-0 py-0">
                         <div className="flex flex-col gap-3 border-b p-5 sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                                <h3 className="flex items-center gap-2 font-bold">
+                                <h2 className="flex items-center gap-2 font-bold">
                                     <ClipboardList className="size-4 text-primary" /> Tindakan koreksi
-                                </h3>
+                                </h2>
                                 <p className="text-xs text-muted-foreground">Akar masalah → tindakan → PIC → tenggat → bukti → verifikasi.</p>
                             </div>
                             {can.respond && (
@@ -237,7 +237,7 @@ export default function FindingShow({ finding, actions, evidence, verifications,
                                             <span className="flex size-6 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">{index + 1}</span>
                                             <StatusBadge tone={actionTone[action.status]}>{action.status_label}</StatusBadge>
                                             {action.root_cause_category && <StatusBadge tone="neutral" dot={false}>{action.root_cause_category}</StatusBadge>}
-                                            <span className={cn('ml-auto text-xs', action.overdue ? 'font-semibold text-destructive' : 'text-muted-foreground')}>
+                                            <span className={cn('ml-auto text-xs', action.overdue ? 'font-semibold text-danger-foreground' : 'text-muted-foreground')}>
                                                 {action.pic} · tenggat {formatDate(action.due_date)}
                                             </span>
                                         </div>
@@ -248,7 +248,7 @@ export default function FindingShow({ finding, actions, evidence, verifications,
                                             {action.implementation_notes && <Section label="Catatan pelaksanaan" text={action.implementation_notes} compact />}
                                         </div>
                                         <div className="mt-3 flex items-center gap-3">
-                                            <Meter value={action.progress} severity="good" className="flex-1" />
+                                            <Meter label="Progres tindakan koreksi" value={action.progress} severity="good" className="flex-1" />
                                             <span className="w-10 text-right text-xs font-bold tabular">{action.progress}%</span>
                                             {can.respond && (
                                                 <Button size="sm" variant="outline" onClick={() => setActionForm(action)}>
@@ -257,7 +257,7 @@ export default function FindingShow({ finding, actions, evidence, verifications,
                                             )}
                                         </div>
                                         <div className="mt-4">
-                                            <div className="mb-2 text-[11px] font-semibold text-muted-foreground uppercase">Bukti pelaksanaan</div>
+                                            <div className="mb-2 text-[11px] font-semibold text-muted-foreground">Bukti pelaksanaan</div>
                                             <LinkedEvidenceList
                                                 items={action.evidence}
                                                 mapTo={{ type: 'corrective_action', id: action.id, label: `Tindakan ${index + 1} — ${finding.code}` }}
@@ -286,7 +286,7 @@ export default function FindingShow({ finding, actions, evidence, verifications,
                             <Info label="PIC auditee" value={finding.pic} />
                             {finding.standard_detail && (
                                 <div className="rounded-xl bg-secondary/60 p-3">
-                                    <div className="text-[11px] font-semibold text-secondary-foreground uppercase">Standar</div>
+                                    <div className="text-[11px] font-semibold text-secondary-foreground">Standar</div>
                                     <div className="font-semibold">
                                         {finding.standard_detail.code} — {finding.standard_detail.name}
                                     </div>
@@ -348,7 +348,7 @@ export default function FindingShow({ finding, actions, evidence, verifications,
 function Section({ label, text, tone, compact }: { label: string; text: string | null; tone?: 'danger' | 'primary'; compact?: boolean }) {
     return (
         <div className={cn(!compact && 'rounded-xl border p-4', tone === 'danger' && !compact && 'border-destructive/20 bg-danger-soft/30', tone === 'primary' && !compact && 'border-primary/20 bg-secondary/40')}>
-            <div className="text-[11px] font-bold tracking-wide text-muted-foreground uppercase">{label}</div>
+            <div className="text-[11px] font-bold text-muted-foreground">{label}</div>
             <p className={cn('mt-1 whitespace-pre-line', compact ? 'text-[13px]' : 'text-sm')}>{text || '—'}</p>
         </div>
     );
@@ -357,7 +357,7 @@ function Section({ label, text, tone, compact }: { label: string; text: string |
 function Info({ label, value }: { label: string; value: React.ReactNode }) {
     return (
         <div>
-            <div className="text-[11px] font-semibold text-muted-foreground uppercase">{label}</div>
+            <div className="text-[11px] font-semibold text-muted-foreground">{label}</div>
             <div className="mt-0.5 font-medium">{value ?? '—'}</div>
         </div>
     );
@@ -432,7 +432,7 @@ function ActionDialog({ findingId, action, rootCauses, picOptions, defaultPic, o
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="mt-3 text-destructive"
+                    className="mt-3 text-danger-foreground"
                     onClick={() => router.delete(route('ami.findings.actions.destroy', [findingId, action.id]), { preserveScroll: true, onSuccess: onClose })}
                 >
                     <Trash2 /> Hapus tindakan ini

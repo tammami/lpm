@@ -31,7 +31,7 @@ export function AppSidebar({ collapsed = false, onToggleCollapse, onNavigate }: 
             </div>
 
             <ScrollArea className="min-h-0 flex-1">
-                <nav className={cn('flex flex-col gap-6 py-5', collapsed ? 'px-2' : 'px-3')}>
+                <nav aria-label="Navigasi utama" className={cn('flex flex-col gap-6 py-5', collapsed ? 'px-2' : 'px-3')}>
                     {groups.map((group) => (
                         <div key={group.label} className="flex flex-col gap-1">
                             {!collapsed && (

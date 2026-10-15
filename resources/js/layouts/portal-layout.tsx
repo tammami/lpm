@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, Bell } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { LogoMark } from '@/components/brand/app-logo';
+import { HelpButton } from '@/components/guide/help-button';
 import { UserMenu } from '@/components/layout/user-menu';
 
 /**
@@ -27,6 +28,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
                             <div className="truncate text-[11px] text-muted-foreground">Portal Responden · {app.institution_short}</div>
                         </div>
                     </Link>
+                    <HelpButton compact />
                     <Link href={route('notifications.index')} className="relative rounded-xl p-2 text-muted-foreground hover:bg-white/60" aria-label="Notifikasi">
                         <Bell className="size-5" />
                         {unreadNotifications > 0 && (

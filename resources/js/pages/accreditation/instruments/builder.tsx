@@ -73,7 +73,7 @@ export default function Builder({ version, instrument, criteria, issues }: Props
                 }
                 actions={
                     <>
-                        <SelectField value={version.id} onChange={(v) => router.visit(route('accreditation.versions.show', Number(v)))} options={instrument.versions.map((v) => ({ value: v.id, label: `v${v.version} · ${v.status_label}` }))} className="w-44" />
+                        <SelectField label="Pilih versi instrumen" value={version.id} onChange={(v) => router.visit(route('accreditation.versions.show', Number(v)))} options={instrument.versions.map((v) => ({ value: v.id, label: `v${v.version} · ${v.status_label}` }))} className="w-44" />
                         {editable ? (
                             <ConfirmDialog
                                 trigger={
@@ -457,7 +457,7 @@ function SettingsDialog({ version, onClose }: { version: Props['version']; onClo
                                 <Plus /> Ambang
                             </Button>
                         )}
-                        {form.errors.thresholds && <p className="text-xs text-destructive">{form.errors.thresholds}</p>}
+                        {form.errors.thresholds && <p className="text-xs text-danger-foreground">{form.errors.thresholds}</p>}
                     </div>
                 </div>
                 <FormField label="Catatan versi" error={form.errors.notes} className="sm:col-span-2">

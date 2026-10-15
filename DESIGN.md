@@ -58,6 +58,7 @@ colors:
   seq-4: "#3fa39c"
   seq-5: "#137d80"
   seq-6: "#0b5a60"
+  seq-ink: "#022a30"
   div-neg-2: "#c63b58"
   div-neg-1: "#f0a3b1"
   div-mid: "#cbd6d5"
@@ -326,7 +327,7 @@ Every gradient is a token in `:root`; these are its stops.
 
 ### Data
 - **Categorical** chart-1 teal, chart-2 violet, chart-3 amber, chart-4 sky, chart-5 pink, used in that order. The set passed the dataviz palette validator (lightness, chroma, colour-vision deficiency, normal vision, contrast); do not reorder or substitute it.
-- **Sequential** seq-1 → seq-6: one-hue teal ramp for heatmaps and magnitude.
+- **Sequential** seq-1 → seq-6: one-hue teal ramp for heatmaps and magnitude. Numbers printed on the ramp use **Seq Ink** (seq-ink) on seq-1 to seq-4 (≥ 5:1 on seq-4) and white only on seq-5 and seq-6; white on seq-4 fails AA at 3.03:1.
 - **Chart details:** the trend line gradient starts at teal-deep; chart dots carry a white dot-ring.
 - **Diverging** div-neg-2 → div-mid → div-pos-2: coral to teal with a grey-teal midpoint, for Likert answer distributions.
 
@@ -361,7 +362,7 @@ Every gradient is a token in `:root`; these are its stops.
 ### Named Rules
 **The Tabular Numbers Rule.** Scores, counts, percentages and dates in data displays use tabular figures so columns and meters align.
 
-**The Uppercase Is Navigation Rule.** Tracked uppercase belongs only to sidebar group headings. Page and card headings stay in sentence case.
+**The Uppercase Is Navigation Rule.** Uppercase belongs only to sidebar group headings. Page and card headings, meta labels and table column headers stay in sentence case.
 
 ## Layout
 

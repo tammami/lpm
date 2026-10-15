@@ -3,9 +3,13 @@ import { cn } from "@/lib/utils"
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
     return (
+        // Bisa difokus agar tabel lebar dapat digeser dengan keyboard (WCAG 2.1.1).
         <div
             data-slot="table-container"
-            className="relative w-full overflow-x-auto"
+            tabIndex={0}
+            role="region"
+            aria-label={props["aria-label"] ?? "Tabel"}
+            className="relative w-full overflow-x-auto rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset"
         >
             <table
                 data-slot="table"

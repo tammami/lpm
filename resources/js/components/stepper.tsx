@@ -8,7 +8,7 @@ export function Stepper({ steps, current, tone = 'primary' }: { steps: { value: 
     const index = steps.findIndex((s) => s.value === current);
 
     return (
-        <ol className="flex w-full items-start overflow-x-auto pb-1">
+        <ol tabIndex={0} aria-label="Tahapan" className="flex w-full items-start overflow-x-auto rounded-lg pb-1 outline-none focus-visible:ring-2 focus-visible:ring-ring/60">
             {steps.map((step, i) => {
                 const done = i < index;
                 const active = i === index;

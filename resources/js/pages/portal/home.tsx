@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { CalendarClock, CheckCircle2, ChevronRight, ClipboardList, EyeOff, History, RotateCcw, ShieldCheck } from 'lucide-react';
+import { CalendarClock, CheckCircle2, ChevronRight, ClipboardList, EyeOff, History, LifeBuoy, RotateCcw, ShieldCheck } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { StatusBadge } from '@/components/status-badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -65,7 +65,7 @@ function ProgressRing({ value, total }: { value: number; total: number }) {
                 <span className="text-lg font-extrabold">
                     {value}/{total}
                 </span>
-                <span className="mt-0.5 text-[11px] font-semibold tracking-wide uppercase opacity-70">selesai</span>
+                <span className="mt-0.5 text-[11px] font-semibold opacity-85">selesai</span>
             </div>
         </div>
     );
@@ -110,7 +110,18 @@ export default function PortalHome({ profile, surveys, highlight }: Props) {
                 </p>
             </div>
 
-            <h2 className="mt-7 mb-3 flex items-center gap-2 text-sm font-bold tracking-wide text-muted-foreground uppercase">
+            <Link
+                href={route('guide.index', { artikel: 'isi-monev' })}
+                className="mt-3 flex items-center gap-3 rounded-2xl border border-gold/45 bg-linear-to-r from-gold-soft to-white/70 px-4 py-3 text-sm transition hover:border-gold focus-visible:ring-2 focus-visible:ring-gold/50 focus-visible:outline-none"
+            >
+                <LifeBuoy className="size-5 shrink-0 text-gold-foreground" aria-hidden="true" />
+                <span className="flex-1">
+                    <span className="font-bold text-gold-foreground">Belum paham cara mengisi?</span> <span className="text-muted-foreground">Lihat panduan langkah demi langkah.</span>
+                </span>
+                <ChevronRight className="size-4 shrink-0 text-gold-foreground" aria-hidden="true" />
+            </Link>
+
+            <h2 className="mt-7 mb-3 flex items-center gap-2 text-sm font-bold text-muted-foreground">
                 <ClipboardList className="size-4" /> Sedang dibuka
             </h2>
 
@@ -128,7 +139,7 @@ export default function PortalHome({ profile, surveys, highlight }: Props) {
 
             {past.length > 0 && (
                 <Collapsible className="mt-8">
-                    <CollapsibleTrigger className="flex w-full items-center gap-2 text-sm font-bold tracking-wide text-muted-foreground uppercase">
+                    <CollapsibleTrigger className="flex min-h-11 w-full items-center gap-2 rounded-lg text-sm font-bold text-muted-foreground">
                         <History className="size-4" /> Riwayat ({past.length})
                         <ChevronRight className="ml-auto size-4" />
                     </CollapsibleTrigger>

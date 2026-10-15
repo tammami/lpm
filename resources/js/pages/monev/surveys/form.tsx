@@ -90,7 +90,7 @@ export default function SurveyFormPage({ survey, instrumentVersions, periods, ac
             />
             {locked && (
                 <Alert className="mb-5 border-info/30 bg-info-soft">
-                    <AlertDescription className="text-info">Kegiatan sudah dibuka — hanya judul, deskripsi, tanggal berakhir, dan ambang minimum respons yang dapat diubah.</AlertDescription>
+                    <AlertDescription className="text-info-foreground">Kegiatan sudah dibuka — hanya judul, deskripsi, tanggal berakhir, dan ambang minimum respons yang dapat diubah.</AlertDescription>
                 </Alert>
             )}
             <form onSubmit={submit} className="flex flex-col gap-5">

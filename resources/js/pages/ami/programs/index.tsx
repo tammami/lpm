@@ -64,7 +64,7 @@ export default function ProgramsIndex({ programs, periods, canManage }: { progra
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
                                         <div className="font-mono text-xs text-muted-foreground">{program.code}</div>
-                                        <h3 className="mt-1 text-lg font-bold group-hover:text-primary">{program.name}</h3>
+                                        <h2 className="mt-1 text-lg font-bold group-hover:text-primary">{program.name}</h2>
                                         <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
                                             <CalendarRange className="size-3.5" /> {formatDate(program.starts_on)} – {formatDate(program.ends_on)}
                                         </div>
@@ -79,11 +79,11 @@ export default function ProgramsIndex({ programs, periods, canManage }: { progra
                                         </span>
                                         <span className="tabular">{progress}%</span>
                                     </div>
-                                    <Meter value={progress} severity="good" />
+                                    <Meter label="Progres audit selesai" value={progress} severity="good" />
                                 </div>
                                 <div className="flex gap-4 border-t pt-3 text-xs">
                                     <span className="inline-flex items-center gap-1.5">
-                                        <ShieldAlert className="size-3.5 text-destructive" /> <b>{program.findings_open}</b> temuan terbuka
+                                        <ShieldAlert className="size-3.5 text-danger-foreground" /> <b>{program.findings_open}</b> temuan terbuka
                                     </span>
                                     <span className="text-muted-foreground">{program.findings_total} total temuan</span>
                                 </div>

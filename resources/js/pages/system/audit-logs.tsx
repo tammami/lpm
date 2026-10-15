@@ -121,7 +121,7 @@ export default function AuditLogs({ logs, filters, events, modules }: { logs: Pa
                                 {keys.map((key) => (
                                     <tr key={key} className="border-t align-top">
                                         <td className="px-3 py-2 font-mono font-semibold">{key}</td>
-                                        <td className="px-3 py-2 font-mono break-all text-destructive/80">{JSON.stringify(detail?.old_values?.[key] ?? null)}</td>
+                                        <td className="px-3 py-2 font-mono break-all text-danger-foreground/80">{JSON.stringify(detail?.old_values?.[key] ?? null)}</td>
                                         <td className="px-3 py-2 font-mono break-all text-primary">{JSON.stringify(detail?.new_values?.[key] ?? null)}</td>
                                     </tr>
                                 ))}

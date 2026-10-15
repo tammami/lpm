@@ -184,7 +184,7 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
                     <div className="flex flex-wrap items-center gap-2 text-xs">
                         <ClassBadge classification={quality?.classification} />
                         {delta !== null && (
-                            <span className={cn('inline-flex items-center gap-0.5 font-semibold', delta >= 0 ? 'text-primary' : 'text-destructive')}>
+                            <span className={cn('inline-flex items-center gap-0.5 font-semibold', delta >= 0 ? 'text-primary' : 'text-danger-foreground')}>
                                 {delta >= 0 ? <ArrowUpRight className="size-3.5" /> : <ArrowDownRight className="size-3.5" />}
                                 {formatScore(Math.abs(delta))} vs {quality?.previous_label}
                             </span>
@@ -199,7 +199,7 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
                     tone="info"
                     hint={active ? `${formatNumber(active.progress.submitted)} dari ${formatNumber(active.progress.eligible)} · sisa ${Math.max(0, daysLeft(active.ends_at))} hari` : 'Tidak ada Monev yang sedang dibuka'}
                 >
-                    {active && <Meter value={active.progress.rate} />}
+                    {active && <Meter label="Response rate Monev berjalan" value={active.progress.rate} />}
                 </StatTile>
                 <StatTile
                     label="Dosen di bawah ambang"
@@ -286,7 +286,7 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
                                                 <span className="truncate text-muted-foreground">{row.name}</span>
                                                 <span className="font-semibold tabular">{formatPercent(row.rate, 0)}</span>
                                             </div>
-                                            <Meter value={row.rate} size="sm" />
+                                            <Meter label="Response rate" value={row.rate} size="sm" />
                                         </div>
                                     ))}
                                 </div>
@@ -307,7 +307,7 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
                             <div key={q.id} className={cn('flex items-center gap-3 rounded-xl p-3', q.score !== null && q.score < threshold ? 'bg-danger-soft/60' : 'bg-muted/50')}>
                                 <span className="font-mono text-xs font-bold text-primary">{q.code}</span>
                                 <span className="min-w-0 flex-1 truncate text-[13px]">{q.indicator ?? q.label}</span>
-                                <span className={cn('font-extrabold tabular', q.score !== null && q.score < threshold && 'text-destructive')}>{formatScore(q.score)}</span>
+                                <span className={cn('font-extrabold tabular', q.score !== null && q.score < threshold && 'text-danger-foreground')}>{formatScore(q.score)}</span>
                             </div>
                         ))}
                         {!quality && <p className="text-sm text-muted-foreground">Belum ada data.</p>}
@@ -341,7 +341,7 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
                                         </div>
                                         {row.period_id !== null && can.accreditation && (
                                             <Link href={route('accreditation.periods.show', row.period_id)} className="mt-1 flex items-center gap-2 text-[11px] font-semibold text-primary after:absolute after:inset-0">
-                                                <Meter value={row.readiness} severity="good" size="sm" className="w-20" />
+                                                <Meter label="Kesiapan dokumen akreditasi" value={row.readiness} severity="good" size="sm" className="w-20" />
                                                 Kesiapan {formatPercent(row.readiness, 0)}
                                             </Link>
                                         )}
@@ -440,14 +440,14 @@ function CycleSection({ cycle }: { cycle: QualityCycle }) {
                                             <span>{panel.meter.label}</span>
                                             <span className="font-semibold text-foreground tabular">{formatPercent(panel.meter.value, 0)}</span>
                                         </div>
-                                        <Meter value={panel.meter.value} severity="good" size="sm" />
+                                        <Meter label={panel.meter.label} value={panel.meter.value} severity="good" size="sm" />
                                     </div>
                                 )}
                                 <dl className="mt-3 flex flex-col gap-1 border-t pt-3 text-xs">
                                     {panel.stats.map((stat) => (
                                         <div key={stat.label} className="flex justify-between gap-2">
                                             <dt className="text-muted-foreground">{stat.label}</dt>
-                                            <dd className={cn('font-bold tabular', stat.danger && 'text-destructive')}>{formatNumber(stat.value)}</dd>
+                                            <dd className={cn('font-bold tabular', stat.danger && 'text-danger-foreground')}>{formatNumber(stat.value)}</dd>
                                         </div>
                                     ))}
                                 </dl>
@@ -469,7 +469,7 @@ function CycleSection({ cycle }: { cycle: QualityCycle }) {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <AlarmClock className="size-4 text-destructive" /> Perlu perhatian
+                        <AlarmClock className="size-4 text-danger-foreground" /> Perlu perhatian
                     </CardTitle>
                     <CardDescription>Temuan & rencana aksi yang melewati tenggat.</CardDescription>
                 </CardHeader>
@@ -606,9 +606,9 @@ function LecturerDashboard({ greeting, scopeLabel, threshold, lecturer, evaluati
                         {evaluation?.improvements.length === 0 && <p className="text-sm text-muted-foreground">Tidak ada butir di bawah ambang. Pertahankan!</p>}
                         {evaluation?.improvements.map((q) => (
                             <div key={q.id} className="flex items-center gap-3 rounded-xl bg-danger-soft/60 p-3">
-                                <span className="font-mono text-xs font-bold text-destructive">{q.code}</span>
+                                <span className="font-mono text-xs font-bold text-danger-foreground">{q.code}</span>
                                 <span className="flex-1 text-[13px]">{q.indicator ?? q.label}</span>
-                                <span className="font-extrabold text-destructive tabular">{formatScore(q.score)}</span>
+                                <span className="font-extrabold text-danger-foreground tabular">{formatScore(q.score)}</span>
                             </div>
                         ))}
                         <Button variant="outline" asChild className="mt-2 self-start">

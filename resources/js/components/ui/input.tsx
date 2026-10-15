@@ -1,7 +1,9 @@
 import * as React from "react"
+import { useFormFieldControl } from "@/components/form-field"
 import { cn } from "@/lib/utils"
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+    const field = useFormFieldControl(props)
     return (
         <input
             type={type}
@@ -13,6 +15,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
                 className,
             )}
             {...props}
+            {...field}
         />
     )
 }

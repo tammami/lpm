@@ -46,7 +46,7 @@ export function QuestionTable({ questions, threshold }: { questions: QuestionSta
                             <DistributionBar segments={question.distribution} />
                             <div className="flex items-center justify-end gap-2">
                                 <ClassBadge classification={question.classification} className="hidden xl:inline-flex" />
-                                <span className={cn('text-base font-extrabold tabular', below && 'text-destructive')}>{formatScore(question.score)}</span>
+                                <span className={cn('text-base font-extrabold tabular', below && 'text-danger-foreground')}>{formatScore(question.score)}</span>
                             </div>
                         </div>
                     );

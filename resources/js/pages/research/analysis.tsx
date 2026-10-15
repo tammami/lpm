@@ -143,11 +143,11 @@ export default function ResearchAnalysis({ summary, groups, byYear, byType, byIn
             />
 
             <div className="mb-6 flex flex-col gap-2 rounded-2xl border bg-card p-3 lg:flex-row lg:flex-wrap lg:items-center">
-                <span className="px-1 text-xs font-bold tracking-wide text-muted-foreground uppercase">Filter</span>
+                <span className="px-1 text-xs font-bold text-muted-foreground">Filter</span>
                 <div className="flex items-center gap-2">
-                    <SelectField value={filters.from} onChange={(v) => navigate({ from: v })} options={yearOptions} className="w-24" />
+                    <SelectField label="Dari tahun" value={filters.from} onChange={(v) => navigate({ from: v })} options={yearOptions} className="w-24" />
                     <span className="text-sm text-muted-foreground">s.d.</span>
-                    <SelectField value={filters.to} onChange={(v) => navigate({ to: v })} options={yearOptions} className="w-24" />
+                    <SelectField label="Sampai tahun" value={filters.to} onChange={(v) => navigate({ to: v })} options={yearOptions} className="w-24" />
                 </div>
                 <SelectField value={filters.study_program_id ?? 'all'} onChange={(v) => navigate({ study_program_id: v === 'all' ? undefined : v })} options={studyPrograms} allLabel="Semua prodi" className="lg:w-64" />
                 <SelectField value={filters.employment_status ?? 'all'} onChange={(v) => navigate({ employment_status: v === 'all' ? undefined : v })} options={employmentOptions} allLabel="Semua status dosen" className="lg:w-48" />
@@ -159,7 +159,7 @@ export default function ResearchAnalysis({ summary, groups, byYear, byType, byIn
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatTile label="Dosen yang berkarya" value={formatPercent(summary.rate)} icon={UserRoundCheck} hint={`${summary.productive} dari ${summary.lecturers} dosen aktif`}>
-                    <Meter value={summary.rate} />
+                    <Meter label="Persentase dosen berkarya" value={summary.rate} />
                 </StatTile>
                 <StatTile label="Belum punya karya" value={formatNumber(summary.without)} icon={UserRoundX} tone={summary.without ? 'danger' : 'neutral'} hint={`dosen tanpa karya pada ${range}`} />
                 <StatTile label="Jumlah karya" value={formatNumber(summary.works)} icon={BookOpenText} tone="info" hint={`Sinta ${summary.sinta} · Scopus ${summary.scopus} · WoS ${summary.wos} · ${summary.verified} valid`} />
@@ -170,7 +170,7 @@ export default function ResearchAnalysis({ summary, groups, byYear, byType, byIn
                     tone={summary.student_rate !== null && summary.student_rate >= summary.student_target ? 'primary' : 'gold'}
                     hint={`${summary.with_students} karya · ${summary.students} mahasiswa · acuan ≥ ${summary.student_target}%`}
                 >
-                    <Meter value={summary.student_rate} />
+                    <Meter label="Persentase karya melibatkan mahasiswa" value={summary.student_rate} />
                 </StatTile>
             </div>
 
@@ -204,7 +204,7 @@ export default function ResearchAnalysis({ summary, groups, byYear, byType, byIn
                             <CardTitle>Produktivitas per program studi</CardTitle>
                             <CardDescription>Kolom mengikuti sheet Rekap per Prodi pada template LPM. Diurutkan dari persentase dosen berkarya terendah — prodi teratas paling perlu pendampingan.</CardDescription>
                         </CardHeader>
-                        <CardContent className="overflow-x-auto">
+                        <CardContent className="relative overflow-x-auto">
                             <table className="w-full min-w-[1040px] text-sm">
                                 <thead>
                                     <tr className="border-b text-left text-xs font-semibold text-muted-foreground">
@@ -222,20 +222,20 @@ export default function ResearchAnalysis({ summary, groups, byYear, byType, byIn
                                     {byProgram.map((program) => (
                                         <tr key={program.id} className="border-b last:border-0">
                                             <td className="py-2.5 pr-4 font-medium">
-                                                <button type="button" className="text-left hover:text-primary" onClick={() => navigate({ study_program_id: program.id })}>
+                                                <button type="button" className="min-h-6 rounded text-left hover:text-primary" onClick={() => navigate({ study_program_id: program.id })}>
                                                     {program.name}
                                                 </button>
                                             </td>
                                             <td className="py-2.5 pr-4">
                                                 <div className="flex items-center gap-2">
-                                                    <Meter value={program.rate} size="sm" className="flex-1" />
+                                                    <Meter label="Persentase dosen berkarya di prodi" value={program.rate} size="sm" className="flex-1" />
                                                     <span className="w-24 text-right text-xs tabular">
                                                         <b>{program.productive}</b>/{program.lecturers} · {formatPercent(program.rate, 0)}
                                                     </span>
                                                 </div>
                                             </td>
                                             {programColumns.map((column) => (
-                                                <td key={column.key} className={cn('py-2.5 pr-3 text-right tabular', column.key === 'total' && 'font-bold', !program.recap[column.key] && 'text-muted-foreground/50')}>
+                                                <td key={column.key} className={cn('py-2.5 pr-3 text-right tabular', column.key === 'total' && 'font-bold', !program.recap[column.key] && 'text-muted-foreground')}>
                                                     {program.recap[column.key] || '–'}
                                                 </td>
                                             ))}
@@ -256,7 +256,7 @@ export default function ResearchAnalysis({ summary, groups, byYear, byType, byIn
                                 <CardDescription>Dosen aktif tanpa karya tercatat pada {range}{filters.verified_only ? ' (yang terverifikasi)' : ''}. Daftar lengkap ada di ekspor Excel.</CardDescription>
                             </div>
                         </CardHeader>
-                        <CardContent className="overflow-x-auto">
+                        <CardContent className="relative overflow-x-auto">
                             {without.length === 0 ? (
                                 <Muted>Semua dosen pada filter ini sudah memiliki karya.</Muted>
                             ) : (
@@ -268,7 +268,9 @@ export default function ResearchAnalysis({ summary, groups, byYear, byType, byIn
                                                 <th className="py-2 pr-4">Program studi</th>
                                                 <th className="py-2 pr-4">Jabatan</th>
                                                 <th className="py-2 pr-4">Karya terakhir</th>
-                                                <th className="py-2" />
+                                                <th className="relative py-2">
+                                                    <span className="sr-only">Aksi</span>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -342,7 +344,7 @@ export default function ResearchAnalysis({ summary, groups, byYear, byType, byIn
                                 <CardTitle>Dosen paling produktif</CardTitle>
                                 <CardDescription>10 dosen dengan karya terbanyak pada {range}.</CardDescription>
                             </CardHeader>
-                            <CardContent className="overflow-x-auto">
+                            <CardContent className="relative overflow-x-auto">
                                 <table className="w-full min-w-[640px] text-sm">
                                     <thead>
                                         <tr className="border-b text-left text-xs font-semibold text-muted-foreground">
@@ -366,12 +368,12 @@ export default function ResearchAnalysis({ summary, groups, byYear, byType, byIn
                                                     <div className="text-xs text-muted-foreground">{lecturer.study_program}</div>
                                                 </td>
                                                 {groups.map((group) => (
-                                                    <td key={group.key} className={cn('py-2.5 pr-4 text-right tabular', !lecturer.groups[group.key] && 'text-muted-foreground/50')}>
+                                                    <td key={group.key} className={cn('py-2.5 pr-4 text-right tabular', !lecturer.groups[group.key] && 'text-muted-foreground')}>
                                                         {lecturer.groups[group.key] || '–'}
                                                     </td>
                                                 ))}
                                                 <td className="py-2.5 pr-4 text-right font-bold tabular">{lecturer.works}</td>
-                                                <td className={cn('py-2.5 text-right tabular', !lecturer.recap.with_students && 'text-muted-foreground/50')}>{lecturer.recap.with_students || '–'}</td>
+                                                <td className={cn('py-2.5 text-right tabular', !lecturer.recap.with_students && 'text-muted-foreground')}>{lecturer.recap.with_students || '–'}</td>
                                             </tr>
                                         ))}
                                     </tbody>

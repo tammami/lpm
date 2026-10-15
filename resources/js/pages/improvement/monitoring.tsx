@@ -45,7 +45,7 @@ export default function Monitoring({ plans, filters, statuses, summary }: Props)
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatTile label="Rencana aksi" value={summary.total} icon={ListChecks} tone="neutral" />
                 <StatTile label="Rata-rata progres" value={formatPercent(summary.avg_progress, 0)} icon={Gauge} tone="info">
-                    <Meter value={summary.avg_progress} severity="good" />
+                    <Meter label="Rata-rata progres rencana aksi" value={summary.avg_progress} severity="good" />
                 </StatTile>
                 <StatTile label="Selesai / terverifikasi" value={summary.completed} icon={CheckCircle2} />
                 <StatTile label="Lewat tenggat" value={summary.overdue} icon={AlarmClock} tone={summary.overdue ? 'danger' : 'neutral'} />
@@ -81,12 +81,12 @@ export default function Monitoring({ plans, filters, statuses, summary }: Props)
                                 <StatusBadge tone={planTone[plan.status]}>{plan.status_label}</StatusBadge>
                             </div>
                             <div className="flex items-center gap-3">
-                                <Meter value={plan.progress} severity="good" className="flex-1" size="sm" />
+                                <Meter label="Progres rencana aksi" value={plan.progress} severity="good" className="flex-1" size="sm" />
                                 <span className="text-xs font-bold tabular">{plan.progress}%</span>
                             </div>
                             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                                 <span>PIC {plan.pic}</span>
-                                <span className={cn(plan.overdue && 'font-semibold text-destructive')}>Tenggat {formatDate(plan.due_date)}</span>
+                                <span className={cn(plan.overdue && 'font-semibold text-danger-foreground')}>Tenggat {formatDate(plan.due_date)}</span>
                                 {plan.tasks_count > 0 && (
                                     <span>
                                         {plan.done_tasks_count}/{plan.tasks_count} tugas

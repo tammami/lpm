@@ -123,7 +123,7 @@ export default function InstrumentsIndex({ instruments, filters, types, responde
                                     )
                                 )}
                             </div>
-                            <h3 className="mt-4 text-[16px] leading-snug font-bold group-hover:text-primary">{instrument.name}</h3>
+                            <h2 className="mt-4 text-[16px] leading-snug font-bold group-hover:text-primary">{instrument.name}</h2>
                             <div className="mt-1 font-mono text-xs text-muted-foreground">{instrument.code}</div>
                             {instrument.description && <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{instrument.description}</p>}
 

@@ -38,8 +38,8 @@ export default function InstrumentPreview({ instrument, version, sections }: Pro
                 }
             />
             <Alert className="mb-5 border-info/30 bg-info-soft">
-                <Eye className="text-info" />
-                <AlertDescription className="text-info">Mode pratinjau — tampilan seperti yang dilihat responden. Jawaban tidak disimpan.</AlertDescription>
+                <Eye className="text-info-foreground" />
+                <AlertDescription className="text-info-foreground">Mode pratinjau — tampilan seperti yang dilihat responden. Jawaban tidak disimpan.</AlertDescription>
             </Alert>
             <div className="sticky top-16 z-10 -mx-1 mb-5 rounded-2xl border bg-card/95 p-4 backdrop-blur">
                 <div className="mb-2 flex justify-between text-xs font-semibold">
@@ -48,7 +48,7 @@ export default function InstrumentPreview({ instrument, version, sections }: Pro
                         {progress.answered}/{progress.total} butir · {percent}%
                     </span>
                 </div>
-                <Progress value={percent} className="h-2" />
+                <Progress value={percent} aria-label="Progres pengisian pertanyaan wajib" className="h-2" />
             </div>
             <Questionnaire sections={sections} answers={answers} onChange={(id, value) => setAnswers((a) => ({ ...a, [id]: value }))} />
         </div>

@@ -172,7 +172,7 @@ export default function PeriodShow({ period, summary, byCriterion, gaps, criteri
                 <Card className="mb-6 border-primary/30 bg-gradient-to-br from-secondary/70 to-card">
                     <CardContent className="flex flex-wrap items-center gap-x-10 gap-y-3">
                         <div>
-                            <div className="text-[11px] font-semibold text-muted-foreground uppercase">Hasil akreditasi</div>
+                            <div className="text-[11px] font-semibold text-muted-foreground">Hasil akreditasi</div>
                             <div className="text-2xl font-extrabold text-primary">{period.result_grade}</div>
                         </div>
                         <Info label="Nilai" value={period.result_score !== null ? formatNumber(period.result_score) : null} />
@@ -212,7 +212,7 @@ export default function PeriodShow({ period, summary, byCriterion, gaps, criteri
                             <span className="text-xs text-muted-foreground">/ 400</span>
                         </div>
                         <div className="mt-1 text-sm font-bold">{summary.estimated_grade ?? <span className="font-medium text-muted-foreground">Nilai ≥ 50% indikator untuk estimasi peringkat</span>}</div>
-                        <Meter value={summary.coverage} severity="neutral" size="sm" className="mt-3" />
+                        <Meter label="Indikator yang memiliki bukti" value={summary.coverage} severity="neutral" size="sm" className="mt-3" />
                         <div className="mt-1 text-[11px] text-muted-foreground">
                             {summary.assessed}/{summary.total} indikator dinilai{period.target_score ? ` · target ${formatNumber(period.target_score)}` : ''}
                         </div>
@@ -221,15 +221,15 @@ export default function PeriodShow({ period, summary, byCriterion, gaps, criteri
                 <Card className={cn('gap-3 py-5', summary.essential_unmet > 0 && 'border-destructive/40')}>
                     <CardContent>
                         <div className="flex items-center gap-1.5 text-[13px] font-semibold text-muted-foreground">
-                            <AlertTriangle className={cn('size-4', summary.essential_unmet ? 'text-destructive' : 'text-primary')} /> Syarat perlu belum terpenuhi
+                            <AlertTriangle className={cn('size-4', summary.essential_unmet ? 'text-danger-foreground' : 'text-primary')} /> Syarat perlu belum terpenuhi
                         </div>
-                        <div className={cn('mt-1 text-3xl font-extrabold tabular', summary.essential_unmet && 'text-destructive')}>{summary.essential_unmet}</div>
+                        <div className={cn('mt-1 text-3xl font-extrabold tabular', summary.essential_unmet && 'text-danger-foreground')}>{summary.essential_unmet}</div>
                         <p className="mt-1 text-[11px] text-muted-foreground">Indikator esensial wajib memiliki bukti terverifikasi dan skor diri ≥ 2.</p>
                         {summary.essential_unmet > 0 && (
                             <Button
                                 variant="link"
                                 size="sm"
-                                className="mt-1 h-auto p-0"
+                                className="mt-1 h-auto min-h-6 p-0"
                                 onClick={() => {
                                     setTab('indicators');
                                     setFilter('essential');
@@ -253,7 +253,7 @@ export default function PeriodShow({ period, summary, byCriterion, gaps, criteri
 
                 <TabsContent value="indicators">
                     <div className="grid grid-cols-1 gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
-                        <nav className="hidden xl:block">
+                        <nav aria-label="Lompat ke kriteria" className="hidden xl:block">
                             <div className="sticky top-20 flex flex-col gap-1 rounded-2xl border bg-card p-2">
                                 {roots.map((root) => {
                                     const stat = stats[root.id];
@@ -314,7 +314,7 @@ export default function PeriodShow({ period, summary, byCriterion, gaps, criteri
                                                 return (
                                                     <div key={group.id} className="flex flex-col gap-2">
                                                         {group.parent_id !== null && (
-                                                            <div className="mt-1 text-[12px] font-bold text-muted-foreground uppercase">
+                                                            <div className="mt-1 text-[12px] font-bold text-muted-foreground">
                                                                 {group.code} · {group.title}
                                                             </div>
                                                         )}
@@ -346,10 +346,10 @@ export default function PeriodShow({ period, summary, byCriterion, gaps, criteri
                             <CardTitle>Rekap per kriteria</CardTitle>
                             <CardDescription>Kesiapan dokumen dan rata-rata skor penilaian diri (tertimbang bobot indikator).</CardDescription>
                         </CardHeader>
-                        <CardContent className="overflow-x-auto">
+                        <CardContent className="relative overflow-x-auto outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset" tabIndex={0} role="region" aria-label="Rekap per kriteria">
                             <table className="w-full min-w-[720px] text-sm">
                                 <thead>
-                                    <tr className="border-b text-left text-[11px] text-muted-foreground uppercase">
+                                    <tr className="border-b text-left text-[11px] text-muted-foreground">
                                         <th className="py-2 pr-3 font-semibold">Kriteria</th>
                                         <th className="px-3 py-2 text-right font-semibold">Bobot</th>
                                         <th className="w-[34%] px-3 py-2 font-semibold">Kesiapan dokumen</th>
@@ -375,7 +375,7 @@ export default function PeriodShow({ period, summary, byCriterion, gaps, criteri
                                             </td>
                                             <td className="px-3">
                                                 <div className="flex items-center gap-2">
-                                                    <Meter value={row.self_percent} severity="neutral" size="sm" className="flex-1" />
+                                                    <Meter label="Skor penilaian diri" value={row.self_percent} severity="neutral" size="sm" className="flex-1" />
                                                     <span className="w-9 text-right font-bold tabular">{row.self_average !== null ? formatNumber(row.self_average, 2) : '—'}</span>
                                                 </div>
                                             </td>
@@ -452,7 +452,7 @@ export default function PeriodShow({ period, summary, byCriterion, gaps, criteri
 function Info({ label, value }: { label: string; value: string | null }) {
     return (
         <div>
-            <div className="text-[11px] font-semibold text-muted-foreground uppercase">{label}</div>
+            <div className="text-[11px] font-semibold text-muted-foreground">{label}</div>
             <div className="font-semibold">{value ?? '—'}</div>
         </div>
     );

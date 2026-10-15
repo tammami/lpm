@@ -193,7 +193,7 @@ function Section({ title, description, children }: { title: string; description?
     return (
         <section>
             <div className="mb-3 border-b pb-1.5">
-                <h3 className="text-xs font-bold tracking-wide text-primary uppercase">{title}</h3>
+                <h3 className="text-xs font-bold text-primary">{title}</h3>
                 {description && <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>}
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">{children}</div>

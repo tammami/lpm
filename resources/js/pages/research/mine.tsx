@@ -152,7 +152,7 @@ function WorkCard({ work, onEdit }: { work: ScientificWork; onEdit?: () => void 
                         <span className="font-semibold text-muted-foreground">{work.type_label}</span>
                         {work.indexation && work.indexation !== 'not_applicable' && <span className="font-bold text-primary">{work.indexation_label}</span>}
                     </div>
-                    <h3 className="font-semibold leading-snug">{work.title}</h3>
+                    <h2 className="font-semibold leading-snug">{work.title}</h2>
                     <p className="mt-0.5 text-sm text-muted-foreground">
                         {work.venue}
                         {work.volume && `, ${work.volume}`}
@@ -197,7 +197,7 @@ function WorkCard({ work, onEdit }: { work: ScientificWork; onEdit?: () => void 
                             {work.status !== 'verified' && (
                                 <ConfirmDialog
                                     trigger={
-                                        <Button variant="ghost" size="icon" aria-label="Hapus" className="text-destructive hover:text-destructive">
+                                        <Button variant="ghost" size="icon" aria-label="Hapus" className="text-danger-foreground hover:text-danger-foreground">
                                             <Trash2 />
                                         </Button>
                                     }

@@ -14,8 +14,8 @@ import type { IndicatorState } from './types';
 
 const icons = {
     ready: <CheckCircle2 className="size-5 text-primary" />,
-    partial: <Clock3 className="size-5 text-warning" />,
-    gap: <CircleDashed className="size-5 text-destructive/70" />,
+    partial: <Clock3 className="size-5 text-gold-foreground" />,
+    gap: <CircleDashed className="size-5 text-danger-foreground/70" />,
 };
 
 interface Props {
@@ -87,13 +87,13 @@ export function IndicatorItem({ indicator, periodId, scaleMax, canContribute, ev
                             <dl className="grid gap-2 rounded-xl bg-muted/40 p-3 text-[13px]">
                                 {indicator.target && (
                                     <div>
-                                        <dt className="text-[11px] font-semibold text-muted-foreground uppercase">Target / kondisi yang diharapkan</dt>
+                                        <dt className="text-[11px] font-semibold text-muted-foreground">Target / kondisi yang diharapkan</dt>
                                         <dd>{indicator.target}</dd>
                                     </div>
                                 )}
                                 {indicator.evidence_hint && (
                                     <div>
-                                        <dt className="text-[11px] font-semibold text-muted-foreground uppercase">Bukti yang dibutuhkan</dt>
+                                        <dt className="text-[11px] font-semibold text-muted-foreground">Bukti yang dibutuhkan</dt>
                                         <dd>{indicator.evidence_hint}</dd>
                                     </div>
                                 )}
@@ -111,7 +111,7 @@ export function IndicatorItem({ indicator, periodId, scaleMax, canContribute, ev
                     </div>
                     <div className="flex flex-col gap-3">
                         <div>
-                            <div className="mb-2 text-[11px] font-semibold text-muted-foreground uppercase">Penilaian diri (0–{scaleMax})</div>
+                            <div className="mb-2 text-[11px] font-semibold text-muted-foreground">Penilaian diri (0–{scaleMax})</div>
                             <div className="flex flex-wrap gap-1.5">
                                 {scores.map((value) => (
                                     <button

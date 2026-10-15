@@ -82,7 +82,7 @@ export default function ClassShow({ courseClass, lecturers, entryYears, canManag
                             </Button>
                             <ConfirmDialog
                                 trigger={
-                                    <Button variant="outline" className="text-destructive">
+                                    <Button variant="outline" className="text-danger-foreground">
                                         <Trash2 /> Hapus kelas
                                     </Button>
                                 }
@@ -121,7 +121,7 @@ export default function ClassShow({ courseClass, lecturers, entryYears, canManag
                                     <ConfirmDialog
                                         trigger={
                                             <Button variant="ghost" size="icon-sm" aria-label="Lepas dosen">
-                                                <UserMinus className="text-destructive" />
+                                                <UserMinus className="text-danger-foreground" />
                                             </Button>
                                         }
                                         title={`Lepas ${assignment.name} dari kelas?`}
@@ -140,9 +140,10 @@ export default function ClassShow({ courseClass, lecturers, entryYears, canManag
                                     lecturerForm.post(route('classes.lecturers.store', courseClass.id), { preserveScroll: true, onSuccess: () => lecturerForm.reset('lecturer_id') });
                                 }}
                             >
-                                <Combobox value={lecturerForm.data.lecturer_id} onChange={(v) => lecturerForm.setData('lecturer_id', v)} options={available} placeholder="Tambah dosen…" searchPlaceholder="Cari nama / prodi / NIDN…" />
+                                <Combobox value={lecturerForm.data.lecturer_id} onChange={(v) => lecturerForm.setData('lecturer_id', v)} options={available} placeholder="Tambah dosen…" ariaLabel="Pilih dosen pengampu" searchPlaceholder="Cari nama / prodi / NIDN…" />
                                 <div className="flex gap-2">
                                     <SelectField
+                                        label="Peran dosen di kelas"
                                         value={lecturerForm.data.role}
                                         onChange={(v) => lecturerForm.setData('role', v)}
                                         options={Object.entries(roleLabels).map(([value, label]) => ({ value, label }))}
@@ -151,7 +152,7 @@ export default function ClassShow({ courseClass, lecturers, entryYears, canManag
                                         <Plus /> Tambah
                                     </Button>
                                 </div>
-                                {lecturerForm.errors.lecturer_id && <p className="text-xs text-destructive">{lecturerForm.errors.lecturer_id}</p>}
+                                {lecturerForm.errors.lecturer_id && <p className="text-xs text-danger-foreground">{lecturerForm.errors.lecturer_id}</p>}
                             </form>
                         )}
                     </CardContent>
@@ -160,13 +161,13 @@ export default function ClassShow({ courseClass, lecturers, entryYears, canManag
                 <Card className="gap-0 overflow-hidden py-0">
                     <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <h3 className="flex items-center gap-2 font-bold">
+                            <h2 className="flex items-center gap-2 font-bold">
                                 <Users className="size-4 text-primary" /> Peserta kelas
                                 <span className="rounded-full bg-secondary px-2 text-xs text-secondary-foreground tabular">
                                     {courseClass.students.length}
                                     {courseClass.capacity ? ` / ${courseClass.capacity}` : ''}
                                 </span>
-                            </h3>
+                            </h2>
                             <p className="text-xs text-muted-foreground">Hanya peserta kelas yang dapat mengevaluasi dosen pengampu.</p>
                         </div>
                         <div className="flex gap-2">
@@ -188,7 +189,9 @@ export default function ClassShow({ courseClass, lecturers, entryYears, canManag
                                         <TableHead className="px-4">NIM</TableHead>
                                         <TableHead>Nama</TableHead>
                                         <TableHead>Angkatan</TableHead>
-                                        <TableHead className="w-12" />
+                                        <TableHead className="w-12">
+                                            <span className="sr-only">Aksi</span>
+                                        </TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>

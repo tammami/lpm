@@ -109,7 +109,7 @@ export default function Institution({ institution, stats }: Props) {
                                     <ImageUp className="size-4" /> Pilih logo
                                 </span>
                             </label>
-                            {form.errors.logo && <p className="text-xs text-destructive">{form.errors.logo}</p>}
+                            {form.errors.logo && <p className="text-xs text-danger-foreground">{form.errors.logo}</p>}
                         </CardContent>
                     </Card>
                     <Card>

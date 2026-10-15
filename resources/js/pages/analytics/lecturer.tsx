@@ -69,8 +69,8 @@ export default function LecturerAnalytics(props: Props) {
             />
             {surveys.length > 0 && (
                 <div className="mb-6 flex items-center gap-2 rounded-2xl border bg-card p-3">
-                    <span className="px-1 text-xs font-bold tracking-wide text-muted-foreground uppercase">Kegiatan</span>
-                    <SelectField value={survey ? String(survey.id) : ''} onChange={switchSurvey} options={surveys} className="sm:w-96" />
+                    <span className="shrink-0 px-1 text-xs font-semibold text-muted-foreground">Kegiatan</span>
+                    <SelectField label="Kegiatan Monev" value={survey ? String(survey.id) : ''} onChange={switchSurvey} options={surveys} className="min-w-0 flex-1 sm:w-96 sm:flex-none" />
                 </div>
             )}
             {!survey ? (
@@ -164,9 +164,9 @@ function LecturerBody({ survey, scheme, threshold = 3, minimum = 5, summary, ben
                         {improvements.length === 0 && <p className="text-sm text-muted-foreground">Tidak ada butir di bawah ambang. Pertahankan!</p>}
                         {improvements.map((q) => (
                             <div key={q.id} className="flex items-start gap-3 rounded-xl bg-danger-soft/60 p-3">
-                                <span className="font-mono text-xs font-bold text-destructive">{q.code}</span>
+                                <span className="font-mono text-xs font-bold text-danger-foreground">{q.code}</span>
                                 <span className="flex-1 text-[13px]">{q.indicator ?? q.label}</span>
-                                <span className="font-extrabold text-destructive tabular">{formatScore(q.score)}</span>
+                                <span className="font-extrabold text-danger-foreground tabular">{formatScore(q.score)}</span>
                             </div>
                         ))}
                     </CardContent>
@@ -260,7 +260,7 @@ function LecturerBody({ survey, scheme, threshold = 3, minimum = 5, summary, ben
                     {comments.length === 0 && <p className="text-sm text-muted-foreground">Belum ada komentar.</p>}
                     {comments.map((comment, index) => (
                         <figure key={index} className="relative rounded-xl bg-muted/50 py-3 pr-4 pl-10">
-                                <Quote className="absolute top-3.5 left-3.5 size-4 fill-gold/30 text-gold" aria-hidden="true" />
+                                <Quote className="absolute top-3.5 left-3.5 size-4 fill-gold/30 text-gold-foreground" aria-hidden="true" />
                             <blockquote className="text-[13px] leading-relaxed">{comment.text}</blockquote>
                             <figcaption className="mt-1 text-[11px] text-muted-foreground">{comment.question}</figcaption>
                         </figure>

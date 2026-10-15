@@ -81,7 +81,7 @@ export default function EvidenceShow({ evidence, categories, units, periods, max
                                 <ConfirmDialog
                                     trigger={
                                         <Button variant="ghost" size="icon" aria-label="Hapus">
-                                            <Trash2 className="text-destructive" />
+                                            <Trash2 className="text-danger-foreground" />
                                         </Button>
                                     }
                                     title="Hapus dokumen?"
@@ -154,7 +154,7 @@ export default function EvidenceShow({ evidence, categories, units, periods, max
                                 <Button onClick={() => setVerifying('accepted')} disabled={evidence.status === 'verified'}>
                                     <CheckCircle2 /> Sah
                                 </Button>
-                                <Button variant="outline" className="text-destructive" onClick={() => setVerifying('rejected')}>
+                                <Button variant="outline" className="text-danger-foreground" onClick={() => setVerifying('rejected')}>
                                     <XCircle /> Tolak
                                 </Button>
                             </CardContent>
@@ -240,7 +240,7 @@ export default function EvidenceShow({ evidence, categories, units, periods, max
 function Info({ label, value }: { label: string; value: string | number | null | undefined }) {
     return (
         <div>
-            <div className="text-[11px] font-semibold text-muted-foreground uppercase">{label}</div>
+            <div className="text-[11px] font-semibold text-muted-foreground">{label}</div>
             <div className="mt-0.5 font-medium">{value ?? '—'}</div>
         </div>
     );

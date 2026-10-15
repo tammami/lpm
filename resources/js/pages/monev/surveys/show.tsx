@@ -95,7 +95,7 @@ export default function SurveyShow({ survey, progress, byStudyProgram, byAssignm
                                         <ConfirmDialog
                                             trigger={
                                                 <Button variant="ghost" size="icon" aria-label="Hapus">
-                                                    <Trash2 className="text-destructive" />
+                                                    <Trash2 className="text-danger-foreground" />
                                                 </Button>
                                             }
                                             title="Hapus kegiatan draf ini?"
@@ -124,7 +124,7 @@ export default function SurveyShow({ survey, progress, byStudyProgram, byAssignm
                 <StatTile label="Responden eligible" value={formatNumber(progress.eligible)} icon={Users} hint={survey.mode === 'teaching_evaluation' ? 'Pasangan mahasiswa × dosen pengampu' : survey.respondent_label} />
                 <StatTile label="Sudah mengisi" value={formatNumber(progress.submitted)} icon={CheckCircle2} tone="gold" hint={`${formatNumber(progress.eligible - progress.submitted)} belum mengisi`} />
                 <StatTile label="Response rate" value={formatPercent(progress.rate)} icon={BarChart3} tone="info">
-                    <Meter value={progress.rate} />
+                    <Meter label="Response rate" value={progress.rate} />
                 </StatTile>
                 <StatTile
                     label={survey.status === 'active' ? 'Sisa waktu' : 'Jadwal'}
@@ -151,7 +151,7 @@ export default function SurveyShow({ survey, progress, byStudyProgram, byAssignm
                                         <span className="font-bold text-foreground">{formatPercent(row.rate)}</span> · {row.submitted}/{row.eligible}
                                     </span>
                                 </div>
-                                <Meter value={row.rate} size="sm" />
+                                <Meter label="Response rate prodi" value={row.rate} size="sm" />
                             </div>
                         ))}
                         <div className="rounded-xl bg-muted/50 p-3 text-xs leading-relaxed text-muted-foreground md:col-span-2 2xl:col-span-1">
@@ -165,7 +165,7 @@ export default function SurveyShow({ survey, progress, byStudyProgram, byAssignm
                     <Card className="gap-0 overflow-hidden py-0">
                         <div className="flex flex-col gap-3 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
                             <div>
-                                <h3 className="font-bold">Per dosen & kelas</h3>
+                                <h2 className="font-bold">Per dosen & kelas</h2>
                                 <p className="text-xs text-muted-foreground">
                                     {insufficient > 0 ? `${insufficient} penugasan belum mencapai minimum ${survey.min_responses} respons — hasilnya akan disembunyikan.` : 'Semua penugasan telah mencapai ambang minimum.'}
                                 </p>
@@ -178,7 +178,7 @@ export default function SurveyShow({ survey, progress, byStudyProgram, byAssignm
                                 <SearchInput value={search} onChange={setSearch} placeholder="Cari dosen/MK…" />
                             </div>
                         </div>
-                        <div className="max-h-[620px] overflow-auto">
+                        <div className="max-h-[620px] overflow-auto outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-inset" tabIndex={0} role="region" aria-label="Daftar dosen dan kelas">
                             <Table>
                                 <TableHeader className="sticky top-0 z-10 bg-muted/90 backdrop-blur">
                                     <TableRow>
@@ -205,7 +205,7 @@ export default function SurveyShow({ survey, progress, byStudyProgram, byAssignm
                                                         {row.submitted}/{row.eligible}
                                                     </span>
                                                 </div>
-                                                <Meter value={row.rate} size="sm" />
+                                                <Meter label="Response rate kelas" value={row.rate} size="sm" />
                                             </TableCell>
                                             <TableCell>{row.sufficient ? <StatusBadge tone="success">Cukup</StatusBadge> : <StatusBadge tone="warning">Kurang</StatusBadge>}</TableCell>
                                         </TableRow>

@@ -55,11 +55,11 @@ export default function Roles({ roles, groups }: Props) {
                 breadcrumbs={[{ label: 'Sistem' }, { label: 'Peran & Hak Akses' }]}
             />
             <Card className="gap-0 overflow-hidden p-0">
-                <div className="overflow-x-auto">
+                <div className="relative overflow-x-auto">
                     <table className="w-full min-w-[980px] text-sm">
                         <thead className="sticky top-0 z-10 bg-card">
                             <tr className="border-b">
-                                <th className="w-72 px-5 py-4 text-left text-xs font-bold tracking-wide text-muted-foreground uppercase">Hak akses</th>
+                                <th className="w-72 px-5 py-4 text-left text-xs font-bold text-muted-foreground">Hak akses</th>
                                 {roles.map((role) => (
                                     <th key={role.name} className="px-2 py-4 text-center align-bottom">
                                         <div className="flex flex-col items-center gap-1">
@@ -83,7 +83,7 @@ export default function Roles({ roles, groups }: Props) {
                             {groups.map((group) => (
                                 <Fragment key={group.group}>
                                     <tr className="bg-secondary/40">
-                                        <td colSpan={roles.length + 1} className="px-5 py-2 text-[11px] font-bold tracking-wider text-secondary-foreground uppercase">
+                                        <td colSpan={roles.length + 1} className="px-5 py-2 text-[11px] font-bold text-secondary-foreground">
                                             {group.group}
                                         </td>
                                     </tr>

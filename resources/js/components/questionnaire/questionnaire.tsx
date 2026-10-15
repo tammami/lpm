@@ -30,7 +30,7 @@ export function Questionnaire({ sections, answers, onChange, errors = {}, disabl
                     <section key={section.id} id={`q-section-${section.id}`} className="scroll-mt-28">
                         <div className="mb-3 flex items-end justify-between gap-3 px-1">
                             <div className="flex items-center gap-3">
-                                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-extrabold text-gold">{section.code}</span>
+                                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-extrabold text-gold-foreground">{section.code}</span>
                                 <div>
                                     <h2 className="text-[16px] leading-tight font-bold">{section.title}</h2>
                                     {section.description && <p className="text-xs text-muted-foreground">{section.description}</p>}
@@ -62,13 +62,13 @@ export function Questionnaire({ sections, answers, onChange, errors = {}, disabl
                                             <div>
                                                 <p className="text-[16px] leading-snug font-semibold">
                                                     {question.label}
-                                                    {question.is_required && <span className="ml-0.5 text-destructive">*</span>}
+                                                    {question.is_required && <span className="ml-0.5 text-danger-foreground">*</span>}
                                                 </p>
                                                 {question.description && <p className="mt-1 text-sm text-muted-foreground">{question.description}</p>}
                                             </div>
                                         </div>
                                         <QuestionInput question={question} value={value} onChange={(v) => onChange(question.id, v)} disabled={disabled} invalid={!!error} />
-                                        {error && <p className="mt-2 text-xs font-medium text-destructive">{error}</p>}
+                                        {error && <p className="mt-2 text-xs font-medium text-danger-foreground">{error}</p>}
                                     </div>
                                 );
                             })}

@@ -73,7 +73,7 @@ export default function Generate({ candidates, threshold, picOptions, defaultDue
                     </Button>
                 }
             />
-            {form.errors.selected && <p className="mb-4 text-sm text-destructive">{form.errors.selected}</p>}
+            {form.errors.selected && <p className="mb-4 text-sm text-danger-foreground">{form.errors.selected}</p>}
             {candidates.length === 0 ? (
                 <Card>
                     <EmptyState icon={Sparkles} title="Tidak ada usulan baru" description="Seluruh indikator berada di atas ambang dan tidak ada tenggat yang terlewat. Pertahankan!" />
@@ -120,7 +120,7 @@ export default function Generate({ candidates, threshold, picOptions, defaultDue
                                             options={picOptions}
                                             placeholder="PIC…"
                                         />
-                                        <SelectField value={selected.priority} onChange={(v) => setSelection((s) => ({ ...s, [candidate.rule_key]: { ...s[candidate.rule_key], priority: v } }))} options={priorities} />
+                                        <SelectField label="Prioritas" value={selected.priority} onChange={(v) => setSelection((s) => ({ ...s, [candidate.rule_key]: { ...s[candidate.rule_key], priority: v } }))} options={priorities} />
                                     </div>
                                 ) : (
                                     <div className="text-xs text-muted-foreground lg:text-right">{candidate.target_name}</div>

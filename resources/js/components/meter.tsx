@@ -26,7 +26,20 @@ export function severityForRate(rate: number | null | undefined, good = 75, warn
 /**
  * Meter persentase: isian membawa tingkat keparahan, track adalah langkah terang dari warna yang sama.
  */
-export function Meter({ value, severity, className, size = 'md' }: { value: number | null | undefined; severity?: Severity; className?: string; size?: 'sm' | 'md' }) {
+export function Meter({
+    value,
+    severity,
+    className,
+    size = 'md',
+    label = 'Persentase',
+}: {
+    value: number | null | undefined;
+    severity?: Severity;
+    className?: string;
+    size?: 'sm' | 'md';
+    /** Nama meter untuk pembaca layar, mis. "Response rate". */
+    label?: string;
+}) {
     const tone = severity ?? severityForRate(value);
     const width = Math.max(0, Math.min(100, value ?? 0));
 
@@ -35,7 +48,9 @@ export function Meter({ value, severity, className, size = 'md' }: { value: numb
             role="meter"
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-valuenow={value ?? undefined}
+            aria-label={label}
+            aria-valuenow={value ?? 0}
+            aria-valuetext={value === null || value === undefined ? 'Belum ada data' : `${Math.round(value)}%`}
             className={cn('w-full overflow-hidden rounded-full', size === 'sm' ? 'h-1.5' : 'h-2', tracks[tone], className)}
         >
             <div className={cn('h-full rounded-full transition-[width] duration-500', fills[tone])} style={{ width: `${width}%` }} />

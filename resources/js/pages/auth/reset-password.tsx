@@ -16,7 +16,7 @@ export default function ResetPassword({ token, email }: { token: string; email: 
     return (
         <>
             <Head title="Atur ulang kata sandi" />
-            <h2 className="text-2xl font-extrabold tracking-tight">Atur ulang kata sandi</h2>
+            <h1 className="text-2xl font-extrabold tracking-tight">Atur ulang kata sandi</h1>
             <p className="mt-1.5 mb-8 text-sm text-muted-foreground">Buat kata sandi baru minimal 8 karakter.</p>
             <form onSubmit={submit} className="flex flex-col gap-5">
                 <FormField label="Email" htmlFor="email" error={errors.email}>

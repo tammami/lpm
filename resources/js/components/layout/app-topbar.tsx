@@ -1,5 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Bell, CalendarRange, Menu } from 'lucide-react';
+import { HelpButton } from '@/components/guide/help-button';
 import { CommandMenu } from '@/components/layout/command-menu';
 import { UserMenu } from '@/components/layout/user-menu';
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,8 @@ export function AppTopbar({ onOpenMobileNav }: { onOpenMobileNav: () => void }) 
                     <span>{activePeriod.name}</span>
                 </div>
             )}
+
+            <HelpButton />
 
             {hasNotifications && (
                 <Button variant="ghost" size="icon" className="relative rounded-xl" asChild>

@@ -186,7 +186,7 @@ export default function RecommendationShow({ recommendation, plans, targets, pic
                                         {can.manage && plan.status === 'planned' && (
                                             <ConfirmDialog
                                                 trigger={
-                                                    <Button variant="outline" size="sm" className="text-destructive" aria-label={`Hapus rencana aksi ${plan.title}`}>
+                                                    <Button variant="outline" size="sm" className="text-danger-foreground" aria-label={`Hapus rencana aksi ${plan.title}`}>
                                                         <Trash2 /> Hapus
                                                     </Button>
                                                 }
@@ -203,7 +203,7 @@ export default function RecommendationShow({ recommendation, plans, targets, pic
                                         )}
                                         {can.verify && plan.status === 'completed' && (
                                             <>
-                                                <Button size="sm" variant="outline" className="text-destructive" onClick={() => setVerifying({ plan, decision: 'rejected' })}>
+                                                <Button size="sm" variant="outline" className="text-danger-foreground" onClick={() => setVerifying({ plan, decision: 'rejected' })}>
                                                     <XCircle /> Kembalikan
                                                 </Button>
                                                 <Button size="sm" onClick={() => setVerifying({ plan, decision: 'accepted' })}>
@@ -215,7 +215,7 @@ export default function RecommendationShow({ recommendation, plans, targets, pic
                                 </div>
 
                                 <div className="flex items-center gap-3">
-                                    <Meter value={plan.progress} severity="good" className="flex-1" />
+                                    <Meter label="Progres rencana aksi" value={plan.progress} severity="good" className="flex-1" />
                                     <span className="text-sm font-bold tabular">{plan.progress}%</span>
                                 </div>
 
@@ -241,7 +241,7 @@ export default function RecommendationShow({ recommendation, plans, targets, pic
                                 {plan.implementation_notes && <p className="rounded-xl bg-muted/50 p-3 text-sm whitespace-pre-line">{plan.implementation_notes}</p>}
 
                                 <div>
-                                    <div className="mb-2 text-[11px] font-semibold text-muted-foreground uppercase">Bukti pelaksanaan</div>
+                                    <div className="mb-2 text-[11px] font-semibold text-muted-foreground">Bukti pelaksanaan</div>
                                     <LinkedEvidenceList
                                         items={plan.evidence}
                                         mapTo={{ type: 'action_plan', id: plan.id, label: plan.title }}
@@ -256,7 +256,7 @@ export default function RecommendationShow({ recommendation, plans, targets, pic
                                     <div className="flex flex-col gap-1.5 border-t pt-3">
                                         {plan.verifications.map((v, i) => (
                                             <div key={i} className="flex items-start gap-2 text-xs">
-                                                {v.decision === 'accepted' ? <CheckCircle2 className="size-4 text-primary" /> : <XCircle className="size-4 text-destructive" />}
+                                                {v.decision === 'accepted' ? <CheckCircle2 className="size-4 text-primary" /> : <XCircle className="size-4 text-danger-foreground" />}
                                                 <span>
                                                     <b>{v.verifier}</b> {v.decision === 'accepted' ? 'memverifikasi' : 'mengembalikan'} · {formatDateTime(v.verified_at)}
                                                     {v.notes && <span className="block text-muted-foreground">“{v.notes}”</span>}
@@ -298,7 +298,7 @@ export default function RecommendationShow({ recommendation, plans, targets, pic
 function Info({ label, value }: { label: string; value: string | null | undefined }) {
     return (
         <div>
-            <div className="text-[11px] font-semibold text-muted-foreground uppercase">{label}</div>
+            <div className="text-[11px] font-semibold text-muted-foreground">{label}</div>
             <div className="mt-0.5 font-medium">{value ?? '—'}</div>
         </div>
     );

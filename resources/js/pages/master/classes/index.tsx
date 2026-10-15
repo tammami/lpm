@@ -122,7 +122,7 @@ export default function ClassesIndex({ classes, filters, periods, studyPrograms,
                 onRowClick={(row) => router.visit(route('classes.show', row.id))}
                 toolbar={
                     <TableToolbar search={query.search} onSearch={(v) => setFilter('search', v)} placeholder="Cari mata kuliah atau dosen…">
-                        <SelectField value={query.period_id} onChange={(v) => setFilter('period_id', v)} options={periods} />
+                        <SelectField label="Periode akademik" value={query.period_id} onChange={(v) => setFilter('period_id', v)} options={periods} />
                         <SelectField value={query.study_program_id} onChange={(v) => setFilter('study_program_id', v)} options={studyPrograms} allLabel="Semua prodi" />
                     </TableToolbar>
                 }

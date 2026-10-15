@@ -20,12 +20,12 @@ export default function ForgotPassword({ status }: { status?: string }) {
             <Link href={route('login')} className="mb-8 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
                 <ArrowLeft className="size-4" /> Kembali ke halaman masuk
             </Link>
-            <h2 className="text-2xl font-extrabold tracking-tight">Lupa kata sandi?</h2>
+            <h1 className="text-2xl font-extrabold tracking-tight">Lupa kata sandi?</h1>
             <p className="mt-1.5 mb-8 text-sm text-muted-foreground">Masukkan email terdaftar. Kami akan mengirimkan tautan untuk mengatur ulang kata sandi.</p>
 
             {status && (
                 <Alert className="mb-6 border-success/30 bg-success-soft">
-                    <AlertDescription className="text-success">{status}</AlertDescription>
+                    <AlertDescription className="text-success-foreground">{status}</AlertDescription>
                 </Alert>
             )}
 
@@ -38,6 +38,13 @@ export default function ForgotPassword({ status }: { status?: string }) {
                     Kirim tautan
                 </Button>
             </form>
+
+            <p className="mt-6 text-center text-xs leading-relaxed text-muted-foreground">
+                Tidak punya email terdaftar atau email tidak masuk?{' '}
+                <Link href={route('guide.index', { artikel: 'lupa-kata-sandi' })} className="font-semibold text-primary hover:underline">
+                    Baca panduan lupa kata sandi
+                </Link>
+            </p>
         </>
     );
 }

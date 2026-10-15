@@ -27,7 +27,7 @@ export function PageHeader({ title, description, breadcrumbs, actions, meta }: P
                                             {crumb.label}
                                         </Link>
                                     ) : (
-                                        <span className="text-foreground/70">{crumb.label}</span>
+                                        <span className="text-muted-foreground" aria-current={index === breadcrumbs.length - 1 ? 'page' : undefined}>{crumb.label}</span>
                                     )}
                                 </span>
                             ))}

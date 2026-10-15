@@ -131,11 +131,11 @@ function ProgramCard({ program, warningDays, canManage }: { program: ProgramRead
                     </div>
                     <div className="mt-4 flex items-end gap-6">
                         <div>
-                            <div className="text-[11px] font-semibold text-muted-foreground uppercase">Kesiapan dokumen</div>
+                            <div className="text-[11px] font-semibold text-muted-foreground">Kesiapan dokumen</div>
                             <div className="text-4xl font-extrabold tracking-tight text-primary tabular">{formatPercent(summary.readiness, 0)}</div>
                         </div>
                         <div className="pb-1">
-                            <div className="text-[11px] font-semibold text-muted-foreground uppercase">Estimasi</div>
+                            <div className="text-[11px] font-semibold text-muted-foreground">Estimasi</div>
                             <div className="text-sm font-bold">
                                 {summary.estimated_grade ? (
                                     <>
@@ -150,8 +150,8 @@ function ProgramCard({ program, warningDays, canManage }: { program: ProgramRead
                         </div>
                         {summary.essential_unmet > 0 && (
                             <div className="ml-auto pb-1 text-right">
-                                <div className="text-[11px] font-semibold text-destructive uppercase">Syarat perlu</div>
-                                <div className="text-sm font-bold text-destructive">{summary.essential_unmet} belum terpenuhi</div>
+                                <div className="text-[11px] font-semibold text-danger-foreground">Syarat perlu</div>
+                                <div className="text-sm font-bold text-danger-foreground">{summary.essential_unmet} belum terpenuhi</div>
                             </div>
                         )}
                     </div>
@@ -172,7 +172,7 @@ function ProgramCard({ program, warningDays, canManage }: { program: ProgramRead
                     <p className="text-sm text-muted-foreground">
                         {expiring ? (
                             <>
-                                <b className="text-destructive">Belum ada periode persiapan</b> padahal akreditasi berakhir dalam {program.days_left} hari.
+                                <b className="text-danger-foreground">Belum ada periode persiapan</b> padahal akreditasi berakhir dalam {program.days_left} hari.
                             </>
                         ) : (
                             'Belum ada periode akreditasi berjalan.'

@@ -110,6 +110,8 @@
     --seq-4: #3fa39c;
     --seq-5: #137d80;
     --seq-6: #0b5a60;
+    /* Tinta untuk angka di atas seq-3/seq-4 (≥ 5:1); putih hanya di atas seq-5/seq-6. */
+    --seq-ink: #022a30;
     /* Ramp divergen (distribusi jawaban Likert): koral ↔ teal, netral di tengah. */
     --div-neg-2: #c63b58;
     --div-neg-1: #f0a3b1;
@@ -202,6 +204,7 @@
     --color-seq-4: var(--seq-4);
     --color-seq-5: var(--seq-5);
     --color-seq-6: var(--seq-6);
+    --color-seq-ink: var(--seq-ink);
     --color-div-neg-2: var(--div-neg-2);
     --color-div-neg-1: var(--div-neg-1);
     --color-div-mid: var(--div-mid);

@@ -59,7 +59,7 @@ export default function FindingsIndex({ findings, filters, statuses, severities,
             header: 'Tenggat',
             sortable: true,
             cell: (row) => (
-                <span className={row.overdue ? 'inline-flex items-center gap-1 text-xs font-semibold text-destructive' : 'text-xs text-muted-foreground'}>
+                <span className={row.overdue ? 'inline-flex items-center gap-1 text-xs font-semibold text-danger-foreground' : 'text-xs text-muted-foreground'}>
                     {row.overdue && <AlarmClock className="size-3.5" />}
                     {formatDate(row.due_date)}
                 </span>

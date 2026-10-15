@@ -43,13 +43,14 @@ interface Scale {
 }
 
 const colors = [
-    { value: 'danger', label: 'Merah (kritis)', swatch: 'bg-destructive' },
-    { value: 'warning', label: 'Kuning (perlu perhatian)', swatch: 'bg-warning' },
-    { value: 'neutral', label: 'Abu-abu (netral)', swatch: 'bg-muted-foreground' },
-    { value: 'info', label: 'Biru (baik)', swatch: 'bg-info' },
-    { value: 'success', label: 'Hijau (sangat baik)', swatch: 'bg-success' },
+    { value: 'danger', label: 'Merah (kritis)', swatch: 'bg-destructive', band: 'bg-danger-soft text-danger-foreground' },
+    { value: 'warning', label: 'Kuning (perlu perhatian)', swatch: 'bg-warning', band: 'bg-warning-soft text-gold-foreground' },
+    { value: 'neutral', label: 'Abu-abu (netral)', swatch: 'bg-muted-foreground', band: 'bg-neutral-soft text-foreground' },
+    { value: 'info', label: 'Biru (baik)', swatch: 'bg-info', band: 'bg-info-soft text-info-foreground' },
+    { value: 'success', label: 'Hijau (sangat baik)', swatch: 'bg-success', band: 'bg-success-soft text-success-foreground' },
 ];
-const swatch = (color: string) => colors.find((c) => c.value === color)?.swatch ?? 'bg-muted-foreground';
+/** Pita klasifikasi: isian lembut + tinta pasangannya agar teks tetap ≥ 4,5:1 (Ink Pair Rule). */
+const band = (color: string) => colors.find((c) => c.value === color)?.band ?? 'bg-neutral-soft text-foreground';
 const typeLabels: Record<string, string> = { likert: 'Skala Likert', single_choice: 'Pilihan tunggal', multiple_choice: 'Pilihan ganda', yes_no: 'Ya / Tidak' };
 
 export default function Scales({ schemes, scales }: { schemes: Scheme[]; scales: Scale[] }) {
@@ -89,7 +90,7 @@ export default function Scales({ schemes, scales }: { schemes: Scheme[]; scales:
                                             <ConfirmDialog
                                                 trigger={
                                                     <Button variant="ghost" size="icon-sm" aria-label="Hapus">
-                                                        <Trash2 className="text-destructive" />
+                                                        <Trash2 className="text-danger-foreground" />
                                                     </Button>
                                                 }
                                                 title={`Hapus skema ${item.name}?`}
@@ -104,7 +105,7 @@ export default function Scales({ schemes, scales }: { schemes: Scheme[]; scales:
                                         {item.classes.map((c) => (
                                             <div
                                                 key={c.label}
-                                                className={cn('flex items-center justify-center px-1 text-[11px] font-bold text-white', swatch(c.color))}
+                                                className={cn('flex items-center justify-center border-r border-white/80 px-1 text-[11px] font-bold last:border-r-0', band(c.color))}
                                                 style={{ width: `${((c.max_score - c.min_score) / (item.scale_max - item.scale_min)) * 100}%` }}
                                                 title={`${c.label}: ${c.min_score}–${c.max_score}`}
                                             >
@@ -140,7 +141,7 @@ export default function Scales({ schemes, scales }: { schemes: Scheme[]; scales:
                                         <ConfirmDialog
                                             trigger={
                                                 <Button variant="ghost" size="icon-sm" aria-label="Hapus">
-                                                    <Trash2 className="text-destructive" />
+                                                    <Trash2 className="text-danger-foreground" />
                                                 </Button>
                                             }
                                             title={`Hapus preset ${item.name}?`}
@@ -207,7 +208,7 @@ function SchemeForm({ scheme, onClose }: { scheme: Scheme | null; onClose: () =>
                 </FormField>
             </div>
             <div className="mt-5 rounded-xl border bg-muted/30 p-4">
-                <div className="mb-2 grid grid-cols-[1fr_80px_80px_170px_32px] gap-2 text-[11px] font-semibold text-muted-foreground uppercase">
+                <div className="mb-2 grid grid-cols-[1fr_80px_80px_170px_32px] gap-2 text-[11px] font-semibold text-muted-foreground">
                     <span>Label</span>
                     <span>Dari</span>
                     <span>Sampai</span>
@@ -220,14 +221,14 @@ function SchemeForm({ scheme, onClose }: { scheme: Scheme | null; onClose: () =>
                             <Input value={c.label} onChange={(e) => setClass(index, 'label', e.target.value)} className="h-8 bg-card" />
                             <Input type="number" step="0.01" value={c.min_score} onChange={(e) => setClass(index, 'min_score', Number(e.target.value))} className="h-8 bg-card" />
                             <Input type="number" step="0.01" value={c.max_score} onChange={(e) => setClass(index, 'max_score', Number(e.target.value))} className="h-8 bg-card" />
-                            <SelectField value={c.color} onChange={(v) => setClass(index, 'color', v)} options={colors} className="h-8" />
+                            <SelectField label={`Warna kelas ${index + 1}`} value={c.color} onChange={(v) => setClass(index, 'color', v)} options={colors} className="h-8" />
                             <Button type="button" variant="ghost" size="icon-sm" onClick={() => form.setData('classes', form.data.classes.filter((_, i) => i !== index))} aria-label="Hapus">
                                 <Trash2 className="text-muted-foreground" />
                             </Button>
                         </div>
                     ))}
                 </div>
-                {errors.classes && <p className="mt-2 text-xs font-medium text-destructive">{errors.classes}</p>}
+                {errors.classes && <p className="mt-2 text-xs font-medium text-danger-foreground">{errors.classes}</p>}
                 <Button
                     type="button"
                     variant="ghost"

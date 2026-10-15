@@ -93,7 +93,7 @@ export default function AuditShow(props: Props) {
                         {can.manage && !['completed', 'cancelled'].includes(audit.status) && (
                             <ConfirmDialog
                                 trigger={
-                                    <Button variant="outline" className="text-destructive">
+                                    <Button variant="outline" className="text-danger-foreground">
                                         <Ban /> Batalkan
                                     </Button>
                                 }
@@ -131,7 +131,7 @@ export default function AuditShow(props: Props) {
 
             {audit.status === 'planned' && can.work && (
                 <Alert className="mb-6 border-info/30 bg-info-soft">
-                    <AlertDescription className="text-info">Audit masih terjadwal. Ketua auditor dapat memulai tahap desk evaluation agar daftar tilik bisa diisi.</AlertDescription>
+                    <AlertDescription className="text-info-foreground">Audit masih terjadwal. Ketua auditor dapat memulai tahap desk evaluation agar daftar tilik bisa diisi.</AlertDescription>
                 </Alert>
             )}
 
@@ -149,7 +149,7 @@ export default function AuditShow(props: Props) {
                             <section key={section.id} className="overflow-hidden rounded-2xl border bg-card">
                                 <header className="flex items-center gap-3 border-b bg-secondary/50 px-5 py-3">
                                     <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-xs font-extrabold text-white">{section.code}</span>
-                                    <h3 className="font-bold">{section.title}</h3>
+                                    <h2 className="font-bold">{section.title}</h2>
                                 </header>
                                 <div className="divide-y">
                                     {section.questions.map((question) => (
@@ -179,7 +179,7 @@ export default function AuditShow(props: Props) {
                         <Card className="gap-0 py-0">
                             <div className="flex items-center justify-between border-b p-4">
                                 <div>
-                                    <h3 className="font-bold">Temuan audit</h3>
+                                    <h2 className="font-bold">Temuan audit</h2>
                                     <p className="text-xs text-muted-foreground">Temuan draf hanya terlihat oleh auditor sampai diterbitkan.</p>
                                 </div>
                                 {editable && (
@@ -258,7 +258,7 @@ export default function AuditShow(props: Props) {
                                         {compliance.answered}/{compliance.total}
                                     </span>
                                 </div>
-                                <Meter value={percent} severity={percent === 100 ? 'good' : 'neutral'} />
+                                <Meter label="Butir daftar tilik yang sudah dinilai" value={percent} severity={percent === 100 ? 'good' : 'neutral'} />
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                                 {compliance.breakdown.map((item) => (
@@ -277,7 +277,7 @@ export default function AuditShow(props: Props) {
                                             </span>
                                             <span className="shrink-0 font-semibold tabular">{formatPercent(row.score_percent, 0)}</span>
                                         </div>
-                                        <Meter value={row.score_percent} size="sm" />
+                                        <Meter label="Skor kepatuhan" value={row.score_percent} size="sm" />
                                     </div>
                                 ))}
                             </div>
@@ -365,7 +365,7 @@ function ChecklistItem({ auditId, question, editable, onFinding }: { auditId: nu
                             </Button>
                         )}
                         {editable && (selectedValue === 'non_compliant' || selectedValue === 'partial') && (
-                            <Button variant="outline" size="sm" className="h-8 border-destructive/30 text-destructive" onClick={onFinding}>
+                            <Button variant="outline" size="sm" className="h-8 border-destructive/30 text-danger-foreground" onClick={onFinding}>
                                 <ShieldAlert /> Catat temuan
                             </Button>
                         )}

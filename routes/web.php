@@ -19,6 +19,7 @@ use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Evidence\EvidenceCategoryController;
 use App\Http\Controllers\Evidence\EvidenceController;
+use App\Http\Controllers\GuideController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Improvement\ActionPlanController;
 use App\Http\Controllers\Improvement\RecommendationController;
@@ -55,6 +56,9 @@ use App\Http\Controllers\System\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/branding/logo', BrandingController::class)->name('branding.logo');
+
+// Pusat Panduan dapat dibuka sebelum login (topik masuk & lupa kata sandi) maupun sesudahnya.
+Route::get('/panduan', GuideController::class)->name('guide.index');
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
