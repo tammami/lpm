@@ -111,6 +111,7 @@ export default function AcademicPeriods({ periods, filters, semesters, canManage
     return (
         <>
             <PageHeader
+                reset={['academic-periods']}
                 title="Periode Akademik"
                 description="Semester berjalan dan riwayatnya. Data historis tetap tersimpan untuk analisis tren."
                 breadcrumbs={[{ label: 'Master Akademik' }, { label: 'Periode Akademik' }]}

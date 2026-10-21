@@ -136,6 +136,7 @@ export default function StudyPrograms({ programs, filters, faculties, accreditat
     return (
         <>
             <PageHeader
+                reset={['study-programs']}
                 title="Program Studi"
                 description="Setiap prodi terhubung ke fakultas dan lembaga akreditasinya (LAMDIK, LAMGAMA, dll.) — dapat diubah kapan saja tanpa mengubah kode."
                 breadcrumbs={[{ label: 'Organisasi' }, { label: 'Program Studi' }]}

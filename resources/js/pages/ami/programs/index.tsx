@@ -40,6 +40,7 @@ export default function ProgramsIndex({ programs, periods, canManage }: { progra
     return (
         <>
             <PageHeader
+                reset={['audit-programs']}
                 title="Program Audit Mutu Internal"
                 description="Siklus AMI tahunan: rencana audit, pelaksanaan per auditee, temuan, tindakan koreksi, hingga verifikasi."
                 breadcrumbs={[{ label: 'Audit Mutu Internal' }, { label: 'Program Audit' }]}

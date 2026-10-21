@@ -163,6 +163,7 @@ export default function Lecturers({ lecturers, filters, studyPrograms, ranks, ca
     return (
         <>
             <PageHeader
+                reset={['lecturers']}
                 title="Dosen"
                 description="Data dosen per homebase prodi. Akun login otomatis menggunakan NIDN, atau NUPTK bila belum ber-NIDN."
                 breadcrumbs={[{ label: 'Master Akademik' }, { label: 'Dosen' }]}

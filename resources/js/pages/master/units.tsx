@@ -85,6 +85,7 @@ export default function Units({ units, filters, types, faculties, canManage }: P
     return (
         <>
             <PageHeader
+                reset={['units']}
                 title="Unit Kerja"
                 description="Lembaga, biro, dan UPT yang dapat menjadi auditee AMI maupun pemilik dokumen bukti."
                 breadcrumbs={[{ label: 'Organisasi' }, { label: 'Unit Kerja' }]}

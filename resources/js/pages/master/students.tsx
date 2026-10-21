@@ -121,6 +121,7 @@ export default function Students({ students, filters, studyPrograms, statuses, e
     return (
         <>
             <PageHeader
+                reset={['students']}
                 title="Mahasiswa"
                 description="Data mahasiswa sebagai responden e-Monev. Akun login menggunakan NIM."
                 breadcrumbs={[{ label: 'Master Akademik' }, { label: 'Mahasiswa' }]}

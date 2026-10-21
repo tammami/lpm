@@ -59,6 +59,7 @@ export default function InstrumentsIndex({ instruments, filters, types, responde
     return (
         <>
             <PageHeader
+                reset={['instruments']}
                 title="Instrumen Mutu"
                 description="Susun instrumen Monev, survei, dan AMI tanpa bantuan developer. Setiap perubahan tercatat sebagai versi baru sehingga data historis tetap utuh."
                 breadcrumbs={[{ label: 'e-Monev' }, { label: 'Instrumen' }]}

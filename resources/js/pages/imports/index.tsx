@@ -102,6 +102,7 @@ export default function ImportsIndex({ importers, jobs, draftVersions, maxUpload
     return (
         <>
             <PageHeader
+                reset={['imports']}
                 title="Impor Data"
                 description="Excel menjadi alat impor, bukan pusat sistem. Setiap file divalidasi & dipratinjau sebelum benar-benar disimpan."
                 breadcrumbs={[{ label: 'Data' }, { label: 'Impor Data' }]}

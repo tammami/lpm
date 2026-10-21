@@ -98,7 +98,7 @@ export default function References({ standards, categories, severities, rootCaus
 
     return (
         <>
-            <PageHeader title="Standar & Referensi AMI" description="Standar SPMI, kategori temuan, dan klasifikasi akar masalah ditetapkan oleh LPM — tidak ditanam di kode." breadcrumbs={[{ label: 'Audit Mutu Internal' }, { label: 'Standar & Referensi' }]} />
+            <PageHeader reset={['quality-standards', 'finding-references']} title="Standar & Referensi AMI" description="Standar SPMI, kategori temuan, dan klasifikasi akar masalah ditetapkan oleh LPM — tidak ditanam di kode." breadcrumbs={[{ label: 'Audit Mutu Internal' }, { label: 'Standar & Referensi' }]} />
             <Tabs defaultValue="standards">
                 <TabsList className="mb-5">
                     <TabsTrigger value="standards">Standar SPMI ({standards.length})</TabsTrigger>

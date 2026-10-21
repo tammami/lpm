@@ -85,6 +85,7 @@ export default function AccreditationBodies({ bodies, filters }: { bodies: Pagin
     return (
         <>
             <PageHeader
+                reset={['accreditation-bodies']}
                 title="Lembaga Akreditasi"
                 description="Master lembaga akreditasi (LAM/BAN-PT). Tidak ditanam di kode — tambahkan lembaga baru kapan pun regulasi berubah."
                 breadcrumbs={[{ label: 'Organisasi' }, { label: 'Lembaga Akreditasi' }]}

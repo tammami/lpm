@@ -134,6 +134,7 @@ export default function ResearchWorks({ works, filters, studyPrograms, lecturers
     return (
         <>
             <PageHeader
+                reset={['scientific-works']}
                 title="Karya Ilmiah Dosen"
                 description="Artikel, buku, HKI, dan karya lain dosen sesuai template LPM — termasuk mahasiswa yang ikut menulis. Bukti berupa tautan, tanpa unggah berkas."
                 breadcrumbs={[{ label: 'Karya Ilmiah' }, { label: 'Data Karya' }]}

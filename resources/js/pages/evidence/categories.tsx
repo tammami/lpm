@@ -66,6 +66,7 @@ export default function EvidenceCategories({ categories }: { categories: Categor
     return (
         <>
             <PageHeader
+                reset={['evidence-categories']}
                 title="Kategori Dokumen"
                 breadcrumbs={[{ label: 'Dokumen Bukti', href: route('evidence.index') }, { label: 'Kategori' }]}
                 actions={

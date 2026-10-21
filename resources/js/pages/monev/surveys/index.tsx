@@ -63,6 +63,7 @@ export default function SurveysIndex({ surveys, filters, statuses, periods, mode
     return (
         <>
             <PageHeader
+                reset={['surveys', 'survey-responses']}
                 title="Kegiatan Monev"
                 description="Buka periode pengisian evaluasi pembelajaran dan survei. Responden ditentukan otomatis dari penugasan mengajar & peserta kelas."
                 breadcrumbs={[{ label: 'e-Monev' }, { label: 'Kegiatan Monev' }]}

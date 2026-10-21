@@ -2,9 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\UserRole;
 use App\Models\AcademicPeriod;
 use App\Models\Institution;
 use App\Models\User;
+use App\Services\DataReset\DataResetService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -56,6 +58,9 @@ class HandleInertiaRequests extends Middleware
                 ? AcademicPeriod::active()?->only(['id', 'name', 'code'])
                 : null,
             'unreadNotifications' => fn (): int => $user ? $user->unreadNotifications()->count() : 0,
+            'dataResets' => fn (): ?array => $user?->hasRole(UserRole::Superadmin->value)
+                ? app(DataResetService::class)->labels()
+                : null,
         ];
     }
 

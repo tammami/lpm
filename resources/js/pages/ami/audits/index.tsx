@@ -68,7 +68,7 @@ export default function AuditsIndex({ audits, filters, statuses, programs, isAud
 
     return (
         <>
-            <PageHeader title="Jadwal Audit" description="Seluruh audit yang dapat Anda akses. Auditor mengisi daftar tilik dan mencatat temuan dari halaman detail audit." breadcrumbs={[{ label: 'Audit Mutu Internal' }, { label: 'Jadwal Audit' }]} />
+            <PageHeader reset={['audits']} title="Jadwal Audit" description="Seluruh audit yang dapat Anda akses. Auditor mengisi daftar tilik dan mencatat temuan dari halaman detail audit." breadcrumbs={[{ label: 'Audit Mutu Internal' }, { label: 'Jadwal Audit' }]} />
             <DataTable
                 columns={columns}
                 data={audits.data}

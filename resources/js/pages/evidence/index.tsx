@@ -92,6 +92,7 @@ export default function EvidenceIndex(props: Props) {
     return (
         <>
             <PageHeader
+                reset={['evidence']}
                 title="Dokumen Bukti"
                 description="Satu repositori untuk seluruh bukti mutu — unggah sekali, pakai berkali-kali untuk Monev, AMI, rencana aksi, dan akreditasi. File hanya dapat diunduh melalui pemeriksaan hak akses."
                 breadcrumbs={[{ label: 'Penjaminan Mutu' }, { label: 'Dokumen Bukti' }]}

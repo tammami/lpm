@@ -40,6 +40,7 @@ export default function PeriodIndex({ periods, filters, statuses, studyPrograms,
     return (
         <>
             <PageHeader
+                reset={['accreditation-periods']}
                 title="Periode Akreditasi"
                 description="Setiap siklus (re)akreditasi prodi: instrumen LAM, tim penyusun, tenggat, bukti per indikator, hingga keputusan."
                 breadcrumbs={[{ label: 'Akreditasi' }, { label: 'Periode' }]}

@@ -103,6 +103,7 @@ export default function ClassesIndex({ classes, filters, periods, studyPrograms,
     return (
         <>
             <PageHeader
+                reset={['classes']}
                 title="Kelas & Pengampu"
                 description="Penugasan dosen dan peserta kelas menentukan siapa yang wajib mengisi Monev (eligibility) — mahasiswa tidak memilih dosen sendiri."
                 breadcrumbs={[{ label: 'Master Akademik' }, { label: 'Kelas & Pengampu' }]}

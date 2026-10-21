@@ -133,6 +133,7 @@ export default function Users({ users, filters, roles, faculties, studyPrograms,
     return (
         <>
             <PageHeader
+                reset={['users']}
                 title="Pengguna"
                 description="Kelola akun, peran (RBAC), dan cakupan data. Akun dosen & mahasiswa dibuat otomatis dari master data atau impor."
                 breadcrumbs={[{ label: 'Sistem' }, { label: 'Pengguna' }]}

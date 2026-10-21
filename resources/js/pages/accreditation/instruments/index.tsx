@@ -35,6 +35,7 @@ export default function AccreditationInstruments({ instruments, bodies }: { inst
     return (
         <>
             <PageHeader
+                reset={['accreditation-instruments']}
                 title="Instrumen Akreditasi"
                 description="Instrumen LAM berversi: kriteria, sub-kriteria, indikator, bobot, dan bukti yang dibutuhkan. Versi berlaku terkunci; perubahan dibuat pada versi baru."
                 breadcrumbs={[{ label: 'Akreditasi' }, { label: 'Instrumen LAM' }]}

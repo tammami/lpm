@@ -121,6 +121,7 @@ export default function RecommendationsIndex({ recommendations, filters, statuse
     return (
         <>
             <PageHeader
+                reset={['recommendations']}
                 title="Rekomendasi Peningkatan"
                 description="Dari data menjadi tindakan: setiap rekomendasi punya PIC, tenggat, rencana aksi, bukti, dan verifikasi hingga ditutup."
                 breadcrumbs={[{ label: 'Peningkatan Mutu' }, { label: 'Rekomendasi' }]}

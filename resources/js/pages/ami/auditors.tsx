@@ -107,6 +107,7 @@ export default function Auditors({ auditors, users }: { auditors: AuditorRow[]; 
     return (
         <>
             <PageHeader
+                reset={['auditors']}
                 title="Auditor Internal"
                 description="Pengguna yang ditetapkan sebagai auditor AMI beserta sertifikasi dan kompetensinya."
                 breadcrumbs={[{ label: 'Audit Mutu Internal' }, { label: 'Auditor' }]}

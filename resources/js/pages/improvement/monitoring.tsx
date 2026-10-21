@@ -41,7 +41,7 @@ export default function Monitoring({ plans, filters, statuses, summary }: Props)
 
     return (
         <>
-            <PageHeader title="Monitoring Rencana Aksi" description="Pantau pelaksanaan seluruh rencana aksi peningkatan mutu: progres, PIC, dan tenggat." breadcrumbs={[{ label: 'Peningkatan Mutu' }, { label: 'Monitoring' }]} />
+            <PageHeader reset={['action-plans']} title="Monitoring Rencana Aksi" description="Pantau pelaksanaan seluruh rencana aksi peningkatan mutu: progres, PIC, dan tenggat." breadcrumbs={[{ label: 'Peningkatan Mutu' }, { label: 'Monitoring' }]} />
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatTile label="Rencana aksi" value={summary.total} icon={ListChecks} tone="neutral" />
                 <StatTile label="Rata-rata progres" value={formatPercent(summary.avg_progress, 0)} icon={Gauge} tone="info">

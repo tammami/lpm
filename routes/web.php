@@ -47,6 +47,7 @@ use App\Http\Controllers\Research\ResearchAnalysisController;
 use App\Http\Controllers\Research\ScientificWorkController;
 use App\Http\Controllers\System\AuditLogController;
 use App\Http\Controllers\System\BackupController;
+use App\Http\Controllers\System\DataResetController;
 use App\Http\Controllers\System\ImportController;
 use App\Http\Controllers\System\NotificationController;
 use App\Http\Controllers\System\RoleController;
@@ -258,6 +259,11 @@ Route::middleware('auth')->group(function (): void {
             Route::post('skala/preset', [ScaleController::class, 'storeScale'])->name('settings.answer-scales.store');
             Route::put('skala/preset/{scale}', [ScaleController::class, 'updateScale'])->name('settings.answer-scales.update');
             Route::delete('skala/preset/{scale}', [ScaleController::class, 'destroyScale'])->name('settings.answer-scales.destroy');
+        });
+
+        Route::prefix('kosongkan')->middleware('role:superadmin')->group(function (): void {
+            Route::get('{dataset}', [DataResetController::class, 'show'])->name('data-reset.show');
+            Route::delete('{dataset}', [DataResetController::class, 'destroy'])->middleware('throttle:6,1')->name('data-reset.destroy');
         });
 
         Route::get('log-audit', [AuditLogController::class, 'index'])->middleware('permission:audit_logs.view')->name('audit-logs.index');

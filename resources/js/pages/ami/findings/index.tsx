@@ -70,7 +70,7 @@ export default function FindingsIndex({ findings, filters, statuses, severities,
 
     return (
         <>
-            <PageHeader title="Temuan & Tindak Lanjut" description="Temuan tidak berhenti di laporan: setiap temuan dilacak sampai tindakan koreksinya diverifikasi dan ditutup." breadcrumbs={[{ label: 'Audit Mutu Internal' }, { label: 'Temuan' }]} />
+            <PageHeader reset={['findings']} title="Temuan & Tindak Lanjut" description="Temuan tidak berhenti di laporan: setiap temuan dilacak sampai tindakan koreksinya diverifikasi dan ditutup." breadcrumbs={[{ label: 'Audit Mutu Internal' }, { label: 'Temuan' }]} />
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatTile label="Belum tuntas" value={stats.unresolved} icon={ShieldAlert} tone="danger" hint={`dari ${stats.total} temuan`} />
                 <StatTile label="Melewati tenggat" value={stats.overdue} icon={AlarmClock} tone={stats.overdue ? 'danger' : 'neutral'} />

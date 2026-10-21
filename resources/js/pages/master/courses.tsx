@@ -101,6 +101,7 @@ export default function Courses({ courses, filters, studyPrograms, canManage }: 
     return (
         <>
             <PageHeader
+                reset={['courses']}
                 title="Mata Kuliah"
                 description="Kurikulum per program studi. Kelas dibuka per periode melalui menu Kelas & Pengampu."
                 breadcrumbs={[{ label: 'Master Akademik' }, { label: 'Mata Kuliah' }]}

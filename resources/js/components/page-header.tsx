@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { DataResetButton } from '@/components/data-reset-button';
 import type { BreadcrumbItem } from '@/types';
 
 interface Props {
@@ -9,9 +10,11 @@ interface Props {
     breadcrumbs?: BreadcrumbItem[];
     actions?: ReactNode;
     meta?: ReactNode;
+    /** Kunci data yang dapat dikosongkan Superadmin dari halaman ini. */
+    reset?: string[];
 }
 
-export function PageHeader({ title, description, breadcrumbs, actions, meta }: Props) {
+export function PageHeader({ title, description, breadcrumbs, actions, meta, reset }: Props) {
     return (
         <>
             <Head title={title} />
@@ -37,7 +40,12 @@ export function PageHeader({ title, description, breadcrumbs, actions, meta }: P
                     {description && <div className="mt-1.5 max-w-3xl text-sm text-muted-foreground">{description}</div>}
                     {meta && <div className="mt-3 flex flex-wrap items-center gap-2">{meta}</div>}
                 </div>
-                {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
+                {(actions || reset) && (
+                    <div className="flex shrink-0 flex-wrap items-center gap-2">
+                        {reset && <DataResetButton datasets={reset} />}
+                        {actions}
+                    </div>
+                )}
             </div>
         </>
     );

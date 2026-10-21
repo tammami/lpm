@@ -23,6 +23,7 @@ export default function Notifications({ notifications, filter }: { notifications
     return (
         <div className="mx-auto max-w-3xl">
             <PageHeader
+                reset={['notifications']}
                 title="Notifikasi"
                 breadcrumbs={[{ label: 'Notifikasi' }]}
                 actions={

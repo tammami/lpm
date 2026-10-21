@@ -84,7 +84,7 @@ export default function AuditLogs({ logs, filters, events, modules }: { logs: Pa
 
     return (
         <>
-            <PageHeader title="Log Audit" description="Jejak lengkap aktivitas: login, perubahan data (sebelum/sesudah), publikasi, impor/ekspor, dan perubahan hak akses." breadcrumbs={[{ label: 'Sistem' }, { label: 'Log Audit' }]} />
+            <PageHeader reset={['audit-logs']} title="Log Audit" description="Jejak lengkap aktivitas: login, perubahan data (sebelum/sesudah), publikasi, impor/ekspor, dan perubahan hak akses." breadcrumbs={[{ label: 'Sistem' }, { label: 'Log Audit' }]} />
             <DataTable
                 columns={columns}
                 data={logs.data}

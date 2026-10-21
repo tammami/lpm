@@ -79,6 +79,7 @@ export default function Faculties({ faculties, filters, canManage }: Props) {
     return (
         <>
             <PageHeader
+                reset={['faculties']}
                 title="Fakultas"
                 description="Struktur fakultas di bawah institusi. Program studi dikelompokkan per fakultas."
                 breadcrumbs={[{ label: 'Organisasi' }, { label: 'Fakultas' }]}
