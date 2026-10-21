@@ -58,6 +58,11 @@ export default function SurveyShow({ survey, progress, byStudyProgram, byAssignm
                 meta={
                     <>
                         <StatusBadge tone={surveyTone[survey.status]}>{survey.status_label}</StatusBadge>
+                        {survey.stage_label && (
+                            <StatusBadge tone="gold" dot={false}>
+                                {survey.stage_label}
+                            </StatusBadge>
+                        )}
                         <StatusBadge tone="primary" dot={false}>
                             {survey.instrument} v{survey.instrument_version}
                         </StatusBadge>

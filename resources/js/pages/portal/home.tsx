@@ -13,7 +13,7 @@ interface Target {
     course: string | null;
     course_code: string | null;
     class_code: string | null;
-    lecturer: string | null;
+    lecturer_slot: string | null;
     status: 'pending' | 'submitted' | 'reopened';
     submitted_at: string | null;
     reopen_reason: string | null;
@@ -24,6 +24,7 @@ interface PortalSurvey {
     title: string;
     description: string | null;
     mode: string;
+    stage_label: string | null;
     is_open: boolean;
     is_anonymous: boolean;
     starts_at: string;
@@ -170,6 +171,11 @@ function SurveyCard({ survey, highlight }: { survey: PortalSurvey; highlight: st
                     <StatusBadge tone={left <= 3 ? 'warning' : 'success'} dot={false}>
                         <CalendarClock className="size-3" /> {left <= 0 ? 'Berakhir hari ini' : `Sisa ${left} hari`}
                     </StatusBadge>
+                    {survey.stage_label && (
+                        <StatusBadge tone="gold" dot={false}>
+                            {survey.stage_label}
+                        </StatusBadge>
+                    )}
                     {survey.is_anonymous && (
                         <StatusBadge tone="neutral" dot={false}>
                             <EyeOff className="size-3" /> Anonim
@@ -202,7 +208,7 @@ function SurveyCard({ survey, highlight }: { survey: PortalSurvey; highlight: st
                             <div className="min-w-0 flex-1">
                                 <div className="truncate text-[14px] font-semibold">{target.course ?? survey.instrument}</div>
                                 <div className="truncate text-xs text-muted-foreground">
-                                    {target.lecturer ? `${target.lecturer} · Kelas ${target.class_code}` : 'Survei umum'}
+                                    {target.class_code ? [`Kelas ${target.class_code}`, target.lecturer_slot].filter(Boolean).join(' · ') : 'Survei umum'}
                                 </div>
                                 {target.status === 'reopened' && <div className="mt-0.5 text-[11px] font-medium text-gold-foreground">Dibuka kembali: {target.reopen_reason}</div>}
                             </div>

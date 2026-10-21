@@ -28,7 +28,7 @@ class EligibilityService
     /**
      * Target yang dapat diisi seorang pengguna pada sebuah survei.
      *
-     * @return Collection<int, array{target_key: string, teaching_assignment_id: int|null, course: string|null, course_code: string|null, class_code: string|null, lecturer: string|null, study_program_id: int|null}>
+     * @return Collection<int, array{target_key: string, teaching_assignment_id: int|null, course: string|null, course_code: string|null, class_code: string|null, lecturer_slot: string|null, study_program_id: int|null}>
      */
     public function targetsFor(Survey $survey, User $user): Collection
     {
@@ -39,20 +39,25 @@ class EligibilityService
                 return collect();
             }
 
+            // Nama dosen tidak ditampilkan kepada mahasiswa. Kelas team teaching dibedakan dengan
+            // nomor urut pengampu (koordinator lebih dulu) agar setiap dosen tetap dievaluasi.
             return $this->teachingAssignmentsQuery($survey)
                 ->whereHas('courseClass.students', fn (Builder $query) => $query->whereKey($student->id))
-                ->with(['courseClass.course', 'lecturer'])
+                ->with('courseClass.course')
+                ->orderByRaw("role = 'koordinator' desc")
+                ->orderBy('id')
                 ->get()
-                ->map(fn (TeachingAssignment $assignment): array => [
+                ->groupBy('course_class_id')
+                ->flatMap(fn (Collection $assignments): Collection => $assignments->values()->map(fn (TeachingAssignment $assignment, int $index): array => [
                     'target_key' => SurveyParticipation::targetKeyFor($assignment->id),
                     'teaching_assignment_id' => $assignment->id,
                     'course' => $assignment->courseClass->course->name,
                     'course_code' => $assignment->courseClass->course->code,
                     'class_code' => $assignment->courseClass->code,
-                    'lecturer' => $assignment->lecturer->full_name,
+                    'lecturer_slot' => $assignments->count() > 1 ? 'Dosen '.($index + 1).' dari '.$assignments->count() : null,
                     'study_program_id' => $assignment->courseClass->course->study_program_id,
-                ])
-                ->sortBy(['course', 'lecturer'])
+                ]))
+                ->sortBy([['course', 'asc'], ['class_code', 'asc'], ['lecturer_slot', 'asc']])
                 ->values();
         }
 
@@ -68,13 +73,13 @@ class EligibilityService
             'course' => null,
             'course_code' => null,
             'class_code' => null,
-            'lecturer' => null,
+            'lecturer_slot' => null,
             'study_program_id' => $studyProgramId,
         ]]);
     }
 
     /**
-     * @return array{target_key: string, teaching_assignment_id: int|null, course: string|null, course_code: string|null, class_code: string|null, lecturer: string|null, study_program_id: int|null}|null
+     * @return array{target_key: string, teaching_assignment_id: int|null, course: string|null, course_code: string|null, class_code: string|null, lecturer_slot: string|null, study_program_id: int|null}|null
      */
     public function findTarget(Survey $survey, User $user, ?int $teachingAssignmentId): ?array
     {

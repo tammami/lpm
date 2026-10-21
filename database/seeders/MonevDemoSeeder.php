@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\MonevStage;
 use App\Enums\ParticipationStatus;
 use App\Enums\QuestionType;
 use App\Enums\SurveyMode;
@@ -96,11 +97,12 @@ class MonevDemoSeeder extends Seeder
 
             $survey = Survey::query()->create([
                 'code' => "EVP-{$period->code}-".Str::upper(Str::random(4)),
-                'title' => "Monev Pembelajaran {$period->name}",
+                'title' => "Monev Pembelajaran Akhir Semester {$period->name}",
                 'description' => 'Isilah evaluasi untuk setiap dosen pengampu secara jujur dan objektif. Jawaban Anda anonim dan digunakan untuk peningkatan mutu pembelajaran.',
                 'instrument_version_id' => $item['version']->id,
                 'academic_period_id' => $period->id,
                 'mode' => SurveyMode::TeachingEvaluation,
+                'stage' => MonevStage::Akhir,
                 'respondent_type' => 'mahasiswa',
                 'is_anonymous' => true,
                 'starts_at' => Carbon::parse($item['start'])->setTime(8, 0),

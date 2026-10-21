@@ -53,6 +53,7 @@ class InstrumentVersionController extends Controller
                 'published_at' => $version->published_at?->toIso8601String(),
                 'publisher' => $version->publisher?->name,
                 'surveys_count' => $version->surveys()->count(),
+                'deletable' => $user->can('instruments.manage') && $version->instrument->versions()->count() > 1 && ! $version->isInUse(),
                 'responses_count' => SurveyResponse::query()->where('instrument_version_id', $version->id)->count(),
             ],
             'versions' => $version->instrument->versions()->get(['id', 'version', 'status', 'published_at', 'created_at'])
@@ -176,10 +177,14 @@ class InstrumentVersionController extends Controller
         return redirect()->route('instrument-versions.show', $newVersion);
     }
 
+    /**
+     * Versi apa pun (termasuk yang sudah terbit) boleh dihapus selama belum pernah dipakai,
+     * mis. versi yang diterbitkan dengan salah ketik.
+     */
     public function destroy(InstrumentVersion $version): RedirectResponse
     {
-        if ($version->status !== InstrumentVersionStatus::Draft) {
-            $this->failWith('Hanya versi draf yang dapat dihapus.');
+        if ($version->isInUse()) {
+            $this->failWith("Versi {$version->version} sudah dipakai kegiatan Monev/AMI sehingga tidak dapat dihapus. Arsipkan saja.");
         }
 
         $instrument = $version->instrument;

@@ -62,6 +62,7 @@ class PortalController extends Controller
                     'title' => $survey->title,
                     'description' => $survey->description,
                     'mode' => $survey->mode->value,
+                    'stage_label' => $survey->stage?->label(),
                     'is_open' => $survey->isOpen(),
                     'is_anonymous' => $survey->is_anonymous,
                     'starts_at' => $survey->starts_at->toIso8601String(),

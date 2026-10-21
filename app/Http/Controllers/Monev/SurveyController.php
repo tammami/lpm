@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Monev;
 
 use App\Enums\InstrumentType;
 use App\Enums\InstrumentVersionStatus;
+use App\Enums\MonevStage;
 use App\Enums\ParticipationStatus;
 use App\Enums\RespondentType;
 use App\Enums\SurveyMode;
@@ -38,7 +39,7 @@ class SurveyController extends Controller
 
         $surveys = TableQuery::for($query, $request)
             ->search(['title', 'code'])
-            ->filter(['status' => 'status', 'academic_period_id' => 'academic_period_id', 'mode' => 'mode'])
+            ->filter(['status' => 'status', 'academic_period_id' => 'academic_period_id', 'mode' => 'mode', 'stage' => 'stage'])
             ->sort(['starts_at', 'title', 'ends_at'], '-starts_at')
             ->paginate(10)
             ->through(fn (Survey $survey): array => [
@@ -48,10 +49,11 @@ class SurveyController extends Controller
 
         return Inertia::render('monev/surveys/index', [
             'surveys' => $surveys,
-            'filters' => $this->filters($request, ['status', 'academic_period_id', 'mode']),
+            'filters' => $this->filters($request, ['status', 'academic_period_id', 'mode', 'stage']),
             'statuses' => SurveyStatus::options(),
             'periods' => Options::periods(),
             'modes' => SurveyMode::options(),
+            'stages' => MonevStage::options(),
             'canManage' => $request->user()->can('surveys.manage'),
         ]);
     }
@@ -122,6 +124,7 @@ class SurveyController extends Controller
             'survey' => [
                 ...$survey->only(['id', 'title', 'description', 'instrument_version_id', 'academic_period_id', 'is_anonymous', 'min_responses']),
                 'mode' => $survey->mode->value,
+                'stage' => $survey->stage?->value,
                 'respondent_type' => $survey->respondent_type->value,
                 'status' => $survey->status->value,
                 'starts_at' => $survey->starts_at->format('Y-m-d\TH:i'),
@@ -144,12 +147,14 @@ class SurveyController extends Controller
                 $survey->studyPrograms()->sync($programIds);
             });
         } else {
-            // Setelah dibuka, instrumen & sasaran dikunci agar data tetap konsisten.
+            // Setelah dibuka, instrumen & sasaran dikunci agar data tetap konsisten. Tahap hanya label
+            // pengelompokan sehingga tetap boleh dikoreksi.
             $survey->update($request->validate([
                 'title' => ['required', 'string', 'max:255'],
                 'description' => ['nullable', 'string', 'max:2000'],
                 'ends_at' => ['required', 'date', 'after:'.$survey->starts_at->toDateTimeString()],
                 'min_responses' => ['nullable', 'integer', 'min:1', 'max:100'],
+                'stage' => [Rule::requiredIf($survey->mode === SurveyMode::TeachingEvaluation), Rule::prohibitedIf($survey->mode !== SurveyMode::TeachingEvaluation), 'nullable', Rule::enum(MonevStage::class)],
             ]));
         }
 
@@ -287,6 +292,8 @@ class SurveyController extends Controller
             'title' => $survey->title,
             'mode' => $survey->mode->value,
             'mode_label' => $survey->mode->label(),
+            'stage' => $survey->stage?->value,
+            'stage_label' => $survey->stage?->label(),
             'respondent_type' => $survey->respondent_type->value,
             'respondent_label' => $survey->respondent_type->label(),
             'status' => $survey->status->value,
@@ -326,6 +333,7 @@ class SurveyController extends Controller
             'activePeriodId' => AcademicPeriod::active()?->id,
             'studyPrograms' => Options::studyPrograms($request->user()),
             'modes' => SurveyMode::options(),
+            'stages' => MonevStage::options(),
             'respondentTypes' => collect([RespondentType::Mahasiswa, RespondentType::Dosen])
                 ->map(fn (RespondentType $type): array => ['value' => $type->value, 'label' => $type->label()])->all(),
             'defaultMinResponses' => (int) Settings::get('monev.min_responses', 5),
@@ -345,6 +353,7 @@ class SurveyController extends Controller
                 Rule::exists('instrument_versions', 'id')->where('status', InstrumentVersionStatus::Published->value),
             ],
             'mode' => ['required', Rule::enum(SurveyMode::class)],
+            'stage' => ['nullable', 'required_if:mode,teaching_evaluation', Rule::enum(MonevStage::class)],
             'respondent_type' => ['required', Rule::in([RespondentType::Mahasiswa->value, RespondentType::Dosen->value])],
             'academic_period_id' => ['nullable', 'required_if:mode,teaching_evaluation', 'exists:academic_periods,id'],
             'is_anonymous' => ['boolean'],
@@ -356,7 +365,13 @@ class SurveyController extends Controller
         ], [
             'instrument_version_id.exists' => 'Pilih versi instrumen yang sudah terbit.',
             'academic_period_id.required_if' => 'Evaluasi pembelajaran membutuhkan periode akademik.',
+            'stage.required_if' => 'Pilih tahap Monev: awal atau akhir semester.',
         ]);
+
+        // Tahap hanya berlaku untuk Monev pembelajaran; survei umum tidak bertahap.
+        if ($validated['mode'] !== SurveyMode::TeachingEvaluation->value) {
+            $validated['stage'] = null;
+        }
 
         if ($validated['mode'] === SurveyMode::TeachingEvaluation->value && $validated['respondent_type'] !== RespondentType::Mahasiswa->value) {
             throw ValidationException::withMessages(['respondent_type' => 'Evaluasi pembelajaran diisi oleh mahasiswa.']);

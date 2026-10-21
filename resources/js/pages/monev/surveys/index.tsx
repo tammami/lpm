@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import { CalendarClock, ClipboardCheck, EyeOff, Plus, Users } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { Meter } from '@/components/meter';
+import { SurveyOpenSwitch } from '@/components/monev/survey-open-switch';
 import { PageHeader } from '@/components/page-header';
 import { PaginationBar } from '@/components/pagination-bar';
 import { SearchInput } from '@/components/search-input';
@@ -19,6 +20,8 @@ export interface SurveySummary {
     title: string;
     mode: string;
     mode_label: string;
+    stage: string | null;
+    stage_label: string | null;
     respondent_label: string;
     status: string;
     status_label: string;
@@ -44,15 +47,17 @@ interface Props {
     statuses: Option[];
     periods: Option[];
     modes: Option[];
+    stages: Option[];
     canManage: boolean;
 }
 
-export default function SurveysIndex({ surveys, filters, statuses, periods, modes, canManage }: Props) {
+export default function SurveysIndex({ surveys, filters, statuses, periods, modes, stages, canManage }: Props) {
     const { filters: query, setFilter } = useQueryFilters({
         search: filters.search ?? '',
         status: filters.status ?? 'all',
         academic_period_id: filters.academic_period_id ?? 'all',
         mode: filters.mode ?? 'all',
+        stage: filters.stage ?? 'all',
     });
 
     return (
@@ -76,7 +81,8 @@ export default function SurveysIndex({ surveys, filters, statuses, periods, mode
                 <div className="grid grid-cols-2 gap-2 sm:flex">
                     <SelectField value={query.status} onChange={(v) => setFilter('status', v)} options={statuses} allLabel="Semua status" className="sm:w-40" />
                     <SelectField value={query.academic_period_id} onChange={(v) => setFilter('academic_period_id', v)} options={periods} allLabel="Semua periode" className="sm:w-48" />
-                    <SelectField value={query.mode} onChange={(v) => setFilter('mode', v)} options={modes} allLabel="Semua jenis" className="col-span-2 sm:w-64" />
+                    <SelectField value={query.stage} onChange={(v) => setFilter('stage', v)} options={stages} allLabel="Semua tahap" className="sm:w-40" />
+                    <SelectField value={query.mode} onChange={(v) => setFilter('mode', v)} options={modes} allLabel="Semua jenis" className="sm:w-64" />
                 </div>
             </div>
 
@@ -89,14 +95,19 @@ export default function SurveysIndex({ surveys, filters, statuses, periods, mode
                     {surveys.data.map((survey) => {
                         const left = daysLeft(survey.ends_at);
                         return (
-                            <Link
+                            <div
                                 key={survey.id}
-                                href={route('surveys.show', survey.id)}
-                                className="group grid grid-cols-1 gap-4 rounded-2xl border bg-card p-5 transition hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-center"
+                                className="group relative grid grid-cols-1 gap-4 rounded-2xl border bg-card p-5 transition hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 lg:grid-cols-[minmax(0,1fr)_280px_auto] lg:items-center"
                             >
                                 <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <StatusBadge tone={surveyTone[survey.status]}>{survey.status_label}</StatusBadge>
+                                        {survey.stage_label && (
+                                            <StatusBadge tone="gold" dot={false}>
+                                                {survey.stage_label}
+                                            </StatusBadge>
+                                        )}
+                                        {survey.status === 'active' && left < 0 && <StatusBadge tone="warning">Jadwal sudah berakhir</StatusBadge>}
                                         {survey.is_open && left <= 3 && <StatusBadge tone="warning">Berakhir {left <= 0 ? 'hari ini' : `${left} hari lagi`}</StatusBadge>}
                                         {survey.is_anonymous && (
                                             <StatusBadge tone="neutral" dot={false}>
@@ -105,7 +116,15 @@ export default function SurveysIndex({ surveys, filters, statuses, periods, mode
                                         )}
                                         <span className="font-mono text-[11px] text-muted-foreground">{survey.code}</span>
                                     </div>
-                                    <h2 className="mt-2 truncate text-[16px] font-bold group-hover:text-primary">{survey.title}</h2>
+                                    <h2 className="mt-2 truncate text-[16px] font-bold group-hover:text-primary">
+                                        {/* Tautan menutupi seluruh kartu; sakelar buka/tutup berada di atasnya. */}
+                                        <Link
+                                            href={route('surveys.show', survey.id)}
+                                            className="after:absolute after:inset-0 after:rounded-2xl focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-ring"
+                                        >
+                                            {survey.title}
+                                        </Link>
+                                    </h2>
                                     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                                         <span>
                                             {survey.instrument} v{survey.instrument_version}
@@ -131,7 +150,8 @@ export default function SurveysIndex({ surveys, filters, statuses, periods, mode
                                     </div>
                                     <Meter label="Response rate" value={survey.progress.rate} />
                                 </div>
-                            </Link>
+                                {canManage && <SurveyOpenSwitch survey={survey} className="relative z-10 lg:justify-self-end" />}
+                            </div>
                         );
                     })}
                 </div>

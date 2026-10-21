@@ -78,6 +78,16 @@ class InstrumentVersion extends Model
         return $this->status->isEditable();
     }
 
+    /**
+     * Versi yang sudah dirujuk kegiatan Monev, respons, atau audit AMI tidak boleh dihapus.
+     */
+    public function isInUse(): bool
+    {
+        return $this->surveys()->exists()
+            || Response::query()->where('instrument_version_id', $this->id)->exists()
+            || Audit::query()->where('instrument_version_id', $this->id)->exists();
+    }
+
     public function isUsable(): bool
     {
         return $this->status === InstrumentVersionStatus::Published;

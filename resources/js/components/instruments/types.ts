@@ -69,5 +69,6 @@ export interface BuilderVersion {
     published_at: string | null;
     publisher: string | null;
     surveys_count: number;
+    deletable: boolean;
     responses_count: number;
 }

@@ -11,6 +11,7 @@ use App\Models\SurveyParticipation;
 use App\Models\TeachingAssignment;
 use App\Models\User;
 use Illuminate\Support\Facades\Schema;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /**
  * Siapkan kelas berisi satu mahasiswa yang dievaluasi oleh satu dosen.
@@ -147,4 +148,26 @@ it('lists the evaluation targets of the student on the portal', function () {
             ->has('surveys.0.targets', 1)
             ->where('surveys.0.targets.0.teaching_assignment_id', $assignment->id)
             ->where('surveys.0.targets.0.status', 'pending'));
+});
+
+it('lists every enrolled course without lecturer names and numbers team-taught lecturers', function () {
+    ['survey' => $survey, 'assignment' => $assignment, 'user' => $user] = enrolledStudentWithSurvey();
+    $second = TeachingAssignment::factory()->for($assignment->courseClass, 'courseClass')->create(['role' => 'anggota']);
+
+    $otherClass = CourseClass::factory()->create(['academic_period_id' => $survey->academic_period_id]);
+    TeachingAssignment::factory()->for($otherClass, 'courseClass')->create();
+    $otherClass->students()->attach($user->student);
+
+    $this->actingAs($user)
+        ->get(route('portal.home'))
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('surveys.0.targets', 3)
+            ->where('surveys.0.stage_label', 'Monev Akhir')
+            ->missing('surveys.0.targets.0.lecturer')
+            ->where('surveys.0.targets', fn ($targets) => collect($targets)->pluck('lecturer_slot', 'teaching_assignment_id')->all() == [
+                $assignment->id => 'Dosen 1 dari 2',
+                $second->id => 'Dosen 2 dari 2',
+                $otherClass->teachingAssignments()->value('id') => null,
+            ]))
+        ->assertDontSee($assignment->lecturer->full_name);
 });

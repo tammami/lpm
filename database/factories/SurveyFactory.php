@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\MonevStage;
 use App\Enums\RespondentType;
 use App\Enums\SurveyMode;
 use App\Enums\SurveyStatus;
@@ -23,6 +24,7 @@ class SurveyFactory extends Factory
             'instrument_version_id' => InstrumentVersion::factory()->published()->withLikertQuestions(),
             'academic_period_id' => AcademicPeriod::factory(),
             'mode' => SurveyMode::TeachingEvaluation,
+            'stage' => MonevStage::Akhir,
             'respondent_type' => RespondentType::Mahasiswa,
             'is_anonymous' => true,
             'min_responses' => 3,

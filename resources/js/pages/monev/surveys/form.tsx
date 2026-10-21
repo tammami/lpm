@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type { Option } from '@/types';
 
 interface SurveyForm {
@@ -20,6 +21,7 @@ interface SurveyForm {
     instrument_version_id: number;
     academic_period_id: number | null;
     mode: string;
+    stage: string | null;
     respondent_type: string;
     status: string;
     is_anonymous: boolean;
@@ -36,6 +38,7 @@ interface Props {
     activePeriodId: number | null;
     studyPrograms: Option[];
     modes: Option[];
+    stages: Option[];
     respondentTypes: Option[];
     defaultMinResponses: number;
 }
@@ -48,7 +51,13 @@ const localDate = (offsetDays: number, hour: number) => {
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:00`;
 };
 
-export default function SurveyFormPage({ survey, instrumentVersions, periods, activePeriodId, studyPrograms, modes, respondentTypes, defaultMinResponses }: Props) {
+const stagePhrase: Record<string, string> = { awal: 'Awal Semester', akhir: 'Akhir Semester' };
+
+/** Judul baku, mis. "Monev Pembelajaran Awal Semester Ganjil 2026/2027". */
+const suggestTitle = (instrument: string, stage: string, period: string) =>
+    [instrument.replace(/\s+(awal|akhir)\s+semester\b.*$/i, ''), stagePhrase[stage], period].filter(Boolean).join(' ');
+
+export default function SurveyFormPage({ survey, instrumentVersions, periods, activePeriodId, studyPrograms, modes, stages, respondentTypes, defaultMinResponses }: Props) {
     const locked = survey !== null && survey.status !== 'draft';
     const form = useForm({
         title: survey?.title ?? '',
@@ -56,6 +65,7 @@ export default function SurveyFormPage({ survey, instrumentVersions, periods, ac
         instrument_version_id: survey ? String(survey.instrument_version_id) : '',
         academic_period_id: survey?.academic_period_id ? String(survey.academic_period_id) : activePeriodId ? String(activePeriodId) : '',
         mode: survey?.mode ?? 'teaching_evaluation',
+        stage: survey?.stage ?? 'awal',
         respondent_type: survey?.respondent_type ?? 'mahasiswa',
         is_anonymous: survey?.is_anonymous ?? true,
         min_responses: survey?.min_responses ?? ('' as number | ''),
@@ -64,19 +74,34 @@ export default function SurveyFormPage({ survey, instrumentVersions, periods, ac
         study_program_ids: survey?.study_program_ids ?? ([] as string[]),
     });
 
+    // Judul diisi otomatis dari instrumen, tahap, dan periode selama belum diketik sendiri.
+    const autoTitle = (data: typeof form.data) => {
+        const version = instrumentVersions.find((v) => String(v.value) === data.instrument_version_id);
+        if (!version) return '';
+        const period = periods.find((p) => String(p.value) === data.academic_period_id)?.label ?? '';
+        return suggestTitle(version.label.split(' — ')[0], data.mode === 'teaching_evaluation' ? data.stage : '', period);
+    };
+
+    const update = (changes: Partial<typeof form.data>) =>
+        form.setData((data) => {
+            const next = { ...data, ...changes };
+            return { ...next, title: !data.title || data.title === autoTitle(data) ? autoTitle(next) : data.title };
+        });
+
     const pickVersion = (value: string) => {
         const version = instrumentVersions.find((v) => String(v.value) === value);
-        form.setData((data) => ({
-            ...data,
+        const stage = version && /akhir\s+semester/i.test(version.label) ? 'akhir' : version && /awal\s+semester/i.test(version.label) ? 'awal' : undefined;
+        update({
             instrument_version_id: value,
             mode: version?.instrument_type === 'monev_pembelajaran' ? 'teaching_evaluation' : 'general',
             respondent_type: version?.respondent_type === 'dosen' ? 'dosen' : 'mahasiswa',
-            title: data.title || (version ? version.label.split(' — ')[0] + (activePeriodId ? ` ${periods.find((p) => p.value === activePeriodId)?.label ?? ''}` : '') : ''),
-        }));
+            ...(stage && { stage }),
+        });
     };
 
     const submit = (event: FormEvent) => {
         event.preventDefault();
+        form.transform((data) => ({ ...data, stage: data.mode === 'teaching_evaluation' ? data.stage : null }));
         if (survey) form.put(route('surveys.update', survey.id));
         else form.post(route('surveys.store'));
     };
@@ -90,7 +115,7 @@ export default function SurveyFormPage({ survey, instrumentVersions, periods, ac
             />
             {locked && (
                 <Alert className="mb-5 border-info/30 bg-info-soft">
-                    <AlertDescription className="text-info-foreground">Kegiatan sudah dibuka — hanya judul, deskripsi, tanggal berakhir, dan ambang minimum respons yang dapat diubah.</AlertDescription>
+                    <AlertDescription className="text-info-foreground">Kegiatan sudah dibuka — hanya judul, tahap Monev, deskripsi, tanggal berakhir, dan ambang minimum respons yang dapat diubah.</AlertDescription>
                 </Alert>
             )}
             <form onSubmit={submit} className="flex flex-col gap-5">
@@ -98,8 +123,26 @@ export default function SurveyFormPage({ survey, instrumentVersions, periods, ac
                     <FormField label="Versi instrumen" error={form.errors.instrument_version_id} required className="sm:col-span-2">
                         <Combobox value={form.data.instrument_version_id} onChange={pickVersion} options={instrumentVersions} placeholder="Pilih instrumen terbit…" invalid={!!form.errors.instrument_version_id} />
                     </FormField>
+                    {form.data.mode === 'teaching_evaluation' && (
+                        <FormField label="Tahap Monev" error={form.errors.stage} required hint="Monev Awal di pertengahan perkuliahan, Monev Akhir menjelang UAS." className="sm:col-span-2">
+                            <ToggleGroup
+                                type="single"
+                                variant="outline"
+                                value={form.data.stage}
+                                onValueChange={(v) => v && update({ stage: v })}
+                                className="w-full sm:w-auto"
+                                aria-label="Tahap Monev"
+                            >
+                                {stages.map((stage) => (
+                                    <ToggleGroupItem key={stage.value} value={String(stage.value)} className="flex-1 px-5 font-semibold data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:hover:bg-primary data-[state=on]:hover:text-primary-foreground sm:flex-none">
+                                        {stage.label}
+                                    </ToggleGroupItem>
+                                ))}
+                            </ToggleGroup>
+                        </FormField>
+                    )}
                     <FormField label="Judul kegiatan" error={form.errors.title} required className="sm:col-span-2">
-                        <Input value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} placeholder="Monev Pembelajaran Ganjil 2026/2027" />
+                        <Input value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} placeholder="Monev Pembelajaran Awal Semester Ganjil 2026/2027" />
                     </FormField>
                     <FormField label="Petunjuk untuk responden" error={form.errors.description} className="sm:col-span-2">
                         <Textarea rows={3} value={form.data.description} onChange={(e) => form.setData('description', e.target.value)} placeholder="Isilah dengan jujur sesuai pengalaman Anda selama perkuliahan…" />
@@ -109,7 +152,7 @@ export default function SurveyFormPage({ survey, instrumentVersions, periods, ac
                 <fieldset disabled={locked} className="contents">
                     <Section title="Sasaran responden" description="Eligibility dihitung otomatis — mahasiswa hanya mengevaluasi dosen di kelas yang diikutinya.">
                         <FormField label="Jenis kegiatan" error={form.errors.mode} required>
-                            <SelectField value={form.data.mode} onChange={(v) => form.setData('mode', v)} options={modes} disabled={locked} />
+                            <SelectField value={form.data.mode} onChange={(v) => update({ mode: v })} options={modes} disabled={locked} />
                         </FormField>
                         <FormField label="Responden" error={form.errors.respondent_type} required>
                             <SelectField
@@ -120,7 +163,7 @@ export default function SurveyFormPage({ survey, instrumentVersions, periods, ac
                             />
                         </FormField>
                         <FormField label="Periode akademik" error={form.errors.academic_period_id} required={form.data.mode === 'teaching_evaluation'}>
-                            <SelectField value={form.data.academic_period_id} onChange={(v) => form.setData('academic_period_id', v)} options={periods} disabled={locked} />
+                            <SelectField value={form.data.academic_period_id} onChange={(v) => update({ academic_period_id: v })} options={periods} disabled={locked} />
                         </FormField>
                         <FormField label="Cakupan program studi" hint="Kosongkan untuk seluruh prodi." error={form.errors.study_program_ids}>
                             <MultiCombobox values={form.data.study_program_ids} onChange={(v) => form.setData('study_program_ids', v)} options={studyPrograms} placeholder="Semua prodi" />

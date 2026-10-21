@@ -318,14 +318,15 @@ export default function InstrumentBuilder(props: Props) {
                                     {version.publisher ? ` oleh ${version.publisher}` : ''}.
                                 </p>
                             )}
-                            {version.status === 'draft' && versions.length > 1 && can.manage && (
+                            {version.deletable && (
                                 <ConfirmDialog
                                     trigger={
                                         <Button variant="ghost" size="sm" className="mt-2 justify-start text-danger-foreground">
-                                            <Trash2 /> Hapus draf ini
+                                            <Trash2 /> Hapus versi ini
                                         </Button>
                                     }
-                                    title={`Hapus draf v${version.version}?`}
+                                    title={`Hapus v${version.version} (${version.status_label})?`}
+                                    description="Versi ini belum dipakai kegiatan Monev, respons, maupun audit sehingga aman dihapus. Versi lain tidak terpengaruh."
                                     href={route('instrument-versions.destroy', version.id)}
                                     confirmLabel="Hapus"
                                 />

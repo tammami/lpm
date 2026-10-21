@@ -19,7 +19,7 @@ import { formatDateTime } from '@/lib/format';
 
 interface Props {
     survey: { id: number; title: string; description: string | null; is_anonymous: boolean; ends_at: string; instrument: string; version: string };
-    target: { teaching_assignment_id: number | null; course: string | null; course_code: string | null; class_code: string | null; lecturer: string | null };
+    target: { teaching_assignment_id: number | null; course: string | null; course_code: string | null; class_code: string | null; lecturer_slot: string | null };
     reopenReason: string | null;
     sections: QuestionnaireSection[];
 }
@@ -91,7 +91,8 @@ export default function PortalFill({ survey, target, reopenReason, sections }: P
                     <>
                         <h1 className="mt-1 text-xl leading-snug font-extrabold">{target.course}</h1>
                         <p className="mt-1 text-sm text-muted-foreground">
-                            <span className="font-semibold text-foreground">{target.lecturer}</span> · Kelas {target.class_code} · {target.course_code}
+                            Kelas {target.class_code} · {target.course_code}
+                            {target.lecturer_slot && <span className="font-semibold text-foreground"> · {target.lecturer_slot}</span>}
                         </p>
                     </>
                 ) : (

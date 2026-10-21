@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MonevStage;
 use App\Enums\RespondentType;
 use App\Enums\SurveyMode;
 use App\Enums\SurveyStatus;
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Kegiatan survei/Monev: instrumen versi tertentu yang dibuka untuk responden pada rentang waktu tertentu.
  */
 #[Fillable([
-    'code', 'title', 'description', 'instrument_version_id', 'academic_period_id', 'mode', 'respondent_type',
+    'code', 'title', 'description', 'instrument_version_id', 'academic_period_id', 'mode', 'stage', 'respondent_type',
     'is_anonymous', 'min_responses', 'starts_at', 'ends_at', 'status', 'created_by', 'opened_at', 'closed_at',
 ])]
 class Survey extends Model
@@ -34,6 +35,7 @@ class Survey extends Model
     {
         return [
             'mode' => SurveyMode::class,
+            'stage' => MonevStage::class,
             'respondent_type' => RespondentType::class,
             'status' => SurveyStatus::class,
             'is_anonymous' => 'boolean',
