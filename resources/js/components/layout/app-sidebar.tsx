@@ -26,7 +26,7 @@ export function AppSidebar({ collapsed = false, onToggleCollapse, onNavigate }: 
         <div className="flex h-full flex-col border-r border-white/70 bg-sidebar bg-(image:--grad-sidebar) text-sidebar-foreground backdrop-blur-2xl">
             <div className={cn('flex h-16 shrink-0 items-center border-b border-white/60', collapsed ? 'justify-center px-2' : 'px-5')}>
                 <Link href={route('home')} className="min-w-0" onClick={onNavigate}>
-                    {collapsed ? <LogoMark label={`SIMUTU · ${page.props.app.institution_short}`} /> : <AppLogo subtitle={`LPM ${page.props.app.institution_short}`} />}
+                    {collapsed ? <LogoMark label={`SIMUTU · ${page.props.app.institution_short}`} /> : <AppLogo />}
                 </Link>
             </div>
 

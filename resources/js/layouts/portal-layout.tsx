@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, Bell } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { LogoMark } from '@/components/brand/app-logo';
+import { AppTagline, LogoMark } from '@/components/brand/app-logo';
 import { HelpButton } from '@/components/guide/help-button';
 import { UserMenu } from '@/components/layout/user-menu';
 
@@ -25,6 +25,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
                         <LogoMark className="size-9" />
                         <div className="min-w-0 leading-tight">
                             <div className="text-sm font-extrabold">SIMUTU</div>
+                            <AppTagline />
                             <div className="truncate text-[11px] text-muted-foreground">Portal Responden · {app.institution_short}</div>
                         </div>
                     </Link>

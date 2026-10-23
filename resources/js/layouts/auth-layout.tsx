@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import { BarChart3, ClipboardCheck, ShieldCheck } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { AppLogo, LogoMark } from '@/components/brand/app-logo';
+import { AppLogo, AppTagline, LogoMark } from '@/components/brand/app-logo';
 
 const pillars = [
     { icon: ClipboardCheck, title: 'Monitor', text: 'e-Monev pembelajaran & survei kepuasan secara real-time.' },
@@ -55,7 +55,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                     <LogoMark variant="seal" label={`Lambang ${app.institution}`} className="size-20" />
                     <div>
                         <div className="text-lg font-extrabold">SIMUTU</div>
-                        <div className="text-xs text-muted-foreground">LPM {app.institution}</div>
+                        <AppTagline className="text-[11px]" />
                     </div>
                 </div>
                 <div className="w-full max-w-[440px] rounded-3xl border border-white/80 surface-glass p-6 sm:p-9">{children}</div>

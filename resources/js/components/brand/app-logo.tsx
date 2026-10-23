@@ -25,12 +25,20 @@ export function LogoMark({ className, variant = 'mark', label }: { className?: s
     );
 }
 
+/** Jargon LPM, tampil tepat di bawah tulisan SIMUTU. */
+export const APP_TAGLINE = 'LPM AKRAB, AL-MANAN UNGGUL';
+
+export function AppTagline({ className, inverted = false }: { className?: string; inverted?: boolean }) {
+    return <div className={cn('truncate text-[10px] font-bold tracking-wide', inverted ? 'text-hero-accent' : 'text-primary', className)}>{APP_TAGLINE}</div>;
+}
+
 export function AppLogo({ subtitle, className, inverted = false, mark = true }: { subtitle?: string; className?: string; inverted?: boolean; mark?: boolean }) {
     return (
         <div className={cn('flex items-center gap-3', className)}>
             {mark && <LogoMark className="size-10" />}
             <div className="min-w-0 leading-tight">
                 <div className={cn('text-[16px] font-extrabold tracking-tight', inverted ? 'text-white' : 'text-foreground')}>SIMUTU</div>
+                <AppTagline inverted={inverted} />
                 {subtitle && <div className={cn('truncate text-[11px] font-medium', inverted ? 'text-white/85' : 'text-muted-foreground')}>{subtitle}</div>}
             </div>
         </div>

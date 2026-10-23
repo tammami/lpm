@@ -1,7 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { LogIn } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { LogoMark } from '@/components/brand/app-logo';
+import { AppTagline, LogoMark } from '@/components/brand/app-logo';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -18,7 +18,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
                         <LogoMark className="size-9" label={`Lambang ${app.institution}`} />
                         <div className="min-w-0 leading-tight">
                             <div className="text-sm font-extrabold">SIMUTU</div>
-                            <div className="truncate text-[11px] text-muted-foreground">LPM {app.institution_short}</div>
+                            <AppTagline />
                         </div>
                     </Link>
                     <Button asChild>
