@@ -179,11 +179,23 @@ it('deletes the uploaded files of emptied evidence', function () {
 
 it('does not empty anything when the backup fails', function () {
     studentWhoFilledMonev();
+    config(['database.backup.php_fallback' => false]);
     Process::fake(fn () => Process::result(errorOutput: 'Access denied', exitCode: 2));
 
     $this->actingAs($this->superadmin)->delete(route('data-reset.destroy', 'students'), ['confirmation' => 'KOSONGKAN MAHASISWA']);
 
     expect(Student::query()->count())->toBe(1);
+});
+
+it('still empties the data with a PHP backup when mysqldump cannot run for the web server', function () {
+    studentWhoFilledMonev();
+    Process::fake(fn () => Process::result(errorOutput: 'mysqldump: command not found', exitCode: 127));
+
+    $this->actingAs($this->superadmin)->delete(route('data-reset.destroy', 'students'), ['confirmation' => 'KOSONGKAN MAHASISWA'])
+        ->assertSessionHasNoErrors();
+
+    expect(Student::query()->count())->toBe(0)
+        ->and(app(DatabaseBackup::class)->all())->toHaveCount(1);
 });
 
 it('can preview and empty every dataset on the demo data', function () {

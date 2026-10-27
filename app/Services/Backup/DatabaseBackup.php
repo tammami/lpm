@@ -11,9 +11,11 @@ use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\Process\ExecutableFinder;
+use Throwable;
 
 /**
  * Cadangan & pemulihan database MySQL (mysqldump → .sql.gz) di folder penyimpanan lokal.
+ * Bila mysqldump/mysql tidak dapat dijalankan oleh proses server, dipakai SqlDumper (PHP).
  * Nama file memuat tanggal & jam pembuatan dan menjadi satu-satunya sumber informasi waktu cadangan.
  */
 class DatabaseBackup
@@ -78,27 +80,7 @@ class DatabaseBackup
         $dump = $target.'.tmp';
 
         try {
-            $result = Process::timeout(900)
-                ->env(['MYSQL_PWD' => (string) ($connection['password'] ?? '')])
-                ->run([
-                    $this->binary('database.backup.dump_binary', ['mysqldump', 'mariadb-dump'], 'DB_DUMP_BINARY'),
-                    '--host='.$connection['host'],
-                    '--port='.$connection['port'],
-                    '--user='.$connection['username'],
-                    '--single-transaction',
-                    '--quick',
-                    '--routines',
-                    '--triggers',
-                    '--no-tablespaces',
-                    '--default-character-set=utf8mb4',
-                    '--result-file='.$dump,
-                    $connection['database'],
-                ]);
-
-            if ($result->failed() || ! is_file($dump) || filesize($dump) === 0) {
-                throw new RuntimeException('mysqldump gagal: '.(trim($result->errorOutput()) ?: 'tidak ada keluaran.'));
-            }
-
+            $this->dump($connection, $dump);
             $this->compress($dump, $target);
         } finally {
             File::delete($dump);
@@ -109,6 +91,61 @@ class DatabaseBackup
         }
 
         return $name;
+    }
+
+    /**
+     * Tulis dump SQL ke $dump dengan mysqldump; bila program tidak ditemukan atau gagal dijalankan
+     * oleh proses ini, dump dibuat lewat koneksi PHP aplikasi.
+     *
+     * @param  array<string, mixed>  $connection
+     */
+    private function dump(array $connection, string $dump): void
+    {
+        $failure = null;
+
+        try {
+            $binary = $this->binary('database.backup.dump_binary', ['mysqldump', 'mariadb-dump'], 'DB_DUMP_BINARY');
+
+            if ($binary !== null) {
+                $result = Process::timeout(900)
+                    ->env(['MYSQL_PWD' => (string) ($connection['password'] ?? '')])
+                    ->run([
+                        $binary,
+                        '--host='.$connection['host'],
+                        '--port='.$connection['port'],
+                        '--user='.$connection['username'],
+                        '--single-transaction',
+                        '--quick',
+                        '--routines',
+                        '--triggers',
+                        '--no-tablespaces',
+                        '--default-character-set=utf8mb4',
+                        '--result-file='.$dump,
+                        $connection['database'],
+                    ]);
+
+                if (! $result->failed() && is_file($dump) && filesize($dump) > 0) {
+                    return;
+                }
+
+                throw new RuntimeException('mysqldump gagal: '.(trim($result->errorOutput()) ?: 'tidak ada keluaran.'));
+            }
+        } catch (Throwable $exception) {
+            if (! config('database.backup.php_fallback', true)) {
+                throw $exception;
+            }
+
+            report($exception);
+            $failure = $exception->getMessage().' ';
+        }
+
+        File::delete($dump);
+
+        try {
+            app(SqlDumper::class)->dump($dump);
+        } catch (Throwable $exception) {
+            throw new RuntimeException($failure.'Cadangan lewat PHP juga gagal: '.$exception->getMessage(), previous: $exception);
+        }
     }
 
     /**
@@ -125,22 +162,31 @@ class DatabaseBackup
 
         try {
             $this->decompress($source, $sql);
-            $input = fopen($sql, 'rb');
 
-            $result = Process::timeout(1800)
-                ->env(['MYSQL_PWD' => (string) ($connection['password'] ?? '')])
-                ->input($input)
-                ->run([
-                    $client,
-                    '--host='.$connection['host'],
-                    '--port='.$connection['port'],
-                    '--user='.$connection['username'],
-                    '--default-character-set=utf8mb4',
-                    $connection['database'],
-                ]);
+            if ($client === null) {
+                try {
+                    app(SqlDumper::class)->import($sql);
+                } catch (Throwable $exception) {
+                    throw new RuntimeException('Pemulihan gagal: '.$exception->getMessage()." Kondisi sebelum pemulihan tersimpan di {$safety}.", previous: $exception);
+                }
+            } else {
+                $input = fopen($sql, 'rb');
 
-            if ($result->failed()) {
-                throw new RuntimeException('Pemulihan gagal: '.(trim($result->errorOutput()) ?: 'tidak ada keluaran.')." Kondisi sebelum pemulihan tersimpan di {$safety}.");
+                $result = Process::timeout(1800)
+                    ->env(['MYSQL_PWD' => (string) ($connection['password'] ?? '')])
+                    ->input($input)
+                    ->run([
+                        $client,
+                        '--host='.$connection['host'],
+                        '--port='.$connection['port'],
+                        '--user='.$connection['username'],
+                        '--default-character-set=utf8mb4',
+                        $connection['database'],
+                    ]);
+
+                if ($result->failed()) {
+                    throw new RuntimeException('Pemulihan gagal: '.(trim($result->errorOutput()) ?: 'tidak ada keluaran.')." Kondisi sebelum pemulihan tersimpan di {$safety}.");
+                }
             }
         } finally {
             if (isset($input) && is_resource($input)) {
@@ -216,16 +262,22 @@ class DatabaseBackup
     /**
      * @param  list<string>  $names
      */
-    private function binary(string $configKey, array $names, string $envKey): string
+    private function binary(string $configKey, array $names, string $envKey): ?string
     {
-        if ($configured = config($configKey)) {
+        $configured = config($configKey);
+
+        if ($configured === 'php') {
+            return null;
+        }
+
+        if ($configured) {
             return $configured;
         }
 
         $finder = new ExecutableFinder;
         $directories = [
             ...self::BINARY_DIRECTORIES,
-            ...array_filter([getenv('HOME') ? getenv('HOME').'/Library/Application Support/Herd/bin' : null]),
+            ...$this->homeDirectories(),
             ...$this->windowsDirectories(),
         ];
 
@@ -235,7 +287,36 @@ class DatabaseBackup
             }
         }
 
+        if (config('database.backup.php_fallback', true)) {
+            return null;
+        }
+
         throw new RuntimeException("Program {$names[0]} tidak ditemukan di server. Isi {$envKey} pada file .env dengan lokasi lengkapnya.");
+    }
+
+    /**
+     * Folder di profil pengguna (Herd, DBngin). PHP-FPM mengosongkan variabel lingkungan
+     * (clear_env), jadi HOME dibaca dari akun sistem bila getenv('HOME') kosong.
+     *
+     * @return list<string>
+     */
+    private function homeDirectories(): array
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            return [];
+        }
+
+        $home = getenv('HOME') ?: ($_SERVER['HOME'] ?? null);
+        if (! $home && function_exists('posix_getpwuid') && function_exists('posix_geteuid')) {
+            $home = posix_getpwuid(posix_geteuid())['dir'] ?? null;
+        }
+
+        return [
+            ...($home ? [$home.'/Library/Application Support/Herd/bin', $home.'/.config/herd-lite/bin'] : []),
+            ...(glob('/Users/Shared/DBngin/mysql/*/bin', GLOB_ONLYDIR) ?: []),
+            ...(glob('/opt/homebrew/opt/mysql*/bin', GLOB_ONLYDIR) ?: []),
+            ...(glob('/usr/local/opt/mysql*/bin', GLOB_ONLYDIR) ?: []),
+        ];
     }
 
     /**

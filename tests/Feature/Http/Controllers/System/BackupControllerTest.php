@@ -68,12 +68,54 @@ it('shows the backup folder and the existing backups to the admin', function () 
 });
 
 it('reports a failed dump and leaves no file behind', function () {
+    config(['database.backup.php_fallback' => false]);
     Process::fake(fn () => Process::result(errorOutput: 'Access denied for user', exitCode: 2));
 
     $this->actingAs($this->admin)->from(route('backups.index'))->post(route('backups.store'))->assertRedirect(route('backups.index'));
 
     expect(app(DatabaseBackup::class)->all())->toBeEmpty()
         ->and(glob(app(DatabaseBackup::class)->directory().'/*'))->toBeEmpty();
+});
+
+it('falls back to a PHP dump when mysqldump cannot run for the web server', function () {
+    Process::fake(fn () => Process::result(errorOutput: 'mysqldump: command not found', exitCode: 127));
+
+    $this->actingAs($this->admin)->from(route('backups.index'))->post(route('backups.store'))->assertSessionHasNoErrors();
+
+    $backups = app(DatabaseBackup::class);
+    $sql = gzdecode(file_get_contents($backups->path($backups->all()[0]['name'])));
+
+    expect($sql)->toContain('CREATE TABLE `users`')
+        ->and($sql)->toContain('INSERT INTO `users` VALUES')
+        ->and($sql)->toContain($this->admin->email)
+        ->and(glob($backups->directory().'/*.tmp'))->toBeEmpty();
+});
+
+it('uses the built-in PHP dump without running any program when set to php', function () {
+    Process::fake();
+    config(['database.backup.dump_binary' => 'php']);
+
+    $name = app(DatabaseBackup::class)->create();
+
+    expect(gzdecode(file_get_contents(app(DatabaseBackup::class)->path($name))))->toContain('CREATE TABLE `users`');
+    Process::assertNothingRan();
+});
+
+it('restores through PHP when the mysql client is set to php', function () {
+    Process::fake();
+    config(['database.backup.dump_binary' => 'php', 'database.backup.client_binary' => 'php']);
+    $backups = app(DatabaseBackup::class);
+    $this->travelTo('2026-09-29 01:00:00');
+    $name = 'backup_'.config('database.connections.mysql.database').'_2026-09-28_01-00-00.sql.gz';
+    file_put_contents($backups->directory().'/'.$name, gzencode(
+        "-- dump\n/*!40101 SET NAMES utf8mb4 */;\nUPDATE `users` SET `name` = 'Pulih;\\nBaris' WHERE `id` = {$this->admin->id};\n"
+    ));
+
+    $backups->restore($name);
+
+    expect($this->admin->fresh()->name)->toBe("Pulih;\nBaris")
+        ->and($backups->all())->toHaveCount(2);
+    Process::assertNothingRan();
 });
 
 it('keeps only the configured number of newest backups', function () {

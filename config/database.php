@@ -138,13 +138,15 @@ return [
     |--------------------------------------------------------------------------
     |
     | Lokasi lengkap program mysqldump (cadangan) dan mysql (pemulihan).
-    | Kosongkan agar dicari otomatis.
+    | Kosongkan agar dicari otomatis; isi "php" untuk selalu memakai cadangan bawaan PHP.
+    | Bila program tidak ditemukan atau gagal, cadangan dibuat lewat PHP (php_fallback).
     |
     */
 
     'backup' => [
         'dump_binary' => env('DB_DUMP_BINARY'),
         'client_binary' => env('DB_CLIENT_BINARY'),
+        'php_fallback' => (bool) env('DB_BACKUP_PHP_FALLBACK', true),
     ],
 
     /*
