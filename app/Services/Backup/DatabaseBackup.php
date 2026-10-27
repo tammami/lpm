@@ -295,7 +295,7 @@ class DatabaseBackup
     }
 
     /**
-     * Folder di profil pengguna (Herd, DBngin). PHP-FPM mengosongkan variabel lingkungan
+     * Folder di profil pengguna (Herd) dan Homebrew. PHP-FPM mengosongkan variabel lingkungan
      * (clear_env), jadi HOME dibaca dari akun sistem bila getenv('HOME') kosong.
      *
      * @return list<string>
@@ -313,7 +313,6 @@ class DatabaseBackup
 
         return [
             ...($home ? [$home.'/Library/Application Support/Herd/bin', $home.'/.config/herd-lite/bin'] : []),
-            ...(glob('/Users/Shared/DBngin/mysql/*/bin', GLOB_ONLYDIR) ?: []),
             ...(glob('/opt/homebrew/opt/mysql*/bin', GLOB_ONLYDIR) ?: []),
             ...(glob('/usr/local/opt/mysql*/bin', GLOB_ONLYDIR) ?: []),
         ];
