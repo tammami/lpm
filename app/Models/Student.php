@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['user_id', 'study_program_id', 'nim', 'name', 'email', 'phone', 'gender', 'entry_year', 'semester', 'status'])]
 class Student extends Model
@@ -40,5 +41,10 @@ class Student extends Model
     public function classes(): BelongsToMany
     {
         return $this->belongsToMany(CourseClass::class, 'class_enrollments')->withTimestamps();
+    }
+
+    public function achievements(): HasMany
+    {
+        return $this->hasMany(StudentAchievement::class);
     }
 }

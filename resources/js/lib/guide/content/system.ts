@@ -16,7 +16,7 @@ export const systemArticles: GuideArticle[] = [
             'Di menu samping, buka **Sistem › Pengaturan › Pengguna**.',
             'Tekan **Tambah pengguna**.',
             'Isi **Nama lengkap**, **Email**, dan **Username** (opsional, untuk login selain email).',
-            'Pilih satu atau lebih **Peran**, mis. Admin Prodi / Kaprodi, Pimpinan, Auditor, LP2M.',
+            'Pilih satu atau lebih **Peran**, mis. Admin Prodi / Kaprodi, Pimpinan, Auditor, LP2M, Bidang Kemahasiswaan.',
             'Bila memilih Admin Fakultas atau Admin Prodi, pilih fakultas atau program studinya. Ini menentukan cakupan data yang bisa dilihat.',
             'Isi **Unit kerja** bila pengguna menjadi PIC unit. Kosongkan **Kata sandi awal** agar dibuatkan otomatis.',
             'Simpan. Kata sandi sementara tampil di notifikasi kanan atas. Sampaikan ke pengguna. Pengguna wajib menggantinya saat login pertama.',

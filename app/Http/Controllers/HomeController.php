@@ -23,6 +23,10 @@ class HomeController extends Controller
             return redirect()->route('portal.home');
         }
 
+        if (! $user->can('dashboard.view') && $user->can('achievements.verify')) {
+            return redirect()->route('achievements.index');
+        }
+
         return redirect()->route('dashboard');
     }
 }

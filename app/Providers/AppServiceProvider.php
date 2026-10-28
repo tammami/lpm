@@ -10,6 +10,7 @@ use App\Models\Audit;
 use App\Models\CorrectiveAction;
 use App\Models\Evidence;
 use App\Models\Finding;
+use App\Models\LpmActivity;
 use App\Models\Recommendation;
 use App\Models\ScientificWork;
 use App\Models\Survey;
@@ -67,6 +68,7 @@ class AppServiceProvider extends ServiceProvider
             'accreditation_indicator' => AccreditationIndicator::class,
             'accreditation_period' => AccreditationPeriod::class,
             'scientific_work' => ScientificWork::class,
+            'lpm_activity' => LpmActivity::class,
         ]);
 
         Gate::before(fn (User $user): ?bool => $user->hasRole(UserRole::Superadmin->value) ? true : null);

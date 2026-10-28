@@ -8,6 +8,7 @@ use App\Models\Evidence;
 use App\Models\Finding;
 use App\Models\Instrument;
 use App\Models\Lecturer;
+use App\Models\LpmActivity;
 use App\Models\Recommendation;
 use App\Models\StudyProgram;
 use App\Models\Survey;
@@ -20,13 +21,14 @@ use Database\Seeders\DemoUserSeeder;
 use Database\Seeders\EvidenceDemoSeeder;
 use Database\Seeders\ImprovementDemoSeeder;
 use Database\Seeders\InstrumentSeeder;
+use Database\Seeders\LpmProgramDemoSeeder;
 use Database\Seeders\MonevDemoSeeder;
 use Database\Seeders\OrganizationSeeder;
 use Database\Seeders\ReferenceDataSeeder;
 use Database\Seeders\ResearchDemoSeeder;
 
 beforeEach(function () {
-    $this->seed([OrganizationSeeder::class, ReferenceDataSeeder::class, DemoUserSeeder::class, AcademicDemoSeeder::class, InstrumentSeeder::class, MonevDemoSeeder::class, ResearchDemoSeeder::class]);
+    $this->seed([OrganizationSeeder::class, ReferenceDataSeeder::class, DemoUserSeeder::class, AcademicDemoSeeder::class, InstrumentSeeder::class, MonevDemoSeeder::class, ResearchDemoSeeder::class, LpmProgramDemoSeeder::class]);
 });
 
 it('renders every staff page for an LPM admin without errors', function () {
@@ -71,6 +73,11 @@ it('renders every staff page for an LPM admin without errors', function () {
         route('research.works.index', ['search' => 'a', 'type' => 'journal_national', 'indexation_family' => 'sinta', 'with_students' => 1, 'sort' => '-year']),
         route('research.works.index', ['category' => 'book', 'status' => 'revision']),
         route('research.analysis', ['from' => now()->year - 4, 'verified_only' => 1]),
+        route('activities.index', ['status' => 'overdue', 'category' => 'training', 'search' => 'a']),
+        route('activities.show', LpmActivity::query()->firstOrFail()),
+        route('activity-evidence.index', ['evidence' => 'missing']),
+        route('suggestions.index', ['status' => 'new', 'sender_role' => 'mahasiswa', 'search' => 'a']),
+        route('achievements.index', ['status' => 'any', 'level' => 'national', 'year' => now()->year]),
     ];
 
     foreach ($pages as $page) {
@@ -105,6 +112,15 @@ it('renders the lecturer and student experiences', function () {
     $this->actingAs($lecturer)->get(route('my-evaluation.index'))->assertOk();
     $this->actingAs($lecturer)->get(route('research.mine.index'))->assertOk();
     $this->actingAs($student)->get(route('portal.home'))->assertOk();
+    $this->actingAs($student)->get(route('achievements.mine.index'))->assertOk();
+    $this->actingAs($student)->get(route('suggestions.mine.index'))->assertOk();
+    $this->actingAs($lecturer)->get(route('suggestions.mine.index'))->assertOk();
+});
+
+it('renders the student affairs and leadership views of the new services', function () {
+    $this->actingAs(User::query()->where('username', 'kemahasiswaan')->firstOrFail())->get(route('achievements.index'))->assertOk();
+    $this->actingAs(User::query()->where('username', 'rektor')->firstOrFail())->get(route('activities.index'))->assertOk();
+    $this->actingAs(User::query()->where('username', 'prodi.tmtk')->firstOrFail())->get(route('achievements.index'))->assertOk();
 });
 
 it('downloads the monev PDF and Excel reports', function () {

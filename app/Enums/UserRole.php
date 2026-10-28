@@ -12,6 +12,7 @@ enum UserRole: string
     case AdminProdi = 'admin_prodi';
     case Pimpinan = 'pimpinan';
     case Lp2m = 'lp2m';
+    case Kemahasiswaan = 'kemahasiswaan';
     case Auditor = 'auditor';
     case Dosen = 'dosen';
     case Mahasiswa = 'mahasiswa';
@@ -25,6 +26,7 @@ enum UserRole: string
             self::AdminProdi => 'Admin Prodi / Kaprodi',
             self::Pimpinan => 'Pimpinan',
             self::Lp2m => 'LP2M',
+            self::Kemahasiswaan => 'Bidang Kemahasiswaan',
             self::Auditor => 'Auditor',
             self::Dosen => 'Dosen',
             self::Mahasiswa => 'Mahasiswa',
@@ -36,6 +38,6 @@ enum UserRole: string
      */
     public function isInstitutionWide(): bool
     {
-        return in_array($this, [self::Superadmin, self::AdminLpm, self::Pimpinan, self::Lp2m], true);
+        return in_array($this, [self::Superadmin, self::AdminLpm, self::Pimpinan, self::Lp2m, self::Kemahasiswaan], true);
     }
 }

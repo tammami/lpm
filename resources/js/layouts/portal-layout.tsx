@@ -1,9 +1,17 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, Bell } from 'lucide-react';
+import { ArrowLeft, Bell, ClipboardCheck, MessagesSquare, Trophy } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { AppTagline, LogoMark } from '@/components/brand/app-logo';
 import { HelpButton } from '@/components/guide/help-button';
 import { UserMenu } from '@/components/layout/user-menu';
+import { cn } from '@/lib/utils';
+
+/** Menu utama mahasiswa (portal tidak memakai sidebar). */
+const studentTabs = [
+    { label: 'Evaluasi', route: 'portal.home', match: 'portal.*', permission: 'monev.fill', icon: ClipboardCheck },
+    { label: 'Prestasi', route: 'achievements.mine.index', match: 'achievements.mine.*', permission: 'achievements.own', icon: Trophy },
+    { label: 'Kotak Saran', route: 'suggestions.mine.index', match: 'suggestions.mine.*', permission: 'suggestions.submit', icon: MessagesSquare },
+];
 
 /**
  * Tata letak mobile-first untuk responden (mahasiswa/dosen) saat mengisi Monev.
@@ -11,6 +19,8 @@ import { UserMenu } from '@/components/layout/user-menu';
 export default function PortalLayout({ children }: { children: ReactNode }) {
     const { auth, app, unreadNotifications } = usePage().props;
     const isStudent = auth.user?.role === 'mahasiswa';
+    const permissions = auth.user?.permissions ?? [];
+    const tabs = isStudent ? studentTabs.filter((tab) => permissions.includes('*') || permissions.includes(tab.permission)) : [];
 
     return (
         <div className="min-h-svh">
@@ -40,6 +50,26 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
                     </Link>
                     <UserMenu compact />
                 </div>
+                {tabs.length > 1 && (
+                    <nav aria-label="Menu portal" className="mx-auto flex max-w-3xl gap-1 overflow-x-auto px-4 pb-2">
+                        {tabs.map((tab) => {
+                            const active = route().current(tab.match);
+                            return (
+                                <Link
+                                    key={tab.route}
+                                    href={route(tab.route)}
+                                    aria-current={active ? 'page' : undefined}
+                                    className={cn(
+                                        'flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-semibold transition',
+                                        active ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-white/60 hover:text-foreground',
+                                    )}
+                                >
+                                    <tab.icon className="size-4" /> {tab.label}
+                                </Link>
+                            );
+                        })}
+                    </nav>
+                )}
             </header>
             <main className="mx-auto w-full max-w-3xl px-4 pt-5 pb-16">{children}</main>
         </div>

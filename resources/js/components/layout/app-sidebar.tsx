@@ -20,7 +20,7 @@ export function AppSidebar({ collapsed = false, onToggleCollapse, onNavigate }: 
     const page = usePage();
     const can = useCan();
     const groups = useMemo(() => filterNavigation(can, page.props.auth.user ?? {}), [page.props.auth.user]);
-    const counts: Record<string, number> = { unreadNotifications: page.props.unreadNotifications };
+    const counts: Record<string, number> = { unreadNotifications: page.props.unreadNotifications, ...page.props.navCounts };
 
     return (
         <div className="flex h-full flex-col border-r border-white/70 bg-sidebar bg-(image:--grad-sidebar) text-sidebar-foreground backdrop-blur-2xl">

@@ -24,7 +24,7 @@ class DataResetService
     /**
      * Kolom berkas di disk `local` yang ikut dihapus bersama barisnya.
      */
-    private const FILE_COLUMNS = ['evidence_versions' => 'file_path', 'import_jobs' => 'file_path'];
+    private const FILE_COLUMNS = ['evidence_versions' => 'file_path', 'import_jobs' => 'file_path', 'student_achievements' => 'certificate_path'];
 
     private const CHUNK = 1000;
 
@@ -67,6 +67,7 @@ class DataResetService
         'instrument_versions' => 'Versi instrumen',
         'instruments' => 'Instrumen',
         'lecturers' => 'Dosen',
+        'lpm_activities' => 'Kegiatan program kerja LPM',
         'model_has_permissions' => 'Hak akses khusus pengguna',
         'model_has_roles' => 'Peran pengguna',
         'notifications' => 'Notifikasi',
@@ -79,9 +80,11 @@ class DataResetService
         'scientific_works' => 'Karya ilmiah',
         'score_classifications' => 'Klasifikasi skor',
         'sessions' => 'Sesi login',
+        'student_achievements' => 'Prestasi mahasiswa',
         'students' => 'Mahasiswa',
         'study_program_survey' => 'Cakupan prodi kegiatan Monev',
         'study_programs' => 'Program studi',
+        'suggestions' => 'Kotak saran',
         'survey_participations' => 'Status pengisian Monev',
         'surveys' => 'Kegiatan Monev',
         'teaching_assignments' => 'Penugasan mengajar',
@@ -155,6 +158,9 @@ class DataResetService
             new Dataset('accreditation-instruments', 'Instrumen akreditasi', 'Seluruh instrumen akreditasi beserta kriteria dan indikatornya.', ['accreditation_instruments' => null]),
             new Dataset('accreditation-periods', 'Periode akreditasi', 'Seluruh periode akreditasi beserta penilaiannya.', ['accreditation_periods' => null]),
             new Dataset('scientific-works', 'Karya ilmiah', 'Seluruh karya ilmiah dosen beserta anggotanya.', ['scientific_works' => null]),
+            new Dataset('lpm-activities', 'Program kerja LPM', 'Seluruh kegiatan timeline program kerja LPM. Dokumen buktinya tetap tersimpan di repositori.', ['lpm_activities' => null]),
+            new Dataset('suggestions', 'Kotak saran', 'Seluruh saran mahasiswa dan dosen beserta tanggapan LPM.', ['suggestions' => null]),
+            new Dataset('student-achievements', 'Prestasi mahasiswa', 'Seluruh data prestasi mahasiswa beserta berkas sertifikatnya.', ['student_achievements' => null]),
             new Dataset('imports', 'Riwayat impor', 'Seluruh riwayat impor beserta berkas unggahannya. Data hasil impor tetap ada.', ['import_jobs' => null]),
             new Dataset('notifications', 'Notifikasi', 'Notifikasi seluruh pengguna, bukan hanya milik Anda.', ['notifications' => null]),
             new Dataset('audit-logs', 'Log audit', 'Seluruh catatan log audit.', ['audit_logs' => null], [

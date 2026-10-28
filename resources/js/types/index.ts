@@ -24,6 +24,8 @@ export interface SharedProps {
     auth: { user: AuthUser | null };
     activePeriod: { id: number; name: string; code: string } | null;
     unreadNotifications: number;
+    /** Jumlah antrean untuk lencana menu (saran baru, prestasi menunggu verifikasi). */
+    navCounts: Record<string, number>;
     /** Data yang dapat dikosongkan (kunci → label); hanya terisi untuk Superadmin. */
     dataResets: Record<string, string> | null;
     errors: Record<string, string>;

@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             AccreditationSeeder::class,
             ImprovementDemoSeeder::class,
             ResearchDemoSeeder::class,
+            LpmProgramDemoSeeder::class,
         ]);
     }
 }

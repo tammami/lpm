@@ -20,7 +20,7 @@ createInertiaApp({
         if (name === 'guide/index' && !user) return PublicLayout;
         if (name === 'guide/index' && isStudent) return PortalLayout;
         if (name.startsWith('portal/')) return PortalLayout;
-        if (isStudent && (name === 'system/notifications' || name.startsWith('profile/'))) return PortalLayout;
+        if (isStudent && (name === 'system/notifications' || name.startsWith('profile/') || name === 'suggestions/mine' || name === 'achievements/mine')) return PortalLayout;
         if (name === 'error') return null;
         return AppLayout;
     },

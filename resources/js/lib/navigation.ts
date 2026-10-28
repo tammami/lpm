@@ -6,6 +6,7 @@ import {
     BookOpenCheck,
     BookOpenText,
     Building2,
+    CalendarRange,
     ClipboardCheck,
     ClipboardList,
     DatabaseBackup,
@@ -16,9 +17,11 @@ import {
     LayoutDashboard,
     LifeBuoy,
     type LucideIcon,
+    MessagesSquare,
     Settings2,
     ShieldCheck,
     Target,
+    Trophy,
     UserRoundSearch,
 } from 'lucide-react';
 
@@ -52,6 +55,7 @@ export const navigation: NavGroup[] = [
             { title: 'Hasil Evaluasi Saya', icon: UserRoundSearch, route: 'my-evaluation.index', permission: 'monev.own_results', profile: 'lecturer' },
             { title: 'Karya Ilmiah Saya', icon: BookOpenText, route: 'research.mine.index', match: 'research.mine.*', permission: 'research.own', profile: 'lecturer' },
             { title: 'Isi Survei', icon: ClipboardCheck, route: 'portal.home', match: 'portal.*', permission: 'monev.fill', profile: 'respondent' },
+            { title: 'Kirim Saran', icon: MessagesSquare, route: 'suggestions.mine.index', match: 'suggestions.mine.*', permission: 'suggestions.submit', profile: 'respondent' },
             { title: 'Notifikasi', icon: Bell, route: 'notifications.index', permission: 'notifications.view', badgeKey: 'unreadNotifications' },
         ],
     },
@@ -93,6 +97,14 @@ export const navigation: NavGroup[] = [
                     { title: 'Analisis & Statistik', route: 'research.analysis', match: 'research.analysis*', permission: 'research.view' },
                 ],
             },
+            {
+                title: 'Program Kerja LPM',
+                icon: CalendarRange,
+                children: [
+                    { title: 'Timeline Kegiatan', route: 'activities.index', match: 'activities.*', permission: 'activities.view' },
+                    { title: 'Bukti Program Kerja', route: 'activity-evidence.index', match: 'activity-evidence.*', permission: 'activities.view' },
+                ],
+            },
             { title: 'Dokumen Bukti', icon: FolderArchive, route: 'evidence.index', match: 'evidence.*', permission: 'evidence.view' },
             {
                 title: 'Akreditasi',
@@ -103,6 +115,13 @@ export const navigation: NavGroup[] = [
                     { title: 'Instrumen LAM', route: 'accreditation.instruments.index', match: 'accreditation.instruments.*', permission: 'accreditation.manage' },
                 ],
             },
+        ],
+    },
+    {
+        label: 'Layanan',
+        items: [
+            { title: 'Kotak Saran', icon: MessagesSquare, route: 'suggestions.index', match: 'suggestions.index', permission: 'suggestions.manage', badgeKey: 'newSuggestions' },
+            { title: 'Prestasi Mahasiswa', icon: Trophy, route: 'achievements.index', match: 'achievements.index', permission: 'achievements.view', badgeKey: 'pendingAchievements' },
         ],
     },
     {

@@ -2,6 +2,7 @@ import {
     BadgeCheck,
     BookOpenText,
     Building2,
+    CalendarRange,
     ClipboardCheck,
     ClipboardList,
     Compass,
@@ -11,14 +12,17 @@ import {
     GraduationCap,
     KeyRound,
     ListChecks,
+    MessagesSquare,
     Settings2,
     ShieldCheck,
     Target,
+    Trophy,
 } from 'lucide-react';
 import { accountArticles } from './content/account';
 import { dataArticles } from './content/data';
 import { monevArticles } from './content/monev';
 import { qualityArticles } from './content/quality';
+import { serviceArticles } from './content/services';
 import { systemArticles } from './content/system';
 import type { GuideArticle, GuideCategory } from './types';
 
@@ -36,13 +40,16 @@ export const guideCategories: GuideCategory[] = [
     { key: 'dokumen', title: 'Dokumen Bukti', description: 'Unggah, verifikasi, dan pakai ulang bukti.', icon: FolderArchive },
     { key: 'akreditasi', title: 'Akreditasi', description: 'Instrumen LAM, periode, kesiapan.', icon: BadgeCheck },
     { key: 'karya', title: 'Karya Ilmiah', description: 'Publikasi dosen, verifikasi, analisis.', icon: BookOpenText },
+    { key: 'program-kerja', title: 'Program Kerja LPM', description: 'Timeline kegiatan dan bukti pelaksanaan.', icon: CalendarRange },
+    { key: 'saran', title: 'Kotak Saran', description: 'Mengirim dan menanggapi saran.', icon: MessagesSquare },
+    { key: 'prestasi', title: 'Prestasi Mahasiswa', description: 'Mencatat dan memverifikasi prestasi.', icon: Trophy },
     { key: 'master', title: 'Master Akademik', description: 'Periode, dosen, mahasiswa, MK, kelas.', icon: GraduationCap },
     { key: 'organisasi', title: 'Organisasi', description: 'Institusi, fakultas, prodi, unit.', icon: Building2 },
     { key: 'impor', title: 'Impor Data', description: 'Memasukkan data massal dari Excel.', icon: FileSpreadsheet },
     { key: 'sistem', title: 'Pengguna & Sistem', description: 'Pengguna, hak akses, pengaturan, backup.', icon: Settings2 },
 ];
 
-export const guideArticles: GuideArticle[] = [...accountArticles, ...monevArticles, ...qualityArticles, ...dataArticles, ...systemArticles];
+export const guideArticles: GuideArticle[] = [...accountArticles, ...monevArticles, ...qualityArticles, ...serviceArticles, ...dataArticles, ...systemArticles];
 
 const bySlug = new Map(guideArticles.map((article) => [article.slug, article]));
 

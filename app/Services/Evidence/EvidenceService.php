@@ -15,6 +15,7 @@ use App\Models\Evidence;
 use App\Models\EvidenceMapping;
 use App\Models\EvidenceVersion;
 use App\Models\Finding;
+use App\Models\LpmActivity;
 use App\Models\Recommendation;
 use App\Models\User;
 use App\Models\Verification;
@@ -50,6 +51,7 @@ class EvidenceService
             'action_plan' => ActionPlan::class,
             'audit' => Audit::class,
             'accreditation_indicator' => AccreditationIndicator::class,
+            'lpm_activity' => LpmActivity::class,
         ]);
     }
 

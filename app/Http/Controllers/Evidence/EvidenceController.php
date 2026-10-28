@@ -341,6 +341,7 @@ class EvidenceController extends Controller
         $labels = [
             'finding' => 'Temuan AMI', 'corrective_action' => 'Tindakan koreksi', 'recommendation' => 'Rekomendasi',
             'action_plan' => 'Rencana aksi', 'audit' => 'Audit', 'accreditation_indicator' => 'Indikator akreditasi',
+            'lpm_activity' => 'Program kerja LPM',
         ];
 
         [$label, $url] = match ($mapping->mappable_type) {
@@ -353,6 +354,7 @@ class EvidenceController extends Controller
                 $item ? "{$item->code} — ".Str::limit($item->statement, 80) : 'Dihapus',
                 $mapping->context_id ? route('accreditation.periods.show', $mapping->context_id) : null,
             ],
+            'lpm_activity' => [$item ? "{$item->code} — {$item->title}" : 'Dihapus', $item ? route('activities.show', $item) : null],
             default => ['—', null],
         };
 
@@ -401,10 +403,18 @@ class EvidenceController extends Controller
     }
 
     /**
-     * Bukti indikator akreditasi hanya dapat diatur oleh kontributor periode (pengelola, PIC, admin prodi terkait).
+     * Bukti indikator akreditasi hanya dapat diatur oleh kontributor periode (pengelola, PIC, admin prodi terkait);
+     * bukti program kerja LPM hanya oleh pengelola program kerja.
      */
     private function authorizeAccreditationContext(Request $request, string $type, int $id, ?int $contextId): void
     {
+        // Bukti program kerja LPM hanya diatur pengelola program kerja.
+        if ($type === 'lpm_activity') {
+            abort_unless($request->user()->can('activities.manage'), 403, 'Hanya pengelola program kerja LPM yang dapat mengatur buktinya.');
+
+            return;
+        }
+
         if ($type !== 'accreditation_indicator') {
             return;
         }
@@ -444,6 +454,7 @@ class EvidenceController extends Controller
                 'accreditation_indicator' => $mapping->context_id !== null && AccreditationPeriod::query()->whereKey($mapping->context_id)
                     ->where(fn ($q) => $q->where('pic_user_id', $user->id)->when($user->can('accreditation.view'), fn ($inner) => $inner->orWhere(fn ($scoped) => $scoped->visibleTo($user))))
                     ->exists(),
+                'lpm_activity' => $user->can('activities.view'),
                 default => false,
             };
         });

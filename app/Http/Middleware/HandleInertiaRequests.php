@@ -2,9 +2,13 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\AchievementStatus;
+use App\Enums\SuggestionStatus;
 use App\Enums\UserRole;
 use App\Models\AcademicPeriod;
 use App\Models\Institution;
+use App\Models\StudentAchievement;
+use App\Models\Suggestion;
 use App\Models\User;
 use App\Services\DataReset\DataResetService;
 use Illuminate\Http\Request;
@@ -58,6 +62,10 @@ class HandleInertiaRequests extends Middleware
                 ? AcademicPeriod::active()?->only(['id', 'name', 'code'])
                 : null,
             'unreadNotifications' => fn (): int => $user ? $user->unreadNotifications()->count() : 0,
+            'navCounts' => fn (): array => $user ? [
+                'newSuggestions' => $user->can('suggestions.manage') ? Suggestion::query()->where('status', SuggestionStatus::New)->count() : 0,
+                'pendingAchievements' => $user->can('achievements.verify') ? StudentAchievement::query()->visibleTo($user)->where('status', AchievementStatus::Pending)->count() : 0,
+            ] : [],
             'dataResets' => fn (): ?array => $user?->hasRole(UserRole::Superadmin->value)
                 ? app(DataResetService::class)->labels()
                 : null,

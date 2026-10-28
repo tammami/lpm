@@ -23,6 +23,7 @@ class DemoUserSeeder extends Seeder
             ['username' => 'lpm', 'name' => 'Admin LPM', 'email' => 'lpm@simutu.test', 'role' => UserRole::AdminLpm],
             ['username' => 'rektor', 'name' => 'Pimpinan Institut', 'email' => 'pimpinan@simutu.test', 'role' => UserRole::Pimpinan],
             ['username' => 'lp2m', 'name' => 'Admin LP2M', 'email' => 'lp2m@simutu.test', 'role' => UserRole::Lp2m],
+            ['username' => 'kemahasiswaan', 'name' => 'Bidang Kemahasiswaan', 'email' => 'kemahasiswaan@simutu.test', 'role' => UserRole::Kemahasiswaan],
             ['username' => 'ftk', 'name' => 'Admin Fakultas Tarbiyah', 'email' => 'ftk@simutu.test', 'role' => UserRole::AdminFakultas, 'faculty_id' => $faculty?->id],
             ['username' => 'prodi.tmtk', 'name' => 'Admin Prodi Tadris Matematika', 'email' => 'tmtk@simutu.test', 'role' => UserRole::AdminProdi, 'study_program_id' => $mathematics?->id],
             ['username' => 'auditor', 'name' => 'Auditor Internal', 'email' => 'auditor@simutu.test', 'role' => UserRole::Auditor],

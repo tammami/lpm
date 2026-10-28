@@ -5,6 +5,9 @@ use App\Http\Controllers\Accreditation\InstrumentVersionController as Accreditat
 use App\Http\Controllers\Accreditation\PeriodController;
 use App\Http\Controllers\Accreditation\ReadinessController;
 use App\Http\Controllers\Accreditation\StructureController;
+use App\Http\Controllers\Achievements\AchievementController;
+use App\Http\Controllers\Achievements\MyAchievementController;
+use App\Http\Controllers\Activities\ActivityController;
 use App\Http\Controllers\Ami\AuditController;
 use App\Http\Controllers\Ami\AuditorController;
 use App\Http\Controllers\Ami\AuditProgramController;
@@ -45,6 +48,8 @@ use App\Http\Controllers\Reports\ReportController;
 use App\Http\Controllers\Research\MyScientificWorkController;
 use App\Http\Controllers\Research\ResearchAnalysisController;
 use App\Http\Controllers\Research\ScientificWorkController;
+use App\Http\Controllers\Suggestions\MySuggestionController;
+use App\Http\Controllers\Suggestions\SuggestionController;
 use App\Http\Controllers\System\AuditLogController;
 use App\Http\Controllers\System\BackupController;
 use App\Http\Controllers\System\DataResetController;
@@ -467,6 +472,72 @@ Route::middleware('auth')->group(function (): void {
         });
 
         Route::post('{work}/verifikasi', [ScientificWorkController::class, 'verify'])->middleware('permission:research.verify')->name('works.verify');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Program Kerja LPM (timeline kegiatan di luar Monev & AMI)
+    |--------------------------------------------------------------------------
+    */
+    // Didaftarkan sebelum grup agar "bukti" tidak tertangkap sebagai {activity}.
+    Route::get('program-kerja/bukti', [ActivityController::class, 'evidence'])->middleware('permission:activities.view')->name('activity-evidence.index');
+
+    Route::prefix('program-kerja')->name('activities.')->group(function (): void {
+        Route::middleware('permission:activities.view')->group(function (): void {
+            Route::get('/', [ActivityController::class, 'index'])->name('index');
+            Route::get('ekspor', [ActivityController::class, 'export'])->name('export');
+        });
+
+        Route::middleware('permission:activities.manage')->group(function (): void {
+            Route::post('/', [ActivityController::class, 'store'])->name('store');
+            Route::put('{activity}', [ActivityController::class, 'update'])->name('update');
+            Route::post('{activity}/status', [ActivityController::class, 'status'])->name('status');
+            Route::delete('{activity}', [ActivityController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::get('{activity}', [ActivityController::class, 'show'])->middleware('permission:activities.view')->name('show');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Kotak Saran
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('kotak-saran')->name('suggestions.')->group(function (): void {
+        Route::middleware('permission:suggestions.submit')->group(function (): void {
+            Route::get('saya', [MySuggestionController::class, 'index'])->name('mine.index');
+            Route::post('saya', [MySuggestionController::class, 'store'])->middleware('throttle:10,60')->name('mine.store');
+            Route::delete('saya/{suggestion}', [MySuggestionController::class, 'destroy'])->name('mine.destroy');
+        });
+
+        Route::middleware('permission:suggestions.manage')->group(function (): void {
+            Route::get('/', [SuggestionController::class, 'index'])->name('index');
+            Route::put('{suggestion}', [SuggestionController::class, 'update'])->name('update');
+            Route::delete('{suggestion}', [SuggestionController::class, 'destroy'])->name('destroy');
+        });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Prestasi Mahasiswa
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('prestasi')->name('achievements.')->group(function (): void {
+        Route::middleware('permission:achievements.own')->group(function (): void {
+            Route::get('saya', [MyAchievementController::class, 'index'])->name('mine.index');
+            Route::post('saya', [MyAchievementController::class, 'store'])->name('mine.store');
+            Route::put('saya/{achievement}', [MyAchievementController::class, 'update'])->name('mine.update');
+            Route::delete('saya/{achievement}', [MyAchievementController::class, 'destroy'])->name('mine.destroy');
+        });
+
+        Route::get('{achievement}/sertifikat', [AchievementController::class, 'certificate'])->name('certificate');
+
+        Route::middleware('permission:achievements.view')->group(function (): void {
+            Route::get('/', [AchievementController::class, 'index'])->name('index');
+            Route::get('ekspor', [AchievementController::class, 'export'])->name('export');
+        });
+
+        Route::post('{achievement}/verifikasi', [AchievementController::class, 'verify'])->middleware('permission:achievements.verify')->name('verify');
     });
 
     Route::prefix('portal')->name('portal.')->middleware('permission:monev.fill')->group(function (): void {
