@@ -176,7 +176,7 @@ class EvidenceController extends Controller
 
         $validated = $request->validate([
             'file' => EvidenceService::uploadRules(required: false),
-            'url' => ['nullable', 'required_without:file', 'url', 'max:2048'],
+            'url' => ['nullable', 'required_without:file', 'url:http,https', 'max:2048'],
             'notes' => ['nullable', 'string', 'max:500'],
         ], ['url.required_without' => 'Unggah berkas atau isi tautan dokumen.']);
 
@@ -395,7 +395,7 @@ class EvidenceController extends Controller
             'valid_until' => ['nullable', 'date'],
             'confidentiality' => ['nullable', Rule::in(['public', 'internal', 'restricted'])],
             'file' => EvidenceService::uploadRules(required: false),
-            'url' => ['nullable', 'required_without:file', 'url', 'max:2048'],
+            'url' => ['nullable', 'required_without:file', 'url:http,https', 'max:2048'],
             'map_type' => ['nullable', Rule::in(array_keys(EvidenceService::mappableTypes()))],
             'map_id' => ['nullable', 'integer'],
             'map_context' => ['nullable', 'integer'],

@@ -60,6 +60,13 @@ it('requires a certificate or an evidence link', function () {
         ->assertSessionHasNoErrors();
 });
 
+it('rejects evidence links that are not http or https', function () {
+    $this->actingAs($this->studentUser)->post(route('achievements.mine.store'), achievementPayload(['evidence_url' => 'javascript:alert(1)']))
+        ->assertSessionHasErrors('evidence_url');
+
+    expect(StudentAchievement::query()->count())->toBe(0);
+});
+
 it('sends an edited achievement back to the verification queue and replaces the old certificate', function () {
     $old = UploadedFile::fake()->create('lama.pdf', 50, 'application/pdf')->storeAs("achievements/{$this->student->id}", 'lama.pdf', 'local');
     $achievement = StudentAchievement::factory()->for($this->student)->create([

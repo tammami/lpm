@@ -37,7 +37,7 @@ class InstitutionController extends Controller
             'address' => ['nullable', 'string', 'max:1000'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'website' => ['nullable', 'url', 'max:255'],
+            'website' => ['nullable', 'url:http,https', 'max:255'],
             'rector_name' => ['nullable', 'string', 'max:255'],
             'lpm_head_name' => ['nullable', 'string', 'max:255'],
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],

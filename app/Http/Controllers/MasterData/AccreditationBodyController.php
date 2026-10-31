@@ -62,7 +62,7 @@ class AccreditationBodyController extends Controller
             'code' => ['required', 'string', 'max:30', Rule::unique('accreditation_bodies')->ignore($body)],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
-            'website' => ['nullable', 'url', 'max:255'],
+            'website' => ['nullable', 'url:http,https', 'max:255'],
             'is_active' => ['boolean'],
         ]);
     }

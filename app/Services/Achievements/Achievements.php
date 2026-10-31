@@ -41,7 +41,7 @@ class Achievements
             'achieved_on' => ['required', 'date_format:Y-m-d', 'after_or_equal:2000-01-01', 'before_or_equal:today'],
             'description' => ['nullable', 'string', 'max:2000'],
             'certificate' => ['nullable', 'file', 'mimes:'.implode(',', self::CERTIFICATE_EXTENSIONS), 'max:'.UploadLimit::kilobytes(self::CERTIFICATE_MAX_MB)],
-            'evidence_url' => ['nullable', 'url', 'max:1000'],
+            'evidence_url' => ['nullable', 'url:http,https', 'max:1000'],
         ], [
             'title.required' => 'Isi nama kegiatan atau lomba.',
             'achievement.required' => 'Isi prestasi yang dicapai, mis. Juara 1.',
