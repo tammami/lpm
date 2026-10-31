@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { BarChart3, ChevronRight, ClipboardCheck, FileSpreadsheet, FileText, Info, MessageSquareQuote, Quote, TrendingUp, TriangleAlert, Users } from 'lucide-react';
+import { BarChart3, ChevronRight, ClipboardCheck, FileSpreadsheet, FileText, Info, MessageSquareQuote, Quote, TableProperties, TrendingUp, TriangleAlert, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import { QuestionTable } from '@/components/analytics/question-table';
 import type { AnalyticsSurvey, QuestionStat, Scheme, SectionStat, Summary, TrendPoint } from '@/components/analytics/types';
@@ -14,7 +14,7 @@ import { PageHeader } from '@/components/page-header';
 import { SelectField } from '@/components/select-field';
 import { StatTile } from '@/components/stat-tile';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCan } from '@/hooks/use-can';
 import { formatNumber, formatPercent, formatScore } from '@/lib/format';
 import type { Option } from '@/types';
@@ -74,7 +74,7 @@ function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, thresh
             (byLecturer ?? []).map((l) => ({
                 id: l.id,
                 label: l.name,
-                sublabel: `${l.classes} kelas · n=${l.responses}`,
+                sublabel: `${l.classes} kelas · ${l.responses} respons`,
                 score: l.score,
                 responses: l.responses,
                 classification: l.classification,
@@ -159,7 +159,7 @@ function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, thresh
                     <CardContent>
                         {byStudyProgram.length ? (
                             <ScoreBars
-                                items={byStudyProgram.map((p) => ({ id: p.id, label: p.name, sublabel: `n=${p.responses}`, score: p.score, responses: p.responses, classification: p.classification }))}
+                                items={byStudyProgram.map((p) => ({ id: p.id, label: p.name, sublabel: `${p.responses} respons`, score: p.score, responses: p.responses, classification: p.classification }))}
                                 max={max}
                                 min={min}
                                 threshold={threshold}
@@ -207,7 +207,7 @@ function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, thresh
                         {bySection.map((section) => (
                             <div key={section.id} className="rounded-xl border p-3">
                                 <div className="flex items-center justify-between">
-                                    <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-xs font-extrabold text-gold-foreground">{section.code}</span>
+                                    <span className="flex size-7 items-center justify-center rounded-lg bg-primary text-xs font-extrabold text-white">{section.code}</span>
                                     <span className="text-lg font-extrabold tabular">{formatScore(section.score)}</span>
                                 </div>
                                 <div className="mt-2 truncate text-xs font-semibold text-muted-foreground">{section.title}</div>
@@ -226,6 +226,15 @@ function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, thresh
                             <CardDescription>
                                 Hasil dosen dengan kurang dari {minimum} respons disembunyikan untuk menjaga anonimitas{insufficient ? ` (${insufficient} dosen)` : ''}.
                             </CardDescription>
+                            {route().has('analytics.courses.index') && (
+                                <CardAction>
+                                    <Button variant="outline" size="sm" asChild>
+                                        <Link href={route('analytics.courses.index', { survey: survey.id, study_program_id: filters.study_program_id })}>
+                                            <TableProperties /> Per mata kuliah
+                                        </Link>
+                                    </Button>
+                                </CardAction>
+                            )}
                         </CardHeader>
                         <CardContent className="max-h-[640px] overflow-y-auto pr-2">
                             <ScoreBars items={lecturerItems} max={max} min={min} threshold={threshold} minimum={minimum} onSelect={(item) => router.visit(route('analytics.lecturers.show', { lecturer: item.id, survey: survey.id }))} />

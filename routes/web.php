@@ -14,6 +14,7 @@ use App\Http\Controllers\Ami\AuditProgramController;
 use App\Http\Controllers\Ami\FindingController;
 use App\Http\Controllers\Ami\ReferenceController;
 use App\Http\Controllers\Analytics\AnalyticsController;
+use App\Http\Controllers\Analytics\CourseAnalyticsController;
 use App\Http\Controllers\Analytics\MyEvaluationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
@@ -210,6 +211,12 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('analitik')->middleware('permission:analytics.view')->group(function (): void {
         Route::get('/', [AnalyticsController::class, 'index'])->name('analytics.index');
         Route::get('dosen/{lecturer}', [AnalyticsController::class, 'lecturer'])->name('analytics.lecturers.show');
+
+        Route::middleware('permission:analytics.lecturer')->group(function (): void {
+            Route::get('dosen-mk', [CourseAnalyticsController::class, 'index'])->name('analytics.courses.index');
+            Route::get('dosen-mk/unduh', [CourseAnalyticsController::class, 'export'])->middleware('permission:reports.export')->name('analytics.courses.export');
+            Route::get('dosen-mk/{course}', [CourseAnalyticsController::class, 'show'])->name('analytics.courses.show');
+        });
     });
     Route::prefix('laporan')->group(function (): void {
         Route::middleware('permission:reports.export')->group(function (): void {

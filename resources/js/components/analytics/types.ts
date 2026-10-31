@@ -59,3 +59,33 @@ export interface TrendPoint {
     score: number | null;
     responses: number;
 }
+
+/** Skor satu sel rekap dosen × mata kuliah (MK atau pasangan dosen–MK). */
+export interface CourseCell {
+    responses: number;
+    sufficient: boolean;
+    score: number | null;
+    classification: Classification | null;
+    previous_score: number | null;
+    /** Periode pembanding: terakhir kali MK / pasangan dosen–MK ini dievaluasi. */
+    previous_label: string | null;
+    sections: Record<string, number | null>;
+}
+
+export interface CourseLecturerStat extends CourseCell {
+    id: number;
+    name: string;
+    nidn: string | null;
+    class_codes: string | null;
+}
+
+export interface CourseStat extends CourseCell {
+    id: number;
+    code: string;
+    name: string;
+    semester: number;
+    credits: number;
+    study_program: string | null;
+    classes: number;
+    lecturers: CourseLecturerStat[];
+}

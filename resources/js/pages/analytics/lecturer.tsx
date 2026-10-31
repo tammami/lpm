@@ -28,7 +28,7 @@ interface Props {
     bySection?: SectionStat[];
     sectionBenchmark?: SectionStat[];
     byQuestion?: QuestionStat[];
-    byClass?: { id: number; course: string; course_code: string; class_code: string; responses: number; sufficient: boolean; score: number | null; classification: Classification | null }[];
+    byClass?: { id: number; course_id: number; course: string; course_code: string; class_code: string; responses: number; sufficient: boolean; score: number | null; classification: Classification | null }[];
     trend?: TrendPoint[];
     comments?: { question: string; text: string }[];
     selfView?: boolean;
@@ -84,7 +84,7 @@ export default function LecturerAnalytics(props: Props) {
     );
 }
 
-function LecturerBody({ survey, scheme, threshold = 3, minimum = 5, summary, benchmarks = [], bySection = [], sectionBenchmark = [], byQuestion = [], byClass = [], trend = [], comments = [], selfView }: Props & { survey: AnalyticsSurvey }) {
+function LecturerBody({ lecturer: { id: lecturerId }, survey, scheme, threshold = 3, minimum = 5, summary, benchmarks = [], bySection = [], sectionBenchmark = [], byQuestion = [], byClass = [], trend = [], comments = [], selfView }: Props & { survey: AnalyticsSurvey }) {
     const max = scheme?.scale_max ?? survey.scale_max;
     const min = scheme?.scale_min ?? 0;
 
@@ -120,7 +120,7 @@ function LecturerBody({ survey, scheme, threshold = 3, minimum = 5, summary, ben
                             <span className="mb-1.5 text-sm text-white/85">/ {max}</span>
                         </div>
                         <div className="mt-3 flex items-center gap-2">
-                            <ClassBadge classification={summary?.classification} className="bg-white/10 text-white ring-white/20" />
+                            <ClassBadge classification={summary?.classification} className="bg-white/10 bg-none text-white ring-white/20" />
                             <span className="text-xs text-white/85">{summary?.responses} respons</span>
                         </div>
                     </div>
@@ -206,7 +206,7 @@ function LecturerBody({ survey, scheme, threshold = 3, minimum = 5, summary, ben
                         <TableHeader>
                             <TableRow className="bg-muted/50">
                                 <TableHead className="px-6">Mata kuliah</TableHead>
-                                <TableHead>n</TableHead>
+                                <TableHead title="Jumlah mahasiswa yang mengisi Monev">Respons</TableHead>
                                 <TableHead className="pr-6 text-right">Skor</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -214,7 +214,17 @@ function LecturerBody({ survey, scheme, threshold = 3, minimum = 5, summary, ben
                             {byClass.map((row) => (
                                 <TableRow key={row.id}>
                                     <TableCell className="px-6">
-                                        <div className="font-medium">{row.course}</div>
+                                        {selfView ? (
+                                            <div className="font-medium">{row.course}</div>
+                                        ) : (
+                                            <Link
+                                                href={route('analytics.courses.show', { course: row.course_id, survey: survey.id, lecturer: lecturerId })}
+                                                className="font-medium hover:text-primary hover:underline"
+                                                title="Bandingkan dengan dosen lain di mata kuliah ini"
+                                            >
+                                                {row.course}
+                                            </Link>
+                                        )}
                                         <div className="text-xs text-muted-foreground">
                                             {row.course_code} · Kelas {row.class_code}
                                         </div>

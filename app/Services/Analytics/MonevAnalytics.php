@@ -4,7 +4,9 @@ namespace App\Services\Analytics;
 
 use App\Enums\QuestionType;
 use App\Models\ClassificationScheme;
+use App\Models\Course;
 use App\Models\InstrumentQuestion;
+use App\Models\InstrumentSection;
 use App\Models\Lecturer;
 use App\Models\StudyProgram;
 use App\Models\Survey;
@@ -16,7 +18,8 @@ use Illuminate\Support\Facades\DB;
 /**
  * Analitik hasil Monev: agregasi skor dengan ambang minimum respons (BR-009) dan cakupan akses.
  *
- * Cakupan: `$programIds` (null = seluruh institusi), `$lecturerId` (opsional, untuk drill-down dosen).
+ * Cakupan: `$programIds` (null = seluruh institusi), `$lecturerId` dan/atau `$courseId` (opsional, untuk drill-down
+ * dosen / mata kuliah). Hasil drill-down disembunyikan selama respons di bawah ambang.
  */
 class MonevAnalytics
 {
@@ -26,13 +29,14 @@ class MonevAnalytics
         private Survey $survey,
         private ?array $programIds = null,
         private ?int $lecturerId = null,
+        private ?int $courseId = null,
     ) {
         $this->scheme = $survey->instrumentVersion->resolvedClassificationScheme();
     }
 
-    public static function for(Survey $survey, ?array $programIds = null, ?int $lecturerId = null): self
+    public static function for(Survey $survey, ?array $programIds = null, ?int $lecturerId = null, ?int $courseId = null): self
     {
-        return new self($survey->loadMissing('instrumentVersion'), $programIds, $lecturerId);
+        return new self($survey->loadMissing('instrumentVersion'), $programIds, $lecturerId, $courseId);
     }
 
     public function minimum(): int
@@ -47,7 +51,7 @@ class MonevAnalytics
     {
         $row = $this->responses()->selectRaw('count(*) as n, avg(score) as score')->first();
         $n = (int) $row->n;
-        $suppressed = $this->lecturerId !== null && $n < $this->minimum();
+        $suppressed = $this->isDrillDown() && $n < $this->minimum();
         $score = $suppressed || $row->score === null ? null : round((float) $row->score, 2);
 
         return ['responses' => $n, 'score' => $score, 'classification' => $this->classify($score), 'suppressed' => $suppressed];
@@ -132,8 +136,8 @@ class MonevAnalytics
         return $this->responses()
             ->join('course_classes', 'course_classes.id', '=', 'responses.course_class_id')
             ->join('courses', 'courses.id', '=', 'course_classes.course_id')
-            ->selectRaw('course_classes.id, courses.code, courses.name, course_classes.code as class_code, count(*) as n, avg(responses.score) as score')
-            ->groupBy('course_classes.id', 'courses.code', 'courses.name', 'course_classes.code')
+            ->selectRaw('course_classes.id, courses.id as course_id, courses.code, courses.name, course_classes.code as class_code, count(*) as n, avg(responses.score) as score')
+            ->groupBy('course_classes.id', 'courses.id', 'courses.code', 'courses.name', 'course_classes.code')
             ->orderBy('courses.name')
             ->get()
             ->map(function (object $row) use ($minimum): array {
@@ -142,6 +146,7 @@ class MonevAnalytics
 
                 return [
                     'id' => (int) $row->id,
+                    'course_id' => (int) $row->course_id,
                     'course' => $row->name,
                     'course_code' => $row->code,
                     'class_code' => $row->class_code,
@@ -152,6 +157,163 @@ class MonevAnalytics
                 ];
             })
             ->all();
+    }
+
+    /**
+     * Rekap per mata kuliah beserta skor tiap dosen pengampunya dan skor per aspek (bagian instrumen).
+     * Skor MK maupun pasangan dosen–MK disembunyikan selama respons di bawah ambang.
+     *
+     * @param  array<string, array{score: float, label: string}>  $previous  hasil {@see previousScores()}
+     * @return list<array<string, mixed>>
+     */
+    public function byCourse(array $previous = []): array
+    {
+        $minimum = $this->minimum();
+        $withClasses = fn (): Builder => $this->responses()->join('course_classes', 'course_classes.id', '=', 'responses.course_class_id');
+
+        $courses = $withClasses()
+            ->selectRaw('course_classes.course_id, count(*) as n, sum(responses.score) as total, count(responses.score) as scored, count(distinct responses.course_class_id) as classes')
+            ->groupBy('course_classes.course_id')
+            ->get()
+            ->keyBy('course_id');
+
+        if ($courses->isEmpty()) {
+            return [];
+        }
+
+        $pairs = $withClasses()
+            ->whereNotNull('responses.lecturer_id')
+            ->selectRaw("course_classes.course_id, responses.lecturer_id, count(*) as n, sum(responses.score) as total, count(responses.score) as scored, group_concat(distinct course_classes.code order by course_classes.code separator ', ') as class_codes")
+            ->groupBy('course_classes.course_id', 'responses.lecturer_id')
+            ->get()
+            ->groupBy('course_id');
+
+        $sectionScores = fn (bool $perLecturer): Collection => $withClasses()
+            ->join('response_answers', 'response_answers.response_id', '=', 'responses.id')
+            ->join('instrument_questions', 'instrument_questions.id', '=', 'response_answers.instrument_question_id')
+            ->join('instrument_sections', 'instrument_sections.id', '=', 'instrument_questions.instrument_section_id')
+            ->whereNotNull('response_answers.score')
+            ->when($perLecturer, fn (Builder $q) => $q->whereNotNull('responses.lecturer_id'))
+            ->selectRaw('course_classes.course_id, '.($perLecturer ? 'responses.lecturer_id' : 'null as lecturer_id').', instrument_sections.code, avg(response_answers.score) as score')
+            ->groupBy(array_filter(['course_classes.course_id', $perLecturer ? 'responses.lecturer_id' : null, 'instrument_sections.code']))
+            ->get()
+            ->groupBy(fn (object $row): string => $row->course_id.':'.$row->lecturer_id)
+            ->map(fn (Collection $rows) => $rows->mapWithKeys(fn (object $row): array => [$row->code => round((float) $row->score, 2)]));
+
+        $courseSections = $sectionScores(false);
+        $pairSections = $sectionScores(true);
+        $sectionCodes = $this->scoredSections()->pluck('code');
+
+        $cell = function (object $row, ?Collection $sections, ?array $previous) use ($minimum, $sectionCodes): array {
+            $sufficient = (int) $row->n >= $minimum;
+            $score = $sufficient && (int) $row->scored > 0 ? round((float) $row->total / (int) $row->scored, 2) : null;
+
+            return [
+                'responses' => (int) $row->n,
+                'sufficient' => $sufficient,
+                'score' => $score,
+                'classification' => $this->classify($score),
+                'previous_score' => $sufficient ? ($previous['score'] ?? null) : null,
+                'previous_label' => $sufficient ? ($previous['label'] ?? null) : null,
+                'sections' => $sectionCodes->mapWithKeys(fn (string $code): array => [$code => $sufficient ? ($sections[$code] ?? null) : null])->all(),
+            ];
+        };
+
+        $lecturers = Lecturer::query()->whereIn('id', $pairs->flatten(1)->pluck('lecturer_id')->unique())->get()->keyBy('id');
+
+        return Course::query()->whereIn('id', $courses->keys())->with('studyProgram:id,code')->orderBy('semester')->orderBy('code')->get()
+            ->map(fn (Course $course): array => [
+                'id' => $course->id,
+                'code' => $course->code,
+                'name' => $course->name,
+                'semester' => $course->semester,
+                'credits' => $course->credits,
+                'study_program' => $course->studyProgram?->code,
+                'classes' => (int) $courses[$course->id]->classes,
+                ...$cell($courses[$course->id], $courseSections[$course->id.':'] ?? null, $previous[(string) $course->id] ?? null),
+                'lecturers' => ($pairs[$course->id] ?? collect())
+                    ->map(fn (object $pair): array => [
+                        'id' => (int) $pair->lecturer_id,
+                        'name' => $lecturers->get($pair->lecturer_id)?->full_name ?? '—',
+                        'nidn' => $lecturers->get($pair->lecturer_id)?->identifier,
+                        'class_codes' => $pair->class_codes,
+                        ...$cell($pair, $pairSections[$course->id.':'.$pair->lecturer_id] ?? null, $previous[$course->id.':'.$pair->lecturer_id] ?? null),
+                    ])
+                    ->sortBy([['sufficient', 'desc'], ['score', 'desc'], ['name', 'asc']])
+                    ->values()
+                    ->all(),
+            ])
+            ->all();
+    }
+
+    /**
+     * Skor MK (kunci "courseId") dan pasangan dosen–MK (kunci "courseId:lecturerId") yang memenuhi ambang.
+     *
+     * @return array<string, float>
+     */
+    public function pairScores(): array
+    {
+        $minimum = $this->minimum();
+        $query = fn (bool $perLecturer): Collection => $this->responses()
+            ->join('course_classes', 'course_classes.id', '=', 'responses.course_class_id')
+            ->when($perLecturer, fn (Builder $q) => $q->whereNotNull('responses.lecturer_id'))
+            ->selectRaw('course_classes.course_id, '.($perLecturer ? 'responses.lecturer_id' : 'null as lecturer_id').', count(*) as n, avg(responses.score) as score')
+            ->groupBy(array_filter(['course_classes.course_id', $perLecturer ? 'responses.lecturer_id' : null]))
+            ->havingRaw('count(*) >= ?', [$minimum])
+            ->get();
+
+        return $query(false)->merge($query(true))
+            ->filter(fn (object $row): bool => $row->score !== null)
+            ->mapWithKeys(fn (object $row): array => [rtrim($row->course_id.':'.$row->lecturer_id, ':') => round((float) $row->score, 2)])
+            ->all();
+    }
+
+    /**
+     * Skor terakhir setiap MK / pasangan dosen–MK pada kegiatan sebelumnya yang sebanding. Diambil per kunci dari
+     * kegiatan terbaru yang memuatnya, karena MK umumnya hanya ditawarkan pada semester ganjil atau genap saja.
+     *
+     * @return array<string, array{score: float, label: string}>
+     */
+    public function previousScores(): array
+    {
+        $previous = [];
+
+        foreach ($this->earlierSurveys() as $survey) {
+            $label = $survey->academicPeriod?->name ?? $survey->title;
+            $scores = array_map(fn (float $score): array => ['score' => $score, 'label' => $label], self::for($survey, $this->programIds, null, $this->courseId)->pairScores());
+            $previous += $scores;
+        }
+
+        return $previous;
+    }
+
+    /**
+     * Kegiatan sebelumnya yang sebanding (instrumen, jenis, dan tahap Monev sama), terbaru lebih dulu.
+     *
+     * @return Collection<int, Survey>
+     */
+    private function earlierSurveys(): Collection
+    {
+        return Survey::query()
+            ->where('id', '!=', $this->survey->id)
+            ->where('mode', $this->survey->mode)
+            ->where('stage', $this->survey->stage)
+            ->whereHas('instrumentVersion', fn ($q) => $q->where('instrument_id', $this->survey->instrumentVersion->instrument_id))
+            ->where('status', '!=', 'draft')
+            ->where('starts_at', '<', $this->survey->starts_at)
+            ->with(['academicPeriod', 'instrumentVersion'])
+            ->orderByDesc('starts_at')
+            ->get();
+    }
+
+    /**
+     * Bagian instrumen yang memiliki butir berskor, urut tampilan.
+     *
+     * @return Collection<int, InstrumentSection>
+     */
+    public function scoredSections(): Collection
+    {
+        return $this->survey->instrumentVersion->sections()->whereHas('questions', fn ($q) => $q->where('is_scored', true))->get(['id', 'code', 'title']);
     }
 
     /**
@@ -316,10 +478,11 @@ class MonevAnalytics
                 ->whereNull('voided_at')
                 ->when($this->programIds !== null, fn (Builder $q) => $q->whereIn('study_program_id', $this->programIds))
                 ->when($this->lecturerId !== null, fn (Builder $q) => $q->where('lecturer_id', $this->lecturerId))
+                ->when($this->courseId !== null, fn (Builder $q) => $q->whereIn('course_class_id', $this->courseClassIds()))
                 ->selectRaw('count(*) as n, avg(score) as score')
                 ->first();
 
-            $suppressed = $this->lecturerId !== null && (int) $row->n < $minimum;
+            $suppressed = $this->isDrillDown() && (int) $row->n < $minimum;
 
             return [
                 'survey_id' => $survey->id,
@@ -327,7 +490,10 @@ class MonevAnalytics
                 'score' => $suppressed || $row->score === null ? null : round((float) $row->score, 2),
                 'responses' => (int) $row->n,
             ];
-        })->values()->all();
+        })
+            // MK hanya ditawarkan di sebagian semester; periode tanpa kelasnya tidak relevan untuk drill-down MK.
+            ->filter(fn (array $point): bool => $this->courseId === null || $point['responses'] > 0)
+            ->values()->all();
     }
 
     /**
@@ -354,9 +520,22 @@ class MonevAnalytics
         return $class ? ['label' => $class->label, 'color' => $class->color] : null;
     }
 
+    private function isDrillDown(): bool
+    {
+        return $this->lecturerId !== null || $this->courseId !== null;
+    }
+
     private function isSuppressed(): bool
     {
-        return $this->lecturerId !== null && $this->responses()->count() < $this->minimum();
+        return $this->isDrillDown() && $this->responses()->count() < $this->minimum();
+    }
+
+    /**
+     * Kelas milik mata kuliah terpilih di semua periode (dipakai juga oleh tren lintas periode).
+     */
+    private function courseClassIds(): Builder
+    {
+        return DB::table('course_classes')->where('course_id', $this->courseId)->select('id');
     }
 
     private function responses(): Builder
@@ -365,7 +544,8 @@ class MonevAnalytics
             ->where('responses.survey_id', $this->survey->id)
             ->whereNull('responses.voided_at')
             ->when($this->programIds !== null, fn (Builder $q) => $q->whereIn('responses.study_program_id', $this->programIds))
-            ->when($this->lecturerId !== null, fn (Builder $q) => $q->where('responses.lecturer_id', $this->lecturerId));
+            ->when($this->lecturerId !== null, fn (Builder $q) => $q->where('responses.lecturer_id', $this->lecturerId))
+            ->when($this->courseId !== null, fn (Builder $q) => $q->whereIn('responses.course_class_id', $this->courseClassIds()));
     }
 
     private function answers(): Builder

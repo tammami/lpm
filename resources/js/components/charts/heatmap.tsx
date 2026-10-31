@@ -12,12 +12,17 @@ interface Props {
 
 const ramp = ['bg-seq-1', 'bg-seq-2', 'bg-seq-3', 'bg-seq-4', 'bg-seq-5', 'bg-seq-6'];
 
+/** Kelas warna sel heatmap untuk satu nilai (abu-abu bila kosong). */
+export function heatTone(value: number | null | undefined, min: number, max: number) {
+    if (value === null || value === undefined) return 'bg-muted text-muted-foreground';
+    const level = Math.min(ramp.length - 1, Math.max(0, Math.floor(((value - min) / (max - min)) * ramp.length)));
+    return cn(ramp[level], level >= 4 ? 'text-white' : level >= 2 ? 'text-seq-ink' : 'text-foreground');
+}
+
 /**
  * Heatmap prodi × bagian dengan ramp sekuensial satu hue (terang → gelap = rendah → tinggi).
  */
 export function Heatmap({ sections, rows, min, max, onSelectRow, format = formatScore }: Props) {
-    const step = (value: number) => Math.min(ramp.length - 1, Math.max(0, Math.floor(((value - min) / (max - min)) * ramp.length)));
-
     return (
         <div className="relative overflow-x-auto rounded-lg focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:outline-none" tabIndex={0} role="region" aria-label="Peta skor (geser ke samping bila perlu)">
             <table className="w-full border-separate border-spacing-[3px] text-xs">
@@ -48,16 +53,11 @@ export function Heatmap({ sections, rows, min, max, onSelectRow, format = format
                             </th>
                             {sections.map((section) => {
                                 const value = row.cells[section.code];
-                                const level = value === null || value === undefined ? -1 : step(value);
                                 return (
                                     <td
                                         key={section.code}
                                         title={`${row.name} · ${section.title}: ${format(value)}`}
-                                        className={cn(
-                                            'h-10 min-w-14 rounded-md text-center font-bold tabular transition hover:ring-2 hover:ring-foreground/20',
-                                            level < 0 ? 'bg-muted text-muted-foreground' : ramp[level],
-                                            level >= 4 ? 'text-white' : level >= 2 ? 'text-seq-ink' : 'text-foreground',
-                                        )}
+                                        className={cn('h-10 min-w-14 rounded-md text-center font-bold tabular transition hover:ring-2 hover:ring-foreground/20', heatTone(value, min, max))}
                                     >
                                         {format(value)}
                                     </td>

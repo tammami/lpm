@@ -246,7 +246,7 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
                     <CardContent>
                         {quality && quality.byStudyProgram.length ? (
                             <ScoreBars
-                                items={quality.byStudyProgram.map((p) => ({ id: p.id, label: p.name, sublabel: `n=${p.responses}`, score: p.score, responses: p.responses, classification: p.classification }))}
+                                items={quality.byStudyProgram.map((p) => ({ id: p.id, label: p.name, sublabel: `${p.responses} respons`, score: p.score, responses: p.responses, classification: p.classification }))}
                                 max={max}
                                 min={min}
                                 threshold={threshold}

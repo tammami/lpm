@@ -20,6 +20,7 @@ import {
     MessagesSquare,
     Settings2,
     ShieldCheck,
+    TableProperties,
     Target,
     Trophy,
     UserRoundSearch,
@@ -29,7 +30,7 @@ export interface NavLeaf {
     title: string;
     route: string;
     /** Pola nama rute yang menandai item aktif (default: prefix dari `route`). */
-    match?: string;
+    match?: string | string[];
     permission?: string | string[];
     /** Hanya tampil bila pengguna memiliki profil dosen/mahasiswa. */
     profile?: 'lecturer' | 'respondent';
@@ -127,7 +128,8 @@ export const navigation: NavGroup[] = [
     {
         label: 'Analitik',
         items: [
-            { title: 'Analitik Mutu', icon: BarChart3, route: 'analytics.index', match: 'analytics.*', permission: 'analytics.view' },
+            { title: 'Analitik Mutu', icon: BarChart3, route: 'analytics.index', match: ['analytics.index', 'analytics.lecturers.*'], permission: 'analytics.view' },
+            { title: 'Dosen × Mata Kuliah', icon: TableProperties, route: 'analytics.courses.index', match: 'analytics.courses.*', permission: 'analytics.lecturer' },
             { title: 'Laporan', icon: FileBarChart2, route: 'reports.index', match: 'reports.*', permission: 'reports.export' },
         ],
     },
@@ -217,9 +219,9 @@ export function filterNavigation(can: (...permissions: string[]) => boolean, pro
 
 export function isActive(leaf: Partial<NavLeaf>) {
     if (!leaf.route) return false;
-    const pattern = leaf.match ?? leaf.route.replace(/\.index$/, '.*');
+    const patterns = leaf.match ?? leaf.route.replace(/\.index$/, '.*');
     try {
-        return route().current(pattern) || route().current(leaf.route);
+        return (Array.isArray(patterns) ? patterns : [patterns]).some((pattern) => route().current(pattern)) || route().current(leaf.route);
     } catch {
         return false;
     }
