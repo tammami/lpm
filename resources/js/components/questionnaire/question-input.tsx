@@ -116,12 +116,12 @@ function LikertInput({ question, value, onChange, disabled }: { question: Questi
                         onClick={() => onChange(option.id)}
                         className={cn(
                             'group relative flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl border-2 px-2 py-2.5 text-center transition-all outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40',
-                            selected ? 'border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20' : 'border-border bg-card hover:border-primary/40 hover:bg-secondary/60',
+                            selected ? 'border-primary bg-primary text-primary-foreground shadow-md shadow-primary/20' : 'border-control-stroke/60 bg-white/60 hover:border-primary/60 hover:bg-secondary/60',
                             count % 2 === 1 && index === count - 1 && 'col-span-2 sm:col-span-1',
                         )}
                     >
-                        <span className={cn('text-lg leading-none font-extrabold tabular', selected ? 'text-gold-foreground' : 'text-primary/80')}>{option.value}</span>
-                        <span className={cn('text-[12px] leading-tight font-semibold', selected ? 'text-primary-foreground' : 'text-foreground/80')}>{option.label}</span>
+                        <span className={cn('text-lg leading-none font-extrabold tabular', selected ? 'text-white' : 'text-primary')}>{option.value}</span>
+                        <span className={cn('text-[12px] leading-tight font-semibold', selected ? 'text-white' : 'text-foreground')}>{option.label}</span>
                     </button>
                 );
             })}
@@ -144,7 +144,7 @@ function ChoiceGrid({ question, value, onChange, disabled, columns }: { question
                         onClick={() => onChange(option.id)}
                         className={cn(
                             'h-12 rounded-xl border-2 text-sm font-bold transition outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40',
-                            selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-card hover:border-primary/40',
+                            selected ? 'border-primary bg-primary text-primary-foreground' : 'border-control-stroke/60 bg-white/60 hover:border-primary/60',
                         )}
                     >
                         {option.label}
@@ -170,10 +170,10 @@ function ChoiceList({ question, value, onChange, disabled }: { question: Questio
                         onClick={() => onChange(option.id)}
                         className={cn(
                             'flex min-h-12 items-center gap-3 rounded-xl border-2 px-4 py-2.5 text-left text-sm font-medium transition outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40',
-                            selected ? 'border-primary bg-secondary' : 'border-border bg-card hover:border-primary/40',
+                            selected ? 'border-primary bg-primary/10 font-semibold text-primary' : 'border-control-stroke/60 bg-white/60 hover:border-primary/60',
                         )}
                     >
-                        <span className={cn('flex size-5 shrink-0 items-center justify-center rounded-full border-2', selected ? 'border-primary' : 'border-muted-foreground/40')}>
+                        <span className={cn('flex size-5 shrink-0 items-center justify-center rounded-full border-2', selected ? 'border-primary' : 'border-control-stroke')}>
                             {selected && <span className="size-2.5 rounded-full bg-primary" />}
                         </span>
                         {option.label}
@@ -201,10 +201,10 @@ function MultiChoiceList({ question, value, onChange, disabled }: { question: Qu
                         onClick={() => toggle(option.id)}
                         className={cn(
                             'flex min-h-12 items-center gap-3 rounded-xl border-2 px-4 py-2.5 text-left text-sm font-medium transition outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40',
-                            selected ? 'border-primary bg-secondary' : 'border-border bg-card hover:border-primary/40',
+                            selected ? 'border-primary bg-primary/10 font-semibold text-primary' : 'border-control-stroke/60 bg-white/60 hover:border-primary/60',
                         )}
                     >
-                        <span className={cn('flex size-5 shrink-0 items-center justify-center rounded-md border-2', selected ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/40')}>
+                        <span className={cn('flex size-5 shrink-0 items-center justify-center rounded-md border-2', selected ? 'border-primary bg-primary text-primary-foreground' : 'border-control-stroke')}>
                             {selected && <Check className="size-3.5" />}
                         </span>
                         {option.label}

@@ -6,11 +6,11 @@ export interface Classification {
 }
 
 const tones: Record<string, string> = {
-    danger: 'bg-danger-soft bg-linear-to-r from-danger-soft to-white/70 text-danger-foreground ring-destructive/20',
-    warning: 'bg-warning-soft bg-linear-to-r from-warning-soft to-white/70 text-gold-foreground ring-warning/30',
-    info: 'bg-info-soft bg-linear-to-r from-info-soft to-white/70 text-info-foreground ring-info/20',
-    success: 'bg-success-soft bg-linear-to-r from-success-soft to-white/70 text-success-foreground ring-success/25',
-    neutral: 'bg-muted bg-linear-to-r from-neutral-soft to-white/60 text-muted-foreground ring-border',
+    danger: 'bg-danger-soft text-danger-foreground ring-current/40',
+    warning: 'bg-warning-soft text-gold-foreground ring-current/40',
+    info: 'bg-info-soft text-info-foreground ring-current/40',
+    success: 'bg-success-soft text-success-foreground ring-current/40',
+    neutral: 'bg-neutral-soft text-muted-foreground ring-current/35',
 };
 
 /** Label klasifikasi skor sesuai skema yang diatur admin (ikon titik + label, bukan warna saja). */
@@ -26,7 +26,7 @@ export function ClassBadge({ classification, className }: { classification: Clas
 
 export function InsufficientBadge({ responses, minimum }: { responses: number; minimum: number }) {
     return (
-        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-muted-foreground ring-1 ring-border ring-inset" title={`n=${responses} < minimum ${minimum}`}>
+        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-muted-foreground ring-1 ring-border ring-inset" title={`Baru ${responses} respons, minimum ${minimum}`}>
             Respons tidak mencukupi
         </span>
     );

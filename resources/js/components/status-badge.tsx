@@ -3,13 +3,13 @@ import { cn } from '@/lib/utils';
 export type Tone = 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'primary' | 'gold';
 
 const tones: Record<Tone, string> = {
-    success: 'bg-success-soft bg-linear-to-r from-success-soft to-white/70 text-success-foreground ring-success/25',
-    warning: 'bg-warning-soft bg-linear-to-r from-warning-soft to-white/70 text-gold-foreground ring-warning/30',
-    danger: 'bg-danger-soft bg-linear-to-r from-danger-soft to-white/70 text-danger-foreground ring-destructive/20',
-    info: 'bg-info-soft bg-linear-to-r from-info-soft to-white/70 text-info-foreground ring-info/20',
-    neutral: 'bg-muted bg-linear-to-r from-neutral-soft to-white/60 text-muted-foreground ring-border',
-    primary: 'bg-secondary bg-linear-to-r from-secondary to-white/70 text-secondary-foreground ring-primary/15',
-    gold: 'bg-gold-soft bg-linear-to-r from-gold-soft to-white/70 text-gold-foreground ring-gold/30',
+    success: 'bg-success-soft text-success-foreground ring-current/40',
+    warning: 'bg-warning-soft text-gold-foreground ring-current/40',
+    danger: 'bg-danger-soft text-danger-foreground ring-current/40',
+    info: 'bg-info-soft text-info-foreground ring-current/40',
+    neutral: 'bg-neutral-soft text-muted-foreground ring-current/35',
+    primary: 'bg-secondary text-secondary-foreground ring-current/40',
+    gold: 'bg-gold-soft text-gold-foreground ring-current/40',
 };
 
 export function StatusBadge({ tone = 'neutral', children, dot = true, className }: { tone?: Tone; children: React.ReactNode; dot?: boolean; className?: string }) {

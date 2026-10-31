@@ -53,7 +53,7 @@ export function PaginationBar({ meta }: { meta: Omit<Paginated<unknown>, 'data'>
 function PageLink({ url, className, label, children }: { url: string | null; className: string; label: string; children: React.ReactNode }) {
     if (!url) {
         return (
-            <span className={cn(className, 'text-muted-foreground/40')} aria-disabled>
+            <span className={cn(className, 'text-muted-foreground/55')} aria-disabled>
                 {children}
             </span>
         );

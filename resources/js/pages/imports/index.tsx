@@ -124,7 +124,7 @@ export default function ImportsIndex({ importers, jobs, draftVersions, maxUpload
                                     )}
                                 >
                                     <span className="absolute top-3 right-3 font-mono text-[11px] font-bold text-muted-foreground">{index + 1}</span>
-                                    <span className={cn('flex size-10 items-center justify-center rounded-xl', active ? 'bg-primary text-gold-foreground' : 'bg-secondary text-primary')}>
+                                    <span className={cn('flex size-10 items-center justify-center rounded-xl', active ? 'bg-primary text-white' : 'bg-secondary text-primary')}>
                                         <Icon className="size-5" />
                                     </span>
                                     <span className="text-sm font-bold">{importer.label}</span>

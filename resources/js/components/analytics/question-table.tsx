@@ -35,7 +35,7 @@ export function QuestionTable({ questions, threshold }: { questions: QuestionSta
                 {rows.map((question) => {
                     const below = question.score !== null && question.score < threshold;
                     return (
-                        <div key={question.id} className={cn('grid gap-3 p-3.5 md:grid-cols-[minmax(0,1fr)_220px_110px] md:items-center', below && 'bg-danger-soft/40')}>
+                        <div key={question.id} className={cn('grid gap-3 p-3.5 md:grid-cols-[minmax(0,1fr)_220px_72px] md:items-center xl:grid-cols-[minmax(0,1fr)_220px_148px]', below && 'bg-danger-soft/40')}>
                             <div className="flex min-w-0 gap-3">
                                 <span className="mt-0.5 w-8 shrink-0 font-mono text-xs font-bold text-primary">{question.code}</span>
                                 <div className="min-w-0">

@@ -30,7 +30,7 @@ export function Questionnaire({ sections, answers, onChange, errors = {}, disabl
                     <section key={section.id} id={`q-section-${section.id}`} className="scroll-mt-28">
                         <div className="mb-3 flex items-end justify-between gap-3 px-1">
                             <div className="flex items-center gap-3">
-                                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-extrabold text-gold-foreground">{section.code}</span>
+                                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-sm font-extrabold text-white">{section.code}</span>
                                 <div>
                                     <h2 className="text-[16px] leading-tight font-bold">{section.title}</h2>
                                     {section.description && <p className="text-xs text-muted-foreground">{section.description}</p>}

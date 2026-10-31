@@ -132,7 +132,9 @@
 
     /* Kontrol & jalur (track) netral. */
     --track: #d2e4e1;
-    --control-off: #bcd0ce;
+    /* Tepi kontrol (tombol outline/sekunder, wadah tab & toggle) dan track switch mati: ≥ 2,3:1 terhadap kaca. */
+    --control-stroke: #7b9896;
+    --control-off: #7b9896;
     --neutral-soft: #dbe9e7;
     --glass-tint: #eef7f5;
     --teal-deep: #0b6f7a;
@@ -217,6 +219,7 @@
     --color-hero-shade: var(--hero-shade);
     --color-track: var(--track);
     --color-control-off: var(--control-off);
+    --color-control-stroke: var(--control-stroke);
     --color-neutral-soft: var(--neutral-soft);
     --color-glass-tint: var(--glass-tint);
     --color-teal-deep: var(--teal-deep);

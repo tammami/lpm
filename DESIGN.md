@@ -28,7 +28,8 @@ colors:
   hairline: "rgb(120 160 158 / 0.28)"
   input-stroke: "#4f6a68"
   track: "#d2e4e1"
-  control-off: "#bcd0ce"
+  control-off: "#7b9896"
+  control-stroke: "#7b9896"
   neutral-soft: "#dbe9e7"
   scrim: "#0b3b40"
   dot-ring: "#ffffff"
@@ -308,10 +309,11 @@ A cool teal-and-lavender atmosphere carrying one deep-teal action colour, with w
 - **Mist Base** (mist-base): the page colour under the gradient mist (see grad-page in Gradients).
 - **Teal Ink** (teal-ink): all body and heading text. **Muted Ink** (muted-ink): secondary text, descriptions and placeholders. **Sidebar Ink** (sidebar-ink): inactive navigation labels.
 - **Glass Fill** (glass-fill, fading to 26% white): the card body. **Popover Glass** (popover-glass, 95% → 86% white): dialogs, popovers, menus and sheets.
-- **Glass Edge** (glass-edge): the one-pixel white inner top highlight on glass; outer panel borders are white at 70-85%. **Glass Tint** (glass-tint): the pale end of the active tab gradient. **Hairline** (hairline): dividers and generic borders.
+- **Glass Edge** (glass-edge): the one-pixel white inner top highlight on glass; outer panel borders are white at 70-85%. **Glass Tint** (glass-tint): a pale mint tint kept as a token (active tabs now use the teal gradient; see The Visible State Rule). **Hairline** (hairline): dividers and generic borders.
 - **Input Stroke** (input-stroke): form-field borders, kept at ≥3:1 against glass for WCAG 1.4.11.
 - **Mint Secondary** (mint-secondary, mint gradient): secondary buttons and the primary-tone badge.
-- **Track** (track): the empty channel of sliders, progress bars and score bars. **Control Off** (control-off): an unchecked switch. **Neutral Wash** (neutral-soft): the start of the neutral badge gradient.
+- **Track** (track): the empty channel of sliders, progress bars and score bars. **Control Off** (control-off): an unchecked switch track, dark enough that off and on read apart at a glance.
+- **Control Stroke** (control-stroke): the edge of outline and secondary buttons, tab and toggle containers, and unselected questionnaire options (≥ 2.3:1 against glass). White-on-white edges vanish on glass, so every control that sits on a card carries this stroke. **Neutral Wash** (neutral-soft): the start of the neutral badge gradient.
 - **Scrim** (scrim, at 30%): the veil behind dialogs and sheets.
 
 ### Gradients
@@ -332,6 +334,8 @@ Every gradient is a token in `:root`; these are its stops.
 - **Diverging** div-neg-2 → div-mid → div-pos-2: coral to teal with a grey-teal midpoint, for Likert answer distributions.
 
 ### Named Rules
+**The Visible State Rule.** A selected, active or keyboard-highlighted item never differs from its neighbours by a white or mint tint alone (those measured 1.03–1.15:1 on glass). Highlighted menu, select and command items, active tabs, "on" toggles and chosen questionnaire answers use the teal gradient with white text and icons; a selected-but-not-highlighted list item is teal ink, semibold, with a teal check. Inactive tab text is full muted ink, never a faded foreground.
+
 **The One Teal Voice Rule.** Deep teal gradient marks action and "you are here": primary buttons, the active navigation pill, banners. Never use it as a card or section fill.
 
 **The Ink Pair Rule.** Every tinted tone has a fill token and a separate darker ink token. Text on a tint always uses the ink (success-ink, warm-orange-ink, violet-ink, danger-ink), never the fill hue itself.
@@ -398,14 +402,15 @@ Soft, generous rounding. The base radius is 14px. Cards, tiles, dialogs and list
 Gradient, soft-shadowed and confident.
 - **Shape:** gently rounded (18px) at every size; default 36px tall (xs 24px, sm 32px, lg 40px), semibold 14px.
 - **Primary:** action-teal gradient, white text, primary glow shadow. Hover brightens 10%, active dims 5%.
-- **Outline:** white glass gradient (85% → 45%) with a white border, backdrop blur and the soft shadow; brightens to solid white on hover. Used for secondary actions on glass and on the banner.
-- **Secondary:** mint gradient with mint-secondary ink.
+- **Outline:** white glass gradient (95% → 65%) with a control-stroke border, backdrop blur and the soft shadow; on hover the border and label turn action-teal. Used for secondary actions on glass and on the banner.
+- **Secondary:** mint gradient with action-teal text and a control-stroke border (mint alone is invisible on glass).
 - **Destructive:** coral gradient with the danger glow.
 - **Ghost:** transparent, 55% white wash on hover. **Link:** action-teal text, underlined on hover.
 - **Focus:** 3px action-teal ring at 80%. On the banner teal, focus rings turn white.
 
 ### Chips (status badges)
-- **Style:** full pill, 12px semibold, a leading 6px dot in the text colour, a soft gradient from the tone's wash to 70% white, and a one-pixel inset ring in the tone.
+- **Style:** full pill, 12px semibold, a leading 6px dot in the text colour, the tone's soft gradient fill.
+- **Edge:** a solid soft fill (no fade to white) and a one-pixel inset ring in the chip's own ink at 35-40%, so the pill stays visible on glass.
 - **Tones:** success, warning (orange ink), danger, info (violet), primary (mint), neutral. Status maps to tone in one table: overdue/open/rejected are danger, pending/reopened are warning, in progress/review are info, verified/active are success.
 
 ### Cards / Containers
@@ -454,5 +459,6 @@ Full-pill tracks tinted in the tone (teal 12%, warning 18%, coral 12%) with grad
 - **Don't** fill cards or sections with accent hues (violet, pink, orange, sky). They belong to icon chips, badges, counters and charts.
 - **Don't** lighten the banner back to the first-sketch teal (#0f7f86 → #16a39a); white text on it would fail AA.
 - **Don't** vary button corner radius by size.
+- **Don't** mark a selected or highlighted state with white/mint tint alone, and don't put orange ink (gold-foreground) on teal; on teal, text is white.
 - **Don't** add a dark mode; the product is light-only by decision.
 - **Don't** carry this world into the PDF reports (resources/views/reports); they stay plain for print.
