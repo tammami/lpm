@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Archive, BarChart3, CalendarClock, CheckCircle2, EyeOff, Lock, Pencil, PlayCircle, RotateCcw, ShieldCheck, Trash2, Users, UserSearch } from 'lucide-react';
+import { Archive, BarChart3, CalendarClock, CheckCircle2, EyeOff, ListChecks, Lock, Pencil, PlayCircle, RotateCcw, ShieldCheck, Trash2, Users, UserSearch } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Meter } from '@/components/meter';
@@ -84,6 +84,11 @@ export default function SurveyShow({ survey, progress, byStudyProgram, byAssignm
                             </Button>
                         )}
                         <Button variant="outline" asChild>
+                            <Link href={route('surveys.respondents', survey.id)}>
+                                <ListChecks /> Rekap per prodi
+                            </Link>
+                        </Button>
+                        <Button variant="outline" asChild>
                             <Link href={route('surveys.participations', survey.id)}>
                                 <UserSearch /> Status responden
                             </Link>
@@ -144,7 +149,12 @@ export default function SurveyShow({ survey, progress, byStudyProgram, byAssignm
                 <Card className="h-fit">
                     <CardHeader>
                         <CardTitle>Per program studi</CardTitle>
-                        <CardDescription>Kelengkapan pengisian di setiap prodi.</CardDescription>
+                        <CardDescription>
+                            Kelengkapan pengisian di setiap prodi.{' '}
+                            <Link href={route('surveys.respondents', survey.id)} className="font-medium text-primary hover:underline">
+                                Lihat siapa yang belum mengisi →
+                            </Link>
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-1">
                         {byStudyProgram.length === 0 && <p className="text-sm text-muted-foreground">Belum ada responden eligible pada cakupan ini.</p>}

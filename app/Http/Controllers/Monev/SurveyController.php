@@ -13,6 +13,7 @@ use App\Events\SurveyOpened;
 use App\Http\Controllers\Controller;
 use App\Models\AcademicPeriod;
 use App\Models\InstrumentVersion;
+use App\Models\StudyProgram;
 use App\Models\Survey;
 use App\Models\SurveyParticipation;
 use App\Services\AuditLogger;
@@ -20,22 +21,27 @@ use App\Services\Monev\ResponseSubmitter;
 use App\Services\Monev\SurveyProgress;
 use App\Services\Settings;
 use App\Support\Options;
+use App\Support\Spreadsheet;
 use App\Support\TableQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SurveyController extends Controller
 {
     public function index(Request $request, SurveyProgress $progress): Response
     {
         $query = Survey::query()->with(['instrumentVersion.instrument', 'academicPeriod', 'studyPrograms:id,name,degree']);
+        $visible = $request->user()->accessibleStudyProgramIds();
 
         $surveys = TableQuery::for($query, $request)
             ->search(['title', 'code'])
@@ -44,7 +50,7 @@ class SurveyController extends Controller
             ->paginate(10)
             ->through(fn (Survey $survey): array => [
                 ...$this->surveySummary($survey),
-                'progress' => $progress->summary($survey),
+                'progress' => $progress->summary($survey, $visible),
             ]);
 
         return Inertia::render('monev/surveys/index', [
@@ -105,7 +111,7 @@ class SurveyController extends Controller
                     ->where(fn (Builder $q) => $q->where('submission_count', '>', 1)->orWhere('status', ParticipationStatus::Reopened))
                     ->count(),
             ],
-            'progress' => $progress->summary($survey),
+            'progress' => $progress->summary($survey, $visible),
             'byStudyProgram' => $progress->byStudyProgram($survey, $visible),
             'byAssignment' => $progress->byAssignment($survey, $visible)->all(),
             'can' => [
@@ -260,6 +266,84 @@ class SurveyController extends Controller
             'filters' => $this->filters($request, []),
             'canReopen' => $request->user()->can('surveys.reopen'),
         ]);
+    }
+
+    /**
+     * Rekap per prodi: siapa yang sudah lengkap, baru sebagian, atau belum mengisi (hanya status, tanpa isi).
+     * Kaprodi/admin prodi otomatis hanya melihat responden dari prodinya.
+     */
+    public function respondents(Request $request, Survey $survey, SurveyProgress $progress): Response
+    {
+        $all = $progress->respondents($survey, $request->user()->accessibleStudyProgramIds());
+        $filtered = $this->filterRespondents($all, $request);
+        $names = $this->programNames($all);
+        $page = max(1, $request->integer('page', 1));
+
+        return Inertia::render('monev/surveys/respondents', [
+            'survey' => $this->surveySummary($survey->load(['instrumentVersion.instrument', 'academicPeriod', 'studyPrograms'])),
+            'byStudyProgram' => $progress->respondentsByStudyProgram($all),
+            'totals' => [
+                'total' => $all->count(),
+                'complete' => $all->where('state', 'complete')->count(),
+                'partial' => $all->where('state', 'partial')->count(),
+                'none' => $all->where('state', 'none')->count(),
+            ],
+            'respondents' => (new LengthAwarePaginator($filtered->forPage($page, 25)->values(), $filtered->count(), 25, $page, [
+                'path' => $request->url(),
+                'query' => $request->query(),
+            ]))->through(fn (array $row): array => [...$row, 'study_program' => $names[$row['study_program_id']] ?? null]),
+            'filters' => $this->filters($request, ['study_program_id', 'state']),
+        ]);
+    }
+
+    public function respondentsExport(Request $request, Survey $survey, SurveyProgress $progress): StreamedResponse
+    {
+        $all = $progress->respondents($survey, $request->user()->accessibleStudyProgramIds());
+        $rows = $this->filterRespondents($all, $request);
+        $names = $this->programNames($all);
+        $states = ['complete' => 'Lengkap', 'partial' => 'Sebagian', 'none' => 'Belum mengisi'];
+        $isLecturer = $survey->respondent_type === RespondentType::Dosen && $survey->mode !== SurveyMode::TeachingEvaluation;
+
+        AuditLogger::log('exported', 'monev', $survey, "Mengunduh rekap status responden {$survey->title}");
+
+        return Spreadsheet::downloadSheets('status-responden-'.Str::slug($survey->code).'.xlsx', [
+            ['title' => 'Per Prodi', 'headers' => ['Program Studi', 'Jumlah responden', 'Lengkap', 'Sebagian', 'Belum mengisi', '% Lengkap'], 'widths' => [40, 18, 12, 12, 16, 12], 'rows' => array_map(
+                fn (array $row): array => [$row['name'], $row['total'], $row['complete'], $row['partial'], $row['none'], $row['rate']],
+                $progress->respondentsByStudyProgram($all),
+            )],
+            ['title' => 'Responden', 'headers' => ['Nama', $isLecturer ? 'NIDN' : 'NIM', 'Program Studi', 'Status', 'Terisi', 'Wajib diisi'], 'widths' => [36, 18, 36, 16, 10, 12], 'rows' => $rows->map(
+                fn (array $row): array => [$row['name'], $row['identifier'], $names[$row['study_program_id']] ?? '—', $states[$row['state']], $row['submitted'], $row['targets']],
+            )->all()],
+        ]);
+    }
+
+    /**
+     * @param  Collection<int, array<string, mixed>>  $respondents
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function filterRespondents(Collection $respondents, Request $request): Collection
+    {
+        $term = Str::lower(trim((string) $request->string('search')));
+        $programId = $request->integer('study_program_id');
+        $state = (string) $request->string('state');
+
+        return $respondents
+            ->when($programId > 0, fn (Collection $rows) => $rows->where('study_program_id', $programId))
+            ->when(in_array($state, ['complete', 'partial', 'none'], true), fn (Collection $rows) => $rows->where('state', $state))
+            ->when($state === 'pending', fn (Collection $rows) => $rows->where('state', '!=', 'complete'))
+            ->when($term !== '', fn (Collection $rows) => $rows->filter(fn (array $row): bool => str_contains(Str::lower($row['name']), $term)
+                || str_contains(Str::lower((string) $row['identifier']), $term)))
+            ->values();
+    }
+
+    /**
+     * @param  Collection<int, array<string, mixed>>  $respondents
+     * @return array<int, string>
+     */
+    private function programNames(Collection $respondents): array
+    {
+        return StudyProgram::query()->whereIn('id', $respondents->pluck('study_program_id')->filter()->unique())->get()
+            ->mapWithKeys(fn (StudyProgram $program): array => [$program->id => $program->full_name])->all();
     }
 
     public function reopen(Request $request, Survey $survey, SurveyParticipation $participation, ResponseSubmitter $submitter): RedirectResponse

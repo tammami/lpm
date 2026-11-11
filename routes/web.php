@@ -197,6 +197,8 @@ Route::middleware('auth')->group(function (): void {
             Route::get('kegiatan', [SurveyController::class, 'index'])->name('surveys.index');
             Route::get('kegiatan/{survey}', [SurveyController::class, 'show'])->name('surveys.show');
             Route::get('kegiatan/{survey}/partisipasi', [SurveyController::class, 'participations'])->name('surveys.participations');
+            Route::get('kegiatan/{survey}/rekap-responden', [SurveyController::class, 'respondents'])->name('surveys.respondents');
+            Route::get('kegiatan/{survey}/rekap-responden/excel', [SurveyController::class, 'respondentsExport'])->name('surveys.respondents.export');
         });
 
         Route::post('kegiatan/{survey}/partisipasi/{participation}/buka-kembali', [SurveyController::class, 'reopen'])

@@ -21,14 +21,104 @@ class SurveyProgress
     public function __construct(private EligibilityService $eligibility) {}
 
     /**
+     * Ringkasan kelengkapan. Bila `$visibleProgramIds` diisi (mis. kaprodi), hanya prodi tersebut yang dihitung.
+     *
+     * @param  list<int>|null  $visibleProgramIds
      * @return array{eligible: int, submitted: int, rate: float|null}
      */
-    public function summary(Survey $survey): array
+    public function summary(Survey $survey, ?array $visibleProgramIds = null): array
     {
+        if ($visibleProgramIds !== null) {
+            $rows = collect($this->byStudyProgram($survey, $visibleProgramIds));
+            $eligible = (int) $rows->sum('eligible');
+            $submitted = (int) $rows->sum('submitted');
+
+            return ['eligible' => $eligible, 'submitted' => $submitted, 'rate' => $this->rate($submitted, $eligible)];
+        }
+
         $eligible = $this->eligibility->eligibleCount($survey);
         $submitted = $this->submittedQuery($survey)->count();
 
         return ['eligible' => $eligible, 'submitted' => $submitted, 'rate' => $this->rate($submitted, $eligible)];
+    }
+
+    /**
+     * Daftar orang (bukan pasangan) yang wajib mengisi beserta status kelengkapannya,
+     * dikelompokkan menurut prodi asal responden. Hanya status — tanpa isi jawaban.
+     *
+     * @param  list<int>|null  $visibleProgramIds
+     * @return Collection<int, array{user_id: int, name: string, identifier: string|null, study_program_id: int|null, targets: int, submitted: int, state: string}>
+     */
+    public function respondents(Survey $survey, ?array $visibleProgramIds = null): Collection
+    {
+        $targets = $this->eligibility->targetCountsByUser($survey);
+
+        if ($targets->isEmpty()) {
+            return collect();
+        }
+
+        $submitted = $this->submittedQuery($survey)
+            ->select('user_id', DB::raw('count(*) as total'))
+            ->groupBy('user_id')
+            ->pluck('total', 'user_id');
+
+        $isLecturer = $survey->respondent_type === RespondentType::Dosen && $survey->mode !== SurveyMode::TeachingEvaluation;
+
+        return DB::table($isLecturer ? 'lecturers' : 'students')
+            ->whereIn('user_id', $targets->keys())
+            ->when($visibleProgramIds !== null, fn (Builder $query) => $query->whereIn('study_program_id', $visibleProgramIds))
+            ->orderBy('name')
+            ->get(['user_id', 'name', $isLecturer ? 'nidn as identifier' : 'nim as identifier', 'study_program_id'])
+            ->unique('user_id')
+            ->map(function (object $row) use ($targets, $submitted): array {
+                $targetCount = (int) $targets[$row->user_id];
+                $submittedCount = min($targetCount, (int) ($submitted[$row->user_id] ?? 0));
+
+                return [
+                    'user_id' => (int) $row->user_id,
+                    'name' => $row->name,
+                    'identifier' => $row->identifier,
+                    'study_program_id' => $row->study_program_id !== null ? (int) $row->study_program_id : null,
+                    'targets' => $targetCount,
+                    'submitted' => $submittedCount,
+                    'state' => match (true) {
+                        $submittedCount >= $targetCount => 'complete',
+                        $submittedCount > 0 => 'partial',
+                        default => 'none',
+                    },
+                ];
+            })
+            ->values();
+    }
+
+    /**
+     * Jumlah responden (orang) per prodi asal: lengkap, sebagian, belum mengisi.
+     *
+     * @param  Collection<int, array<string, mixed>>  $respondents  Hasil `respondents()`.
+     * @return list<array{study_program_id: int|null, name: string, total: int, complete: int, partial: int, none: int, rate: float|null}>
+     */
+    public function respondentsByStudyProgram(Collection $respondents): array
+    {
+        $names = StudyProgram::query()->whereIn('id', $respondents->pluck('study_program_id')->filter()->unique())->get()
+            ->mapWithKeys(fn (StudyProgram $program): array => [$program->id => $program->full_name]);
+
+        return $respondents->groupBy(fn (array $row): int => $row['study_program_id'] ?? 0)
+            ->map(function (Collection $rows, int $programId) use ($names): array {
+                $complete = $rows->where('state', 'complete')->count();
+
+                return [
+                    'study_program_id' => $programId ?: null,
+                    'name' => $names[$programId] ?? 'Tanpa prodi',
+                    'total' => $rows->count(),
+                    'complete' => $complete,
+                    'partial' => $rows->where('state', 'partial')->count(),
+                    'none' => $rows->where('state', 'none')->count(),
+                    'rate' => $this->rate($complete, $rows->count()),
+                ];
+            })
+            ->sortBy('name')
+            ->values()
+            ->all();
     }
 
     /**
