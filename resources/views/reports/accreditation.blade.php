@@ -7,12 +7,13 @@
 
 @section('content')
     <h1>Laporan Kesiapan Akreditasi</h1>
-    <div class="muted">{{ $period->studyProgram->full_name }} · {{ $period->name }} ({{ $period->code }})</div>
+    <div class="muted">{{ $period->subjectName() }} · {{ $period->name }} ({{ $period->code }})</div>
 
+    @php($current = $period->currentAccreditation())
     <table class="meta">
         <tr><td class="label">Instrumen</td><td>{{ $period->version->instrument->name }} ({{ $period->version->instrument->code }} v{{ $period->version->version }})</td><td class="label">Lembaga</td><td>{{ $period->version->instrument->body?->code ?? '—' }}</td></tr>
         <tr><td class="label">Tahap</td><td>{{ $period->status->label() }}</td><td class="label">PIC</td><td>{{ $period->pic?->name ?? '—' }}</td></tr>
-        <tr><td class="label">Batas pengajuan</td><td>{{ $period->submission_deadline?->translatedFormat('d F Y') ?? '—' }}</td><td class="label">Akreditasi saat ini</td><td>{{ $period->studyProgram->accreditation_status ?? '—' }} · s.d. {{ $period->studyProgram->accreditation_valid_until?->translatedFormat('d F Y') ?? '—' }}</td></tr>
+        <tr><td class="label">Batas pengajuan</td><td>{{ $period->submission_deadline?->translatedFormat('d F Y') ?? '—' }}</td><td class="label">Akreditasi saat ini</td><td>{{ $current['grade'] ?? '—' }} · s.d. {{ $current['valid_until'] ? \Illuminate\Support\Carbon::parse($current['valid_until'])->translatedFormat('d F Y') : '—' }}</td></tr>
     </table>
 
     <table class="kpis">

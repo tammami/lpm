@@ -43,14 +43,15 @@ class PeriodWorkflow
         DB::transaction(function () use ($period, $result): void {
             $period->update([...$result, 'status' => AccreditationPeriodStatus::Decided]);
 
-            $period->studyProgram->update([
+            // Akreditasi institusi cukup tercatat pada periodenya; status prodi tidak disentuh.
+            $period->studyProgram?->update([
                 'accreditation_status' => $result['result_grade'],
                 'accreditation_valid_until' => $result['valid_until'],
                 'accreditation_sk_number' => $result['sk_number'] ?? $period->studyProgram->accreditation_sk_number,
             ]);
         });
 
-        AuditLogger::log('closed', 'accreditation', $period, "Keputusan akreditasi {$period->studyProgram->full_name}: {$result['result_grade']}");
+        AuditLogger::log('closed', 'accreditation', $period, "Keputusan akreditasi {$period->subjectName()}: {$result['result_grade']}");
     }
 
     public function cancel(AccreditationPeriod $period, string $reason): void

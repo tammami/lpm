@@ -235,7 +235,7 @@ class RecommendationEngine
                 return [
                     ...$this->candidate(
                         "accreditation:period:{$period->id}:gaps:{$period->submission_deadline->toDateString()}",
-                        "Percepat pemenuhan dokumen akreditasi {$period->studyProgram->full_name}",
+                        "Percepat pemenuhan dokumen akreditasi {$period->subjectName()}",
                         "Lengkapi {$summary['gap']} indikator tanpa bukti dan {$summary['essential_unmet']} syarat perlu yang belum terpenuhi sebelum batas pengajuan. Gunakan daftar gap pada periode {$period->code} sebagai checklist kerja.",
                         'Kesiapan dokumen '.$this->fmt($summary['readiness'], 0).'%; batas pengajuan '.$period->submission_deadline->translatedFormat('d M Y').'.',
                         RecommendationOrigin::Accreditation,

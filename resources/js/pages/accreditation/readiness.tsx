@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 
 interface ProgramReadiness {
     id: number;
+    is_institution: boolean;
     name: string;
     code: string;
     body: string | null;
@@ -47,13 +48,15 @@ export default function Readiness({ programs, warningDays, can }: Props) {
     const gaps = active.reduce((sum, p) => sum + (p.summary?.gap ?? 0), 0);
     const expiring = programs.filter((p) => p.days_left !== null && p.days_left <= warningDays);
     const unprepared = expiring.filter((p) => !p.period);
+    const programCount = programs.filter((p) => !p.is_institution).length;
+    const scopeHint = `${programCount} prodi${programs.some((p) => p.is_institution) ? ' & institusi' : ''}`;
     const criteriaCodes = Array.from(new Map(active.flatMap((p) => p.criteria.map((c) => [c.code, c.title] as const))).entries()).map(([code, title]) => ({ code, title }));
 
     return (
         <>
             <PageHeader
                 title="Kesiapan Akreditasi"
-                description="Pantau kelengkapan bukti per kriteria, estimasi skor, dan tenggat reakreditasi seluruh program studi."
+                description="Pantau kelengkapan bukti per kriteria, estimasi skor, dan tenggat reakreditasi institusi (APT) dan seluruh program studi."
                 breadcrumbs={[{ label: 'Akreditasi' }, { label: 'Kesiapan' }]}
                 actions={
                     can.manage && (
@@ -69,13 +72,13 @@ export default function Readiness({ programs, warningDays, can }: Props) {
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatTile label="Rata-rata kesiapan dokumen" value={formatPercent(average, 0)} icon={Gauge} hint={`${active.length} periode sedang berjalan`} />
                 <StatTile label="Indikator belum ada bukti" value={formatNumber(gaps)} icon={FileWarning} tone={gaps ? 'danger' : 'neutral'} hint="Seluruh periode berjalan" />
-                <StatTile label={`Akreditasi berakhir ≤ ${warningDays} hari`} value={expiring.length} icon={AlarmClock} tone={expiring.length ? 'gold' : 'primary'} hint={`dari ${programs.length} prodi`} />
-                <StatTile label="Belum memulai persiapan" value={unprepared.length} icon={ShieldAlert} tone={unprepared.length ? 'danger' : 'neutral'} hint={unprepared.length ? unprepared.map((p) => p.code).join(', ') : 'Semua prodi yang mendekati masa berakhir sudah memiliki periode'} />
+                <StatTile label={`Akreditasi berakhir ≤ ${warningDays} hari`} value={expiring.length} icon={AlarmClock} tone={expiring.length ? 'gold' : 'primary'} hint={`dari ${scopeHint}`} />
+                <StatTile label="Belum memulai persiapan" value={unprepared.length} icon={ShieldAlert} tone={unprepared.length ? 'danger' : 'neutral'} hint={unprepared.length ? unprepared.map((p) => p.code).join(', ') : 'Semua yang mendekati masa berakhir sudah memiliki periode'} />
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {programs.map((program) => (
-                    <ProgramCard key={program.id} program={program} warningDays={warningDays} canManage={can.manage} />
+                    <ProgramCard key={program.is_institution ? 'institution' : program.id} program={program} warningDays={warningDays} canManage={can.manage} />
                 ))}
             </div>
 
@@ -83,7 +86,7 @@ export default function Readiness({ programs, warningDays, can }: Props) {
                 <Card className="mt-6">
                     <CardHeader>
                         <CardTitle>Peta kesiapan per kriteria</CardTitle>
-                        <CardDescription>Persentase kesiapan dokumen per kriteria untuk setiap periode berjalan. Klik nama prodi untuk membuka periode.</CardDescription>
+                        <CardDescription>Persentase kesiapan dokumen per kriteria untuk setiap periode berjalan. Klik nama prodi/institusi untuk membuka periode.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Heatmap
@@ -106,13 +109,20 @@ function ProgramCard({ program, warningDays, canManage }: { program: ProgramRead
     const summary = program.summary;
 
     return (
-        <Card className={cn('gap-0 overflow-hidden py-0', expiring && !program.period && 'border-destructive/40')}>
+        <Card className={cn('gap-0 overflow-hidden py-0', program.is_institution && 'border-primary/30 lg:col-span-2', expiring && !program.period && 'border-destructive/40')}>
             <div className="flex items-start gap-3 border-b bg-muted/30 px-5 py-4">
                 <span className="flex h-10 min-w-10 shrink-0 items-center justify-center rounded-xl bg-gold-soft px-2 text-[11px] font-extrabold text-gold-foreground">{program.body ?? '—'}</span>
                 <div className="min-w-0 flex-1">
-                    <div className="truncate font-bold">{program.name}</div>
+                    <div className="flex items-center gap-2">
+                        <span className="truncate font-bold">{program.name}</span>
+                        {program.is_institution && (
+                            <StatusBadge tone="primary" dot={false}>
+                                Akreditasi institusi
+                            </StatusBadge>
+                        )}
+                    </div>
                     <div className="text-xs text-muted-foreground">
-                        {program.status ?? 'Belum terakreditasi'} · berlaku s.d. {formatDate(program.valid_until)}
+                        {program.status ?? (program.is_institution ? 'Belum ada keputusan APT tercatat' : 'Belum terakreditasi')} · berlaku s.d. {formatDate(program.valid_until)}
                     </div>
                 </div>
                 {program.days_left !== null && (
@@ -180,7 +190,7 @@ function ProgramCard({ program, warningDays, canManage }: { program: ProgramRead
                     </p>
                     {canManage && (
                         <Button size="sm" variant={expiring ? 'default' : 'outline'} asChild>
-                            <Link href={route('accreditation.periods.index', { create: 1, study_program_id: program.id })}>
+                            <Link href={route('accreditation.periods.index', program.is_institution ? { create: 1 } : { create: 1, study_program_id: program.id })}>
                                 <BadgeCheck /> Mulai persiapan
                             </Link>
                         </Button>

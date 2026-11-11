@@ -43,7 +43,8 @@ interface Period extends PeriodRow {
     target_score: number | null;
     pic_user_id: number | null;
     instrument_version_id: number;
-    study_program_id: number;
+    study_program_id: number | null;
+    default_unit: string | null;
     starts_on: string | null;
     submitted_on: string | null;
     visit_on: string | null;
@@ -326,7 +327,7 @@ export default function PeriodShow({ period, summary, byCriterion, gaps, criteri
                                                                 scaleMax={period.scale_max}
                                                                 canContribute={can.contribute}
                                                                 evidenceOptions={evidenceOptions}
-                                                                defaultUnit={`study_program:${period.study_program_id}`}
+                                                                defaultUnit={period.default_unit}
                                                             />
                                                         ))}
                                                     </div>
@@ -435,7 +436,7 @@ export default function PeriodShow({ period, summary, byCriterion, gaps, criteri
             {cancelling && <CancelDialog id={period.id} onClose={() => setCancelling(false)} />}
             {!open && period.status === 'cancelled' && period.notes && <p className="mt-6 text-sm whitespace-pre-line text-muted-foreground">{period.notes}</p>}
             <div className="mt-8 text-xs text-muted-foreground">
-                Akreditasi prodi saat ini: <b>{period.current_status ?? '—'}</b> · berlaku s.d. {formatDate(period.current_valid_until)}
+                Akreditasi {period.is_institutional ? 'institusi' : 'prodi'} saat ini: <b>{period.current_status ?? '—'}</b> · berlaku s.d. {formatDate(period.current_valid_until)}
                 {canViewReadiness && (
                     <>
                         {' · '}

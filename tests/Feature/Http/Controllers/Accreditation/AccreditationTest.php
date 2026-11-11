@@ -9,6 +9,8 @@ use App\Models\AccreditationPeriod;
 use App\Models\Lecturer;
 use App\Models\StudyProgram;
 use App\Services\Evidence\EvidenceService;
+use App\Services\Improvement\RecommendationEngine;
+use Database\Seeders\InstitutionAccreditationSeeder;
 use Illuminate\Http\UploadedFile;
 
 beforeEach(function () {
@@ -148,6 +150,146 @@ it('scopes accreditation pages to the user and renders readiness', function () {
     $this->actingAs($kaprodi)->get(route('accreditation.periods.show', $period))->assertForbidden();
     $this->actingAs($kaprodi)->get(route('accreditation.instruments.index'))->assertForbidden();
 
-    $this->actingAs($this->lpm)->get(route('accreditation.readiness'))->assertOk()->assertInertia(fn ($page) => $page->where('programs.0.period.id', $period->id));
+    $this->actingAs($this->lpm)->get(route('accreditation.readiness'))->assertOk()->assertInertia(fn ($page) => $page->where('programs.0.is_institution', true)->where('programs.1.period.id', $period->id));
     $this->actingAs($this->lpm)->get(route('accreditation.instruments.index'))->assertOk();
+});
+
+it('seeds the institution (APT) instrument once as a draft with nine criteria', function () {
+    $this->seed(InstitutionAccreditationSeeder::class);
+    $this->seed(InstitutionAccreditationSeeder::class);
+
+    $instrument = AccreditationInstrument::query()->where('code', InstitutionAccreditationSeeder::CODE)->sole();
+    $version = $instrument->versions()->sole();
+
+    expect($instrument->body->code)->toBe('BAN-PT')
+        ->and($version->status->value)->toBe('draft')
+        ->and($version->criteria()->count())->toBe(9)
+        ->and((float) $version->criteria()->sum('weight'))->toBe(100.0)
+        ->and($version->indicators()->count())->toBeGreaterThan(20);
+
+    $this->actingAs($this->lpm)->get(route('accreditation.versions.show', $version))->assertInertia(fn ($page) => $page->where('issues', []));
+    $this->actingAs($this->lpm)->post(route('accreditation.versions.transition', $version), ['status' => 'published'])->assertSessionHasNoErrors();
+    expect($version->fresh()->status->value)->toBe('published');
+});
+
+/**
+ * Instrumen APT hasil seeder, langsung ditetapkan berlaku.
+ */
+function publishedInstitutionVersion(): AccreditationInstrumentVersion
+{
+    test()->seed(InstitutionAccreditationSeeder::class);
+    $version = AccreditationInstrument::query()->where('code', InstitutionAccreditationSeeder::CODE)->sole()->versions()->sole();
+    $version->update(['status' => 'published']);
+
+    return $version;
+}
+
+it('creates an institution accreditation period without a study program', function () {
+    $apt = publishedInstitutionVersion();
+
+    $this->actingAs($this->lpm)->get(route('accreditation.periods.index'))
+        ->assertInertia(fn ($page) => $page->where('versions.0.institutional', true));
+
+    $this->actingAs($this->lpm)->post(route('accreditation.periods.store'), [
+        'study_program_id' => $this->program->id, 'instrument_version_id' => $apt->id, 'name' => 'Akreditasi Perguruan Tinggi 2027',
+    ])->assertSessionHasNoErrors();
+
+    $period = AccreditationPeriod::query()->sole();
+    expect($period->study_program_id)->toBeNull()->and($period->isInstitutional())->toBeTrue();
+
+    $this->actingAs($this->lpm)->get(route('accreditation.periods.show', $period))->assertOk()
+        ->assertInertia(fn ($page) => $page->where('period.is_institutional', true)->where('period.study_program', 'Institusi (APT)'));
+    $this->actingAs($this->lpm)->get(route('accreditation.periods.report', $period))->assertOk();
+    $this->actingAs($this->lpm)->get(route('accreditation.periods.index', ['study_program_id' => 'institution']))
+        ->assertInertia(fn ($page) => $page->has('periods', 1));
+
+    // Satu periode institusi berjalan pada satu waktu.
+    $this->actingAs($this->lpm)->post(route('accreditation.periods.store'), [
+        'instrument_version_id' => $apt->id, 'name' => 'Duplikat',
+    ]);
+    expect(AccreditationPeriod::query()->count())->toBe(1);
+});
+
+it('records an institution decision without touching any study program', function () {
+    $apt = publishedInstitutionVersion();
+    $this->program->update(['accreditation_status' => 'Baik']);
+    $this->actingAs($this->lpm)->post(route('accreditation.periods.store'), ['instrument_version_id' => $apt->id, 'name' => 'APT 2027']);
+    $period = AccreditationPeriod::query()->sole();
+
+    $this->actingAs($this->lpm)->post(route('accreditation.periods.decide', $period), [
+        'result_grade' => 'Unggul', 'decided_on' => '2027-08-01', 'valid_until' => '2032-08-01',
+    ])->assertSessionHasNoErrors();
+
+    expect($period->fresh()->currentAccreditation())->toBe(['grade' => 'Unggul', 'valid_until' => '2032-08-01'])
+        ->and($this->program->fresh()->accreditation_status)->toBe('Baik');
+});
+
+it('keeps institution periods away from study program admins', function () {
+    $apt = publishedInstitutionVersion();
+    $this->actingAs($this->lpm)->post(route('accreditation.periods.store'), ['instrument_version_id' => $apt->id, 'name' => 'APT 2027']);
+    $period = AccreditationPeriod::query()->sole();
+    $kaprodi = userWithRole(UserRole::AdminProdi, ['study_program_id' => $this->program->id]);
+    $kaprodi->givePermissionTo('accreditation.view');
+
+    $this->actingAs($kaprodi)->get(route('accreditation.periods.index'))->assertInertia(fn ($page) => $page->has('periods', 0));
+    $this->actingAs($kaprodi)->get(route('accreditation.periods.show', $period))->assertForbidden();
+});
+
+it('still requires a study program for a study program instrument', function () {
+    $this->actingAs($this->lpm)->post(route('accreditation.periods.store'), [
+        'instrument_version_id' => publishedVersion()->id, 'name' => 'Tanpa prodi',
+    ])->assertSessionHasErrors('study_program_id');
+});
+
+it('suggests closing document gaps for an institution period nearing its deadline', function () {
+    $apt = publishedInstitutionVersion();
+    AccreditationPeriod::query()->create([
+        'instrument_version_id' => $apt->id, 'code' => 'AKR-APT', 'name' => 'APT 2027', 'status' => AccreditationPeriodStatus::Preparing,
+        'submission_deadline' => now()->addDays(20)->toDateString(),
+    ]);
+
+    $titles = app(RecommendationEngine::class)->candidates($this->lpm)->pluck('title');
+
+    expect($titles->contains(fn (string $title): bool => str_starts_with($title, 'Percepat pemenuhan dokumen akreditasi')))->toBeTrue();
+});
+
+it('shows the institution first on the readiness page and dashboard for institution-wide users', function () {
+    $apt = publishedInstitutionVersion();
+    $this->actingAs($this->lpm)->post(route('accreditation.periods.store'), ['instrument_version_id' => $apt->id, 'name' => 'APT 2027']);
+    $period = AccreditationPeriod::query()->sole();
+
+    $this->actingAs($this->lpm)->get(route('accreditation.readiness'))
+        ->assertInertia(fn ($page) => $page
+            ->where('programs.0.is_institution', true)
+            ->where('programs.0.body', 'BAN-PT')
+            ->where('programs.0.period.id', $period->id)
+            ->has('programs.0.criteria', 9)
+            ->where('programs.1.is_institution', false));
+
+    $this->actingAs($this->lpm)->get(route('dashboard'))
+        ->assertInertia(fn ($page) => $page
+            ->where('accreditation.0.is_institution', true)
+            ->where('accreditation.0.period_id', $period->id));
+});
+
+it('shows the latest institution decision even without a running period', function () {
+    $apt = publishedInstitutionVersion();
+    AccreditationPeriod::query()->create([
+        'instrument_version_id' => $apt->id, 'code' => 'AKR-APT-2022', 'name' => 'APT 2022', 'status' => AccreditationPeriodStatus::Decided,
+        'result_grade' => 'Baik Sekali', 'decided_on' => '2022-05-01', 'valid_until' => now()->addDays(100)->toDateString(),
+    ]);
+
+    $this->actingAs($this->lpm)->get(route('accreditation.readiness'))
+        ->assertInertia(fn ($page) => $page
+            ->where('programs.0.status', 'Baik Sekali')
+            ->where('programs.0.days_left', 100)
+            ->where('programs.0.period', null));
+});
+
+it('hides the institution row from study program admins', function () {
+    $kaprodi = userWithRole(UserRole::AdminProdi, ['study_program_id' => $this->program->id]);
+    $kaprodi->givePermissionTo('accreditation.view');
+
+    $this->actingAs($kaprodi)->get(route('accreditation.readiness'))
+        ->assertInertia(fn ($page) => $page->where('programs', fn ($programs) => collect($programs)->every(fn ($row) => $row['is_institution'] === false)));
 });

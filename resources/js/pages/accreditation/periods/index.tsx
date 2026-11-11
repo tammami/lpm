@@ -21,7 +21,7 @@ import type { Option } from '@/types';
 
 export interface PeriodFormOptions {
     studyPrograms: Option[];
-    versions: (Option & { body_id: number })[];
+    versions: (Option & { body_id: number; institutional: boolean })[];
     picOptions: Option[];
 }
 
@@ -42,7 +42,7 @@ export default function PeriodIndex({ periods, filters, statuses, studyPrograms,
             <PageHeader
                 reset={['accreditation-periods']}
                 title="Periode Akreditasi"
-                description="Setiap siklus (re)akreditasi prodi: instrumen LAM, tim penyusun, tenggat, bukti per indikator, hingga keputusan."
+                description="Setiap siklus (re)akreditasi prodi maupun institusi (APT): instrumen, tim penyusun, tenggat, bukti per indikator, hingga keputusan."
                 breadcrumbs={[{ label: 'Akreditasi' }, { label: 'Periode' }]}
                 actions={
                     can.manage && (
@@ -55,7 +55,7 @@ export default function PeriodIndex({ periods, filters, statuses, studyPrograms,
 
             <div className="mb-4 flex flex-wrap gap-3">
                 <SelectField value={query.status} onChange={(v) => setFilter('status', v)} options={statuses} allLabel="Semua tahap" className="w-56" />
-                <SelectField value={query.study_program_id} onChange={(v) => setFilter('study_program_id', v)} options={studyPrograms} allLabel="Semua prodi" className="w-72" />
+                <SelectField value={query.study_program_id} onChange={(v) => setFilter('study_program_id', v)} options={[{ value: 'institution', label: 'Institusi (APT)' }, ...studyPrograms]} allLabel="Semua prodi & institusi" className="w-72" />
             </div>
 
             {periods.length === 0 ? (
@@ -69,10 +69,16 @@ export default function PeriodIndex({ periods, filters, statuses, studyPrograms,
                             <div className="min-w-0">
                                 <div className="flex flex-wrap items-center gap-2">
                                     <StatusBadge tone={periodTone[period.status]}>{period.status_label}</StatusBadge>
+                                    {period.is_institutional && (
+                                        <StatusBadge tone="gold" dot={false}>
+                                            Institusi
+                                        </StatusBadge>
+                                    )}
                                     <span className="font-mono text-xs text-muted-foreground">{period.code}</span>
                                 </div>
                                 <div className="mt-1.5 truncate font-bold">{period.name}</div>
                                 <div className="truncate text-xs text-muted-foreground">
+                                    {period.study_program ? `${period.study_program} · ` : ''}
                                     {period.instrument} · PIC {period.pic ?? '—'}
                                 </div>
                             </div>
@@ -117,7 +123,7 @@ export default function PeriodIndex({ periods, filters, statuses, studyPrograms,
 
 export interface EditablePeriod {
     id: number;
-    study_program_id: number;
+    study_program_id: number | null;
     instrument_version_id: number;
     name: string;
     pic_user_id: number | null;
@@ -130,7 +136,7 @@ export interface EditablePeriod {
 
 export function PeriodForm({ period, studyPrograms, versions, picOptions, defaultProgram, onClose }: PeriodFormOptions & { period?: EditablePeriod; defaultProgram?: string | null; onClose: () => void }) {
     const form = useForm({
-        study_program_id: period ? String(period.study_program_id) : (defaultProgram ?? ''),
+        study_program_id: period?.study_program_id ? String(period.study_program_id) : (defaultProgram ?? ''),
         instrument_version_id: period ? String(period.instrument_version_id) : '',
         name: period?.name ?? '',
         pic_user_id: period?.pic_user_id ? String(period.pic_user_id) : '',
@@ -142,6 +148,7 @@ export function PeriodForm({ period, studyPrograms, versions, picOptions, defaul
     });
 
     const programLabel = studyPrograms.find((p) => String(p.value) === form.data.study_program_id)?.label;
+    const institutional = versions.find((v) => String(v.value) === form.data.instrument_version_id)?.institutional ?? false;
 
     const submit = () => {
         const options = { preserveScroll: true, onSuccess: onClose };
@@ -150,23 +157,42 @@ export function PeriodForm({ period, studyPrograms, versions, picOptions, defaul
     };
 
     return (
-        <FormDialog open onOpenChange={(open) => !open && onClose()} title={period ? 'Ubah periode akreditasi' : 'Periode akreditasi baru'} description="Satu prodi hanya dapat memiliki satu periode yang sedang berjalan." onSubmit={submit} processing={form.processing} size="lg">
+        <FormDialog open onOpenChange={(open) => !open && onClose()} title={period ? 'Ubah periode akreditasi' : 'Periode akreditasi baru'} description="Pilih instrumen APT untuk akreditasi institusi, atau instrumen LAM untuk prodi. Satu prodi/institusi hanya dapat memiliki satu periode berjalan." onSubmit={submit} processing={form.processing} size="lg">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormField label="Program studi" error={form.errors.study_program_id} required>
-                    <Combobox
-                        value={form.data.study_program_id}
+                <FormField label="Instrumen (versi berlaku)" error={form.errors.instrument_version_id} required>
+                    <SelectField
+                        value={form.data.instrument_version_id}
                         onChange={(value) => {
-                            form.setData((data) => ({ ...data, study_program_id: value, name: data.name || `Reakreditasi ${studyPrograms.find((p) => String(p.value) === value)?.label ?? ''}` }));
+                            const toInstitution = versions.find((v) => String(v.value) === value)?.institutional ?? false;
+                            form.setData((data) => ({
+                                ...data,
+                                instrument_version_id: value,
+                                study_program_id: toInstitution ? '' : data.study_program_id,
+                                name: data.name || (toInstitution ? `Akreditasi Perguruan Tinggi ${new Date().getFullYear()}` : ''),
+                            }));
                         }}
-                        options={studyPrograms}
-                        placeholder="Pilih prodi"
+                        options={versions}
+                        placeholder="Pilih instrumen"
                     />
                 </FormField>
-                <FormField label="Instrumen LAM (versi berlaku)" error={form.errors.instrument_version_id} required>
-                    <SelectField value={form.data.instrument_version_id} onChange={(value) => form.setData('instrument_version_id', value)} options={versions} placeholder="Pilih instrumen" />
-                </FormField>
+                {institutional ? (
+                    <FormField label="Yang diakreditasi">
+                        <div className="flex h-9 items-center rounded-md border bg-muted/50 px-3 text-sm text-muted-foreground">Institusi (akreditasi perguruan tinggi)</div>
+                    </FormField>
+                ) : (
+                    <FormField label="Program studi" error={form.errors.study_program_id} required>
+                        <Combobox
+                            value={form.data.study_program_id}
+                            onChange={(value) => {
+                                form.setData((data) => ({ ...data, study_program_id: value, name: data.name || `Reakreditasi ${studyPrograms.find((p) => String(p.value) === value)?.label ?? ''}` }));
+                            }}
+                            options={studyPrograms}
+                            placeholder="Pilih prodi"
+                        />
+                    </FormField>
+                )}
                 <FormField label="Nama periode" error={form.errors.name} required className="sm:col-span-2">
-                    <Input value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} placeholder={`Reakreditasi ${programLabel ?? 'prodi'} 2027`} />
+                    <Input value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} placeholder={institutional ? 'Akreditasi Perguruan Tinggi 2027' : `Reakreditasi ${programLabel ?? 'prodi'} 2027`} />
                 </FormField>
                 <FormField label="PIC / ketua tim penyusun" error={form.errors.pic_user_id}>
                     <Combobox value={form.data.pic_user_id} onChange={(value) => form.setData('pic_user_id', value)} options={picOptions} placeholder="Pilih PIC" />

@@ -22,6 +22,14 @@ class AccreditationInstrument extends Model
         return ['is_active' => 'boolean'];
     }
 
+    /**
+     * Instrumen tingkat institusi (APT, kode berawalan "IAPT") — bukan untuk periode akreditasi program studi.
+     */
+    public function isInstitutional(): bool
+    {
+        return str_starts_with(strtoupper($this->code), 'IAPT');
+    }
+
     public function body(): BelongsTo
     {
         return $this->belongsTo(AccreditationBody::class, 'accreditation_body_id');

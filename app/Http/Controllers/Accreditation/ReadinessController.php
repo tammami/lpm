@@ -7,12 +7,13 @@ use App\Models\AccreditationPeriod;
 use App\Models\StudyProgram;
 use App\Services\Accreditation\ReadinessCalculator;
 use App\Services\Settings;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * Dashboard kesiapan akreditasi seluruh prodi dalam cakupan pengguna.
+ * Dashboard kesiapan akreditasi seluruh prodi dalam cakupan pengguna, plus institusi (APT) untuk pengguna se-institusi.
  */
 class ReadinessController extends Controller
 {
@@ -29,40 +30,59 @@ class ReadinessController extends Controller
             ->get()
             ->keyBy('study_program_id');
 
-        $rows = $programs->map(function (StudyProgram $program) use ($periods): array {
-            $period = $periods->get($program->id);
-            $calculator = $period ? ReadinessCalculator::for($period) : null;
+        $rows = $programs->map(fn (StudyProgram $program): array => $this->row(
+            ['id' => $program->id, 'name' => $program->full_name, 'code' => $program->code, 'body' => $program->accreditationBody?->code, 'is_institution' => false],
+            $program->accreditation_status,
+            $program->accreditation_valid_until,
+            $periods->get($program->id),
+        ))->sortBy(fn (array $row): array => [$row['period'] ? 0 : 1, $row['days_left'] ?? PHP_INT_MAX])->values();
 
-            return [
-                'id' => $program->id,
-                'name' => $program->full_name,
-                'code' => $program->code,
-                'body' => $program->accreditationBody?->code,
-                'status' => $program->accreditation_status,
-                'valid_until' => $program->accreditation_valid_until?->toDateString(),
-                'days_left' => $program->accreditation_valid_until ? (int) now()->startOfDay()->diffInDays($program->accreditation_valid_until, false) : null,
-                'period' => $period ? [
-                    'id' => $period->id,
-                    'code' => $period->code,
-                    'name' => $period->name,
-                    'status_label' => $period->status->label(),
-                    'status' => $period->status->value,
-                    'instrument' => $period->version->instrument->code.' v'.$period->version->version,
-                    'pic' => $period->pic?->name,
-                    'submission_deadline' => $period->submission_deadline?->toDateString(),
-                    'days_to_deadline' => $period->daysToDeadline(),
-                ] : null,
-                'summary' => $calculator?->summary(),
-                'criteria' => $calculator ? array_map(fn (array $c): array => [
-                    'code' => $c['code'], 'title' => $c['title'], 'readiness' => $c['readiness'],
-                ], $calculator->byCriterion()) : [],
-            ];
-        })->sortBy(fn (array $row): array => [$row['period'] ? 0 : 1, $row['days_left'] ?? PHP_INT_MAX])->values();
+        // Akreditasi institusi (APT) hanya untuk pengguna berwenang se-institusi; selalu di urutan teratas.
+        if ($user->accessibleStudyProgramIds() === null) {
+            $institution = AccreditationPeriod::institutionSnapshot();
+            $rows->prepend($this->row(
+                ['id' => 0, 'name' => $institution['name'], 'code' => 'APT', 'body' => $institution['body'], 'is_institution' => true],
+                $institution['grade'],
+                $institution['valid_until'],
+                $institution['open'],
+            ));
+        }
 
         return Inertia::render('accreditation/readiness', [
             'programs' => $rows->all(),
             'warningDays' => $warningDays,
             'can' => ['manage' => $user->can('accreditation.manage')],
         ]);
+    }
+
+    /**
+     * @param  array{id: int, name: string, code: string, body: string|null, is_institution: bool}  $subject
+     * @return array<string, mixed>
+     */
+    private function row(array $subject, ?string $status, ?CarbonInterface $validUntil, ?AccreditationPeriod $period): array
+    {
+        $calculator = $period ? ReadinessCalculator::for($period) : null;
+
+        return [
+            ...$subject,
+            'status' => $status,
+            'valid_until' => $validUntil?->toDateString(),
+            'days_left' => $validUntil ? (int) now()->startOfDay()->diffInDays($validUntil, false) : null,
+            'period' => $period ? [
+                'id' => $period->id,
+                'code' => $period->code,
+                'name' => $period->name,
+                'status_label' => $period->status->label(),
+                'status' => $period->status->value,
+                'instrument' => $period->version->instrument->code.' v'.$period->version->version,
+                'pic' => $period->pic?->name,
+                'submission_deadline' => $period->submission_deadline?->toDateString(),
+                'days_to_deadline' => $period->daysToDeadline(),
+            ] : null,
+            'summary' => $calculator?->summary(),
+            'criteria' => $calculator ? array_map(fn (array $c): array => [
+                'code' => $c['code'], 'title' => $c['title'], 'readiness' => $c['readiness'],
+            ], $calculator->byCriterion()) : [],
+        ];
     }
 }

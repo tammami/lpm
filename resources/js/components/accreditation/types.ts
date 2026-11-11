@@ -37,6 +37,7 @@ export interface PeriodRow {
     status_label: string;
     study_program: string | null;
     study_program_code: string | null;
+    is_institutional: boolean;
     instrument: string;
     pic: string | null;
     submission_deadline: string | null;

@@ -10,6 +10,7 @@ use App\Models\AccreditationIndicator;
 use App\Models\AccreditationInstrumentVersion;
 use App\Models\AccreditationPeriod;
 use App\Models\EvidenceMapping;
+use App\Models\Institution;
 use App\Models\User;
 use App\Services\Accreditation\PeriodWorkflow;
 use App\Services\Accreditation\ReadinessCalculator;
@@ -24,6 +25,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
@@ -41,6 +43,7 @@ class PeriodController extends Controller
             )
             ->with(['studyProgram:id,code,name,degree,accreditation_body_id', 'version.instrument:id,code', 'pic:id,name'])
             ->when($request->filled('status') && $request->input('status') !== 'all', fn ($q) => $q->where('status', $request->input('status')))
+            ->when($request->input('study_program_id') === 'institution', fn ($q) => $q->whereNull('study_program_id'))
             ->when($request->integer('study_program_id'), fn ($q, $id) => $q->where('study_program_id', $id))
             ->latest('id')
             ->get();
@@ -60,10 +63,15 @@ class PeriodController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validated($request);
-        $this->authorizeStudyProgram($request, (int) $validated['study_program_id']);
+        $this->authorizeTarget($request, $validated['study_program_id']);
 
-        if (AccreditationPeriod::query()->where('study_program_id', $validated['study_program_id'])->whereIn('status', ['preparing', 'submitted', 'visitation'])->exists()) {
-            $this->failWith('Prodi ini masih memiliki periode akreditasi yang berjalan.');
+        $running = AccreditationPeriod::query()
+            ->when($validated['study_program_id'] === null, fn ($q) => $q->whereNull('study_program_id'), fn ($q) => $q->where('study_program_id', $validated['study_program_id']))
+            ->whereIn('status', ['preparing', 'submitted', 'visitation'])
+            ->exists();
+
+        if ($running) {
+            $this->failWith($validated['study_program_id'] === null ? 'Institusi masih memiliki periode akreditasi (APT) yang berjalan.' : 'Prodi ini masih memiliki periode akreditasi yang berjalan.');
         }
 
         $period = AccreditationPeriod::query()->create([
@@ -106,8 +114,11 @@ class PeriodController extends Controller
                 'decided_on' => $period->decided_on?->toDateString(),
                 'valid_from' => $period->valid_from?->toDateString(),
                 'valid_until' => $period->valid_until?->toDateString(),
-                'current_status' => $period->studyProgram->accreditation_status,
-                'current_valid_until' => $period->studyProgram->accreditation_valid_until?->toDateString(),
+                'current_status' => $period->currentAccreditation()['grade'],
+                'current_valid_until' => $period->currentAccreditation()['valid_until'],
+                'default_unit' => $period->isInstitutional()
+                    ? (($institutionId = Institution::current()?->id) ? "institution:{$institutionId}" : null)
+                    : "study_program:{$period->study_program_id}",
                 'scale_max' => $period->version->scale_max,
                 'thresholds' => $period->version->thresholds(),
             ],
@@ -135,7 +146,7 @@ class PeriodController extends Controller
     public function update(Request $request, AccreditationPeriod $period): RedirectResponse
     {
         $validated = $this->validated($request, $period);
-        $this->authorizeStudyProgram($request, (int) $validated['study_program_id']);
+        $this->authorizeTarget($request, $validated['study_program_id']);
         $period->update($validated);
         $this->toast('Periode akreditasi diperbarui.');
 
@@ -207,7 +218,7 @@ class PeriodController extends Controller
         AuditLogger::log('exported', 'report', $period, "Mengunduh laporan kesiapan akreditasi {$period->code}");
 
         return Pdf::loadView('reports.accreditation', [
-            'title' => "Laporan Kesiapan Akreditasi {$period->studyProgram->full_name}",
+            'title' => "Laporan Kesiapan Akreditasi {$period->subjectName()}",
             'brand' => ReportBranding::data(),
             'generatedAt' => now()->translatedFormat('d F Y H:i'),
             'generatedBy' => $request->user()->name,
@@ -215,7 +226,7 @@ class PeriodController extends Controller
             'summary' => $calculator->summary(),
             'criteria' => $calculator->byCriterion(),
             'gaps' => $calculator->gaps(),
-        ])->setPaper('a4')->download(Str::slug("kesiapan-akreditasi-{$period->studyProgram->code}-{$period->code}").'.pdf');
+        ])->setPaper('a4')->download(Str::slug('kesiapan-akreditasi-'.($period->studyProgram?->code ?? 'institusi')."-{$period->code}").'.pdf');
     }
 
     /**
@@ -229,13 +240,28 @@ class PeriodController extends Controller
             'name' => $period->name,
             'status' => $period->status->value,
             'status_label' => $period->status->label(),
-            'study_program' => $period->studyProgram?->full_name,
+            'study_program' => $period->isInstitutional() ? 'Institusi (APT)' : $period->studyProgram?->full_name,
+            'is_institutional' => $period->isInstitutional(),
             'study_program_code' => $period->studyProgram?->code,
             'instrument' => $period->version?->instrument?->code.' v'.$period->version?->version,
             'pic' => $period->pic?->name,
             'submission_deadline' => $period->submission_deadline?->toDateString(),
             'days_to_deadline' => $period->status->isOpen() ? $period->daysToDeadline() : null,
         ];
+    }
+
+    /**
+     * Periode institusi hanya untuk pengguna berwenang se-institusi; periode prodi mengikuti cakupan prodi.
+     */
+    private function authorizeTarget(Request $request, ?int $studyProgramId): void
+    {
+        if ($studyProgramId === null) {
+            abort_unless($request->user()->accessibleStudyProgramIds() === null, 403, 'Periode akreditasi institusi hanya dapat dikelola di tingkat institusi.');
+
+            return;
+        }
+
+        $this->authorizeStudyProgram($request, $studyProgramId);
     }
 
     private function authorizeView(Request $request, AccreditationPeriod $period): void
@@ -259,6 +285,7 @@ class PeriodController extends Controller
                     'value' => $version->id,
                     'label' => "{$version->instrument->code} v{$version->version} — {$version->instrument->name}",
                     'body_id' => $version->instrument->accreditation_body_id,
+                    'institutional' => $version->instrument->isInstitutional(),
                 ])->all(),
             'picOptions' => User::query()->where('is_active', true)->whereDoesntHave('roles', fn ($q) => $q->where('name', 'mahasiswa'))->orderBy('name')->get(['id', 'name'])
                 ->map(fn (User $user): array => ['value' => $user->id, 'label' => $user->name])->all(),
@@ -270,8 +297,8 @@ class PeriodController extends Controller
      */
     private function validated(Request $request, ?AccreditationPeriod $period = null): array
     {
-        return $request->validate([
-            'study_program_id' => ['required', 'exists:study_programs,id'],
+        $validated = $request->validate([
+            'study_program_id' => ['nullable', 'exists:study_programs,id'],
             'instrument_version_id' => [
                 'required',
                 Rule::exists('accreditation_instrument_versions', 'id')->where('status', AccreditationVersionStatus::Published->value),
@@ -289,5 +316,16 @@ class PeriodController extends Controller
             'target_score' => ['nullable', 'numeric', 'between:0,400'],
             'notes' => ['nullable', 'string', 'max:3000'],
         ]);
+
+        // Jenis periode mengikuti instrumen: APT → institusi (tanpa prodi), selain itu wajib memilih prodi.
+        if (AccreditationInstrumentVersion::query()->with('instrument')->find($validated['instrument_version_id'])->instrument->isInstitutional()) {
+            $validated['study_program_id'] = null;
+        } elseif (empty($validated['study_program_id'])) {
+            throw ValidationException::withMessages(['study_program_id' => 'Pilih program studi untuk instrumen akreditasi prodi.']);
+        } else {
+            $validated['study_program_id'] = (int) $validated['study_program_id'];
+        }
+
+        return $validated;
     }
 }

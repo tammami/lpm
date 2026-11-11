@@ -29,7 +29,9 @@ use App\Services\Analytics\MonevAnalytics;
 use App\Services\Monev\SurveyProgress;
 use App\Services\Research\ResearchAnalytics;
 use App\Services\Settings;
+use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -101,18 +103,10 @@ class DashboardController extends Controller
                 'id' => $survey->id,
                 'title' => $survey->title,
                 'ends_at' => $survey->ends_at->toIso8601String(),
-                'progress' => $progress->summary($survey),
+                'progress' => $progress->summary($survey, $scope),
                 'byStudyProgram' => $progress->byStudyProgram($survey, $scope),
             ])->all(),
-            'accreditation' => $programs->map(fn (StudyProgram $program): array => [
-                ...$this->accreditationProgress($openPeriods->get($program->id)),
-                'id' => $program->id,
-                'name' => $program->full_name,
-                'body' => $program->accreditationBody?->code,
-                'status' => $program->accreditation_status,
-                'valid_until' => $program->accreditation_valid_until?->toDateString(),
-                'days_left' => $program->accreditation_valid_until ? (int) now()->startOfDay()->diffInDays($program->accreditation_valid_until, false) : null,
-            ])->sortBy(fn (array $row) => $row['days_left'] ?? PHP_INT_MAX)->values()->all(),
+            'accreditation' => $this->accreditationRows($programs, $openPeriods, $scope === null),
             'accreditationWarningDays' => $warningDays,
             'cycle' => $this->qualityCycle($user),
             'research' => $user->can('research.view') ? $this->researchSummary($user) : null,
@@ -157,6 +151,45 @@ class DashboardController extends Controller
             'students' => $summary['students'],
             'pending' => ScientificWork::query()->visibleTo($user)->where('status', ScientificWorkStatus::Pending)->count(),
         ];
+    }
+
+    /**
+     * Status akreditasi prodi; untuk pengguna se-institusi ditambah baris institusi (APT) di urutan teratas.
+     *
+     * @param  Collection<int, StudyProgram>  $programs
+     * @param  Collection<int, AccreditationPeriod>  $openPeriods
+     * @return list<array<string, mixed>>
+     */
+    private function accreditationRows(Collection $programs, Collection $openPeriods, bool $withInstitution): array
+    {
+        $daysLeft = fn (?CarbonInterface $until): ?int => $until ? (int) now()->startOfDay()->diffInDays($until, false) : null;
+
+        $rows = $programs->map(fn (StudyProgram $program): array => [
+            ...$this->accreditationProgress($openPeriods->get($program->id)),
+            'id' => $program->id,
+            'name' => $program->full_name,
+            'body' => $program->accreditationBody?->code,
+            'status' => $program->accreditation_status,
+            'valid_until' => $program->accreditation_valid_until?->toDateString(),
+            'days_left' => $daysLeft($program->accreditation_valid_until),
+            'is_institution' => false,
+        ])->sortBy(fn (array $row) => $row['days_left'] ?? PHP_INT_MAX)->values();
+
+        if ($withInstitution) {
+            $institution = AccreditationPeriod::institutionSnapshot();
+            $rows->prepend([
+                ...$this->accreditationProgress($institution['open']),
+                'id' => 0,
+                'name' => $institution['name'],
+                'body' => $institution['body'],
+                'status' => $institution['grade'],
+                'valid_until' => $institution['valid_until']?->toDateString(),
+                'days_left' => $daysLeft($institution['valid_until']),
+                'is_institution' => true,
+            ]);
+        }
+
+        return $rows->all();
     }
 
     /**

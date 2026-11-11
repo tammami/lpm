@@ -65,7 +65,7 @@ interface ExecutiveProps {
         progress: { eligible: number; submitted: number; rate: number | null };
         byStudyProgram: { study_program_id: number; name: string; eligible: number; submitted: number; rate: number | null }[];
     }[];
-    accreditation: { id: number; name: string; body: string | null; status: string | null; valid_until: string | null; days_left: number | null; period_id: number | null; readiness: number | null }[];
+    accreditation: { id: number; name: string; body: string | null; status: string | null; valid_until: string | null; days_left: number | null; period_id: number | null; readiness: number | null; is_institution: boolean }[];
     accreditationWarningDays: number;
     counts: { students: number; lecturers: number; programs: number };
     can: { manageSurveys: boolean; manageInstruments: boolean; import: boolean; analytics: boolean; accreditation: boolean };
@@ -213,7 +213,7 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
                     value={`${expiring.length}`}
                     icon={BadgeCheck}
                     tone={expiring.length ? 'gold' : 'primary'}
-                    hint={`dari ${counts.programs} prodi · dalam ${accreditationWarningDays} hari`}
+                    hint={`dari ${counts.programs} prodi${accreditation.some((a) => a.is_institution) ? ' & institusi' : ''} · dalam ${accreditationWarningDays} hari`}
                 />
             </div>
 
@@ -317,7 +317,7 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
                 <Card className="lg:col-span-2 2xl:col-span-1">
                     <CardHeader className="flex flex-row items-start justify-between gap-4">
                         <CardTitle className="flex items-center gap-2">
-                            <BadgeCheck className="size-4 text-primary" /> Status akreditasi prodi
+                            <BadgeCheck className="size-4 text-primary" /> Status akreditasi
                         </CardTitle>
                         {can.accreditation && (
                             <Button variant="ghost" size="sm" asChild>
@@ -332,12 +332,15 @@ function ExecutiveDashboard({ greeting, scopeLabel, threshold, quality, activeSu
                             const warn = row.days_left !== null && row.days_left <= accreditationWarningDays;
                             const expired = row.days_left !== null && row.days_left < 0;
                             return (
-                                <div key={row.id} className="relative flex items-center gap-3 rounded-xl border px-3 py-2.5">
+                                <div key={row.is_institution ? 'institution' : row.id} className={cn('relative flex items-center gap-3 rounded-xl border px-3 py-2.5', row.is_institution && 'border-primary/30 bg-secondary/40')}>
                                     <span className="flex h-9 min-w-9 shrink-0 items-center justify-center rounded-lg bg-gold-soft px-2 text-[11px] font-extrabold text-gold-foreground">{row.body ?? '—'}</span>
                                     <div className="min-w-0 flex-1">
-                                        <div className="truncate text-[13px] font-semibold">{row.name}</div>
+                                        <div className="truncate text-[13px] font-semibold">
+                                            {row.is_institution && <span className="mr-1.5 text-[11px] font-bold text-primary">Institusi ·</span>}
+                                            {row.name}
+                                        </div>
                                         <div className="text-[11px] text-muted-foreground">
-                                            {row.status ?? 'Belum ada status'} · s.d. {formatDate(row.valid_until)}
+                                            {row.status ?? (row.is_institution ? 'Belum ada keputusan APT tercatat' : 'Belum ada status')} · s.d. {formatDate(row.valid_until)}
                                         </div>
                                         {row.period_id !== null && can.accreditation && (
                                             <Link href={route('accreditation.periods.show', row.period_id)} className="mt-1 flex items-center gap-2 text-[11px] font-semibold text-primary after:absolute after:inset-0">

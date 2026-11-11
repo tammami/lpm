@@ -24,7 +24,7 @@ interface Props {
     scaleMax: number;
     canContribute: boolean;
     evidenceOptions: EvidenceFormOptions;
-    defaultUnit: string;
+    defaultUnit: string | null;
     defaultOpen?: boolean;
 }
 

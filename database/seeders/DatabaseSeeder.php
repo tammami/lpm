@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             AmiDemoSeeder::class,
             EvidenceDemoSeeder::class,
             AccreditationSeeder::class,
+            InstitutionAccreditationSeeder::class,
             ImprovementDemoSeeder::class,
             ResearchDemoSeeder::class,
             LpmProgramDemoSeeder::class,
