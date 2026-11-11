@@ -8,6 +8,8 @@ use App\Models\Survey;
 use App\Models\SurveyParticipation;
 use App\Models\TeachingAssignment;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 /**
  * Satu kelas dengan dua dosen pengampu dan tiga mahasiswa: lengkap, sebagian, belum.
@@ -92,4 +94,14 @@ it('exports the respondent status to excel', function () {
     $rows = downloadedRows($this->actingAs(userWithRole(UserRole::AdminLpm))->get(route('surveys.respondents.export', [$survey, 'state' => 'none'])), 'Responden');
 
     expect($rows)->toHaveCount(2)->and($rows[1][0])->toBe('Citra Belum')->and($rows[1][3])->toBe('Belum mengisi');
+});
+
+it('requires the export permission to download the respondent list', function () {
+    ['survey' => $survey] = surveyWithMixedProgress();
+    $viewer = userWithRole(UserRole::Pimpinan);
+    Role::findByName(UserRole::Pimpinan->value)->revokePermissionTo('reports.export');
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    $this->actingAs($viewer)->get(route('surveys.respondents', $survey))->assertOk();
+    $this->actingAs($viewer)->get(route('surveys.respondents.export', $survey))->assertForbidden();
 });

@@ -120,7 +120,7 @@ class AccreditationPeriod extends Model
             return false;
         }
 
-        return $user->can('accreditation.manage')
+        return ($user->can('accreditation.manage') && $this->isVisibleTo($user))
             || $this->pic_user_id === $user->id
             || ($user->can('evidence.manage') && $user->hasRole(UserRole::AdminProdi->value) && $this->isVisibleTo($user));
     }

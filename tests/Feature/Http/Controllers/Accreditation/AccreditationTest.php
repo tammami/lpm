@@ -293,3 +293,29 @@ it('hides the institution row from study program admins', function () {
     $this->actingAs($kaprodi)->get(route('accreditation.readiness'))
         ->assertInertia(fn ($page) => $page->where('programs', fn ($programs) => collect($programs)->every(fn ($row) => $row['is_institution'] === false)));
 });
+
+it('keeps a prodi admin granted accreditation.manage away from periods outside their scope', function () {
+    $apt = publishedInstitutionVersion();
+    $this->actingAs($this->lpm)->post(route('accreditation.periods.store'), ['instrument_version_id' => $apt->id, 'name' => 'APT 2027']);
+    $institution = AccreditationPeriod::query()->sole();
+    $otherProgram = AccreditationPeriod::query()->create([
+        'study_program_id' => StudyProgram::factory()->create()->id, 'instrument_version_id' => publishedVersion()->id, 'code' => 'AKR-LAIN', 'name' => 'Prodi lain',
+    ]);
+
+    $kaprodi = userWithRole(UserRole::AdminProdi, ['study_program_id' => $this->program->id]);
+    $kaprodi->givePermissionTo('accreditation.manage');
+
+    foreach ([$institution, $otherProgram] as $period) {
+        $this->actingAs($kaprodi)->post(route('accreditation.periods.cancel', $period), ['reason' => 'uji'])->assertForbidden();
+        $this->actingAs($kaprodi)->post(route('accreditation.periods.advance', $period))->assertForbidden();
+        $this->actingAs($kaprodi)->post(route('accreditation.periods.decide', $period), [
+            'result_grade' => 'Unggul', 'decided_on' => '2027-08-01', 'valid_until' => '2032-08-01',
+        ])->assertForbidden();
+        $this->actingAs($kaprodi)->put(route('accreditation.periods.update', $period), [
+            'study_program_id' => $this->program->id, 'instrument_version_id' => $period->instrument_version_id, 'name' => 'Diambil alih',
+        ])->assertForbidden();
+
+        expect($period->fresh()->canContribute($kaprodi))->toBeFalse()
+            ->and($period->fresh()->status)->toBe(AccreditationPeriodStatus::Preparing);
+    }
+});

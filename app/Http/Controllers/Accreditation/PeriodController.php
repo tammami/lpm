@@ -145,6 +145,7 @@ class PeriodController extends Controller
 
     public function update(Request $request, AccreditationPeriod $period): RedirectResponse
     {
+        $this->authorizeTarget($request, $period->study_program_id);
         $validated = $this->validated($request, $period);
         $this->authorizeTarget($request, $validated['study_program_id']);
         $period->update($validated);
@@ -155,6 +156,7 @@ class PeriodController extends Controller
 
     public function advance(Request $request, AccreditationPeriod $period, PeriodWorkflow $workflow): RedirectResponse
     {
+        $this->authorizeTarget($request, $period->study_program_id);
         $validated = $request->validate(['date' => ['nullable', 'date']]);
         $workflow->advance($period, $validated['date'] ?? null);
         $this->toast("Tahap diperbarui: {$period->status->label()}.");
@@ -164,6 +166,7 @@ class PeriodController extends Controller
 
     public function decide(Request $request, AccreditationPeriod $period, PeriodWorkflow $workflow): RedirectResponse
     {
+        $this->authorizeTarget($request, $period->study_program_id);
         $validated = $request->validate([
             'result_grade' => ['required', 'string', 'max:50'],
             'result_score' => ['nullable', 'numeric', 'between:0,400'],
@@ -182,6 +185,7 @@ class PeriodController extends Controller
 
     public function cancel(Request $request, AccreditationPeriod $period, PeriodWorkflow $workflow): RedirectResponse
     {
+        $this->authorizeTarget($request, $period->study_program_id);
         $workflow->cancel($period, $request->validate(['reason' => ['required', 'string', 'max:500']])['reason']);
         $this->toast('Periode akreditasi dibatalkan.');
 
