@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { BarChart3, ChevronRight, ClipboardCheck, FileSpreadsheet, FileText, Info, MessageSquareQuote, Quote, TableProperties, TrendingUp, TriangleAlert, Users } from 'lucide-react';
+import { BarChart3, ChevronRight, ClipboardCheck, FileSpreadsheet, FileText, Info, MessageSquareQuote, TableProperties, TrendingUp, TriangleAlert, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import { QuestionTable } from '@/components/analytics/question-table';
 import type { AnalyticsSurvey, QuestionStat, Scheme, SectionStat, Summary, TrendPoint } from '@/components/analytics/types';
@@ -10,6 +10,7 @@ import { TrendChart } from '@/components/charts/trend-chart';
 import type { Classification } from '@/components/charts/score-badge';
 import { EmptyState } from '@/components/empty-state';
 import { Meter } from '@/components/meter';
+import { type CategorizedComments, CommentList } from '@/components/monev/comment-list';
 import { PageHeader } from '@/components/page-header';
 import { SelectField } from '@/components/select-field';
 import { StatTile } from '@/components/stat-tile';
@@ -35,7 +36,7 @@ interface Props {
     byQuestion: QuestionStat[];
     heatmap: { sections: { code: string; title: string }[]; rows: { id: number; name: string; cells: Record<string, number | null> }[] };
     trend: TrendPoint[];
-    comments: { question: string; text: string }[];
+    comments: CategorizedComments;
     minimum: number;
     can: { lecturer: boolean; export: boolean };
 }
@@ -246,17 +247,10 @@ function AnalyticsView({ survey, surveys, filters, studyPrograms, scheme, thresh
                         <CardTitle className="flex items-center gap-2">
                             <MessageSquareQuote className="size-4 text-primary" /> Suara mahasiswa
                         </CardTitle>
-                        <CardDescription>Cuplikan acak komentar terbuka (anonim).</CardDescription>
+                        <CardDescription>Saran & komentar terbuka (anonim), dikelompokkan per kategori.</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex flex-col gap-2.5">
-                        {comments.length === 0 && <p className="text-sm text-muted-foreground">Belum ada komentar.</p>}
-                        {comments.map((comment, index) => (
-                            <figure key={index} className="relative rounded-xl bg-muted/50 py-3 pr-4 pl-10">
-                                <Quote className="absolute top-3.5 left-3.5 size-4 fill-gold/30 text-gold-foreground" aria-hidden="true" />
-                                <blockquote className="text-[13px] leading-relaxed">{comment.text}</blockquote>
-                                <figcaption className="mt-1 text-[11px] text-muted-foreground">{comment.question}</figcaption>
-                            </figure>
-                        ))}
+                    <CardContent>
+                        <CommentList comments={comments} limit={12} />
                     </CardContent>
                 </Card>
             </div>

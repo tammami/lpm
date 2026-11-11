@@ -112,7 +112,7 @@ class CourseAnalyticsController extends Controller
             'byQuestion' => $analytics->byQuestion(),
             'byClass' => $analytics->byClass(),
             'trend' => $analytics->trend(),
-            'comments' => $analytics->comments(limit: 40),
+            'comments' => $analytics->categorizedComments(),
         ]);
     }
 

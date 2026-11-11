@@ -1,11 +1,12 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, EyeOff, FileText, Lightbulb, MessageSquareQuote, Quote, ShieldAlert, TrendingUp } from 'lucide-react';
+import { ArrowLeft, EyeOff, FileText, Lightbulb, MessageSquareQuote, ShieldAlert, TrendingUp } from 'lucide-react';
 import { QuestionTable } from '@/components/analytics/question-table';
 import type { AnalyticsSurvey, QuestionStat, Scheme, SectionStat, Summary, TrendPoint } from '@/components/analytics/types';
 import { ClassBadge, type Classification, InsufficientBadge } from '@/components/charts/score-badge';
 import { SectionRadar } from '@/components/charts/section-radar';
 import { TrendChart } from '@/components/charts/trend-chart';
 import { EmptyState } from '@/components/empty-state';
+import { type CategorizedComments, CommentList } from '@/components/monev/comment-list';
 import { PageHeader } from '@/components/page-header';
 import { SelectField } from '@/components/select-field';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -15,6 +16,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatScore } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { Option } from '@/types';
+
+const EMPTY_COMMENTS: CategorizedComments = { total: 0, categories: [], items: [] };
 
 interface Props {
     lecturer: { id: number; name: string; nidn: string | null; academic_rank: string | null; study_program: string | null };
@@ -30,7 +33,7 @@ interface Props {
     byQuestion?: QuestionStat[];
     byClass?: { id: number; course_id: number; course: string; course_code: string; class_code: string; responses: number; sufficient: boolean; score: number | null; classification: Classification | null }[];
     trend?: TrendPoint[];
-    comments?: { question: string; text: string }[];
+    comments?: CategorizedComments;
     selfView?: boolean;
     backUrl?: string;
 }
@@ -84,7 +87,7 @@ export default function LecturerAnalytics(props: Props) {
     );
 }
 
-function LecturerBody({ lecturer: { id: lecturerId }, survey, scheme, threshold = 3, minimum = 5, summary, benchmarks = [], bySection = [], sectionBenchmark = [], byQuestion = [], byClass = [], trend = [], comments = [], selfView }: Props & { survey: AnalyticsSurvey }) {
+function LecturerBody({ lecturer: { id: lecturerId }, survey, scheme, threshold = 3, minimum = 5, summary, benchmarks = [], bySection = [], sectionBenchmark = [], byQuestion = [], byClass = [], trend = [], comments = EMPTY_COMMENTS, selfView }: Props & { survey: AnalyticsSurvey }) {
     const max = scheme?.scale_max ?? survey.scale_max;
     const min = scheme?.scale_min ?? 0;
 
@@ -263,18 +266,11 @@ function LecturerBody({ lecturer: { id: lecturerId }, survey, scheme, threshold 
                         <MessageSquareQuote className="size-4 text-primary" /> Komentar mahasiswa
                     </CardTitle>
                     <CardDescription>
-                        {selfView ? 'Hanya komentar yang diizinkan untuk dosen. Identitas penulis tidak tersimpan.' : 'Komentar terbuka dari mahasiswa (anonim).'}
+                        {selfView ? 'Hanya komentar yang diizinkan untuk dosen. Identitas penulis tidak tersimpan.' : 'Saran & komentar terbuka dari mahasiswa (anonim), dikelompokkan per kategori.'}
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                    {comments.length === 0 && <p className="text-sm text-muted-foreground">Belum ada komentar.</p>}
-                    {comments.map((comment, index) => (
-                        <figure key={index} className="relative rounded-xl bg-muted/50 py-3 pr-4 pl-10">
-                                <Quote className="absolute top-3.5 left-3.5 size-4 fill-gold/30 text-gold-foreground" aria-hidden="true" />
-                            <blockquote className="text-[13px] leading-relaxed">{comment.text}</blockquote>
-                            <figcaption className="mt-1 text-[11px] text-muted-foreground">{comment.question}</figcaption>
-                        </figure>
-                    ))}
+                <CardContent>
+                    <CommentList comments={comments} columns={2} />
                 </CardContent>
             </Card>
             {selfView && (

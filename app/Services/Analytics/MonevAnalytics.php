@@ -2,6 +2,7 @@
 
 namespace App\Services\Analytics;
 
+use App\Enums\MonevCommentCategory;
 use App\Enums\QuestionType;
 use App\Models\ClassificationScheme;
 use App\Models\Course;
@@ -432,26 +433,79 @@ class MonevAnalytics
     }
 
     /**
-     * Komentar terbuka. Hanya butir yang boleh dilihat evaluatee bila `$forEvaluatee` true.
+     * Komentar terbuka (cuplikan acak). Hanya butir yang boleh dilihat evaluatee bila `$forEvaluatee` true.
      *
-     * @return list<array{question: string, text: string}>
+     * @return list<array{question: string, text: string, category: string, category_label: string}>
      */
     public function comments(bool $forEvaluatee = false, int $limit = 60): array
     {
-        if ($this->isSuppressed() || ($forEvaluatee && ! Settings::get('monev.show_comments_to_lecturer', true))) {
+        if (! $this->canShowComments($forEvaluatee)) {
             return [];
         }
 
+        return $this->commentsQuery($forEvaluatee)
+            ->inRandomOrder()
+            ->limit($limit)
+            ->get()
+            ->map(fn (object $row): array => $this->commentRow($row))
+            ->all();
+    }
+
+    /**
+     * Komentar yang dikelompokkan otomatis per kategori (kata kunci). Jumlah per kategori dihitung dari
+     * SELURUH komentar dalam cakupan; daftar berisi cuplikan acak maksimal `$perCategory` per kategori.
+     *
+     * @return array{total: int, categories: list<array{value: string, label: string, count: int}>, items: list<array{question: string, text: string, category: string, category_label: string}>}
+     */
+    public function categorizedComments(bool $forEvaluatee = false, int $perCategory = 30): array
+    {
+        if (! $this->canShowComments($forEvaluatee)) {
+            return ['total' => 0, 'categories' => [], 'items' => []];
+        }
+
+        $grouped = $this->commentsQuery($forEvaluatee)
+            ->get()
+            ->map(fn (object $row): array => $this->commentRow($row))
+            ->groupBy('category');
+
+        $categories = collect(MonevCommentCategory::cases())
+            ->filter(fn (MonevCommentCategory $category): bool => $grouped->has($category->value))
+            ->map(fn (MonevCommentCategory $category): array => [
+                'value' => $category->value,
+                'label' => $category->label(),
+                'count' => $grouped[$category->value]->count(),
+            ])
+            ->values();
+
+        return [
+            'total' => (int) $categories->sum('count'),
+            'categories' => $categories->all(),
+            'items' => $grouped->flatMap(fn (Collection $rows): Collection => $rows->shuffle()->take($perCategory))->shuffle()->values()->all(),
+        ];
+    }
+
+    private function canShowComments(bool $forEvaluatee): bool
+    {
+        return ! $this->isSuppressed() && (! $forEvaluatee || Settings::get('monev.show_comments_to_lecturer', true));
+    }
+
+    private function commentsQuery(bool $forEvaluatee): Builder
+    {
         return $this->answers()
             ->whereIn('instrument_questions.type', [QuestionType::Text->value, QuestionType::LongText->value])
             ->whereNotNull('response_answers.value_text')
             ->when($forEvaluatee, fn (Builder $q) => $q->where('instrument_questions.visible_to_evaluatee', true))
-            ->select('instrument_questions.label as question', 'response_answers.value_text as text')
-            ->inRandomOrder()
-            ->limit($limit)
-            ->get()
-            ->map(fn (object $row): array => ['question' => $row->question, 'text' => $row->text])
-            ->all();
+            ->select('instrument_questions.label as question', 'response_answers.value_text as text');
+    }
+
+    /**
+     * @return array{question: string, text: string, category: string, category_label: string}
+     */
+    private function commentRow(object $row): array
+    {
+        $category = MonevCommentCategory::classify((string) $row->text);
+
+        return ['question' => $row->question, 'text' => $row->text, 'category' => $category->value, 'category_label' => $category->label()];
     }
 
     /**

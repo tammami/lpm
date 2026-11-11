@@ -45,14 +45,14 @@ class AnalyticsController extends Controller
             'threshold' => $threshold,
             'summary' => $analytics->summary(),
             'benchmark' => $scope !== null ? MonevAnalytics::for($survey)->summary() : null,
-            'progress' => $progress->summary($survey),
+            'progress' => $progress->summary($survey, $scope),
             'byStudyProgram' => $analytics->byStudyProgram(),
             'byLecturer' => $isTeaching && $canLecturer ? $analytics->byLecturer() : null,
             'bySection' => $analytics->bySection(),
             'byQuestion' => $questions,
             'heatmap' => $analytics->heatmap(),
             'trend' => $analytics->trend(),
-            'comments' => $analytics->comments(limit: 12),
+            'comments' => $analytics->categorizedComments(perCategory: 12),
             'minimum' => $analytics->minimum(),
             'can' => ['lecturer' => $canLecturer, 'export' => $user->can('reports.export')],
         ]);
@@ -104,7 +104,7 @@ class AnalyticsController extends Controller
             'byQuestion' => $analytics->byQuestion(),
             'byClass' => $analytics->byClass(),
             'trend' => $analytics->trend(),
-            'comments' => $analytics->comments(forEvaluatee: $forEvaluatee, limit: 40),
+            'comments' => $analytics->categorizedComments(forEvaluatee: $forEvaluatee),
             'sectionBenchmark' => MonevAnalytics::for($survey, [$lecturer->study_program_id])->bySection(),
         ];
     }

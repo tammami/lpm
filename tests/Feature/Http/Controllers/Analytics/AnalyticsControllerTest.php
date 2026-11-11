@@ -103,7 +103,7 @@ it('shows a lecturer only the comments allowed for evaluatees', function () {
         ->assertInertia(fn (Assert $page) => $page
             ->component('analytics/lecturer')
             ->where('summary.score', 3)
-            ->has('comments', 0));
+            ->where('comments.total', 0));
 });
 
 it('keeps lecturers away from the institutional analytics page', function () {

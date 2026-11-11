@@ -149,7 +149,9 @@ it('shows the detail of one course, optionally narrowed to one lecturer', functi
             ->has('lecturers', 2)
             ->has('byClass', 2)
             ->where('byQuestion.0.score', 3.25)
-            ->where('comments.0.text', 'Penjelasan sangat jelas'));
+            ->where('comments.items.0.text', 'Penjelasan sangat jelas')
+            ->where('comments.items.0.category', 'method')
+            ->where('comments.categories.0.label', 'Metode mengajar'));
 
     $this->actingAs($admin)
         ->get(route('analytics.courses.show', ['course' => $course, 'survey' => $survey->id, 'lecturer' => $strong->id]))
@@ -166,7 +168,7 @@ it('shows the detail of one course, optionally narrowed to one lecturer', functi
             ->where('summary.suppressed', true)
             ->where('summary.score', null)
             ->has('byQuestion', 0)
-            ->has('comments', 0));
+            ->where('comments.total', 0));
 });
 
 it('ignores a lecturer who does not teach the course', function () {
